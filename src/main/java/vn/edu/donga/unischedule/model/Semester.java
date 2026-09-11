@@ -1,0 +1,44 @@
+package vn.edu.donga.unischedule.model;
+
+import java.time.LocalDate;
+
+public class Semester {
+    private Long id;
+    private String name;
+    private LocalDate startDate;
+    private LocalDate endDate;
+    private String status;
+
+    public Semester(Long id, String name, LocalDate startDate, LocalDate endDate, String status) {
+        this.id = id;
+        this.name = name;
+        this.startDate = startDate;
+        this.endDate = endDate;
+        this.status = status;
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public LocalDate getStartDate() {
+        return startDate;
+    }
+
+    public LocalDate getEndDate() {
+        return endDate;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    @Override
+    public String toString() {
+        return name;
+    }
+}
