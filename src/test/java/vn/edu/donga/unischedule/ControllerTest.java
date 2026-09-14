@@ -11,7 +11,7 @@ import java.time.LocalDate;
 import static org.junit.jupiter.api.Assertions.*;
 
 class ControllerTest {
-    private AppControllers controllers() { return new AppControllers(AppServices.createDemo()); }
+    private AppControllers controllers() { return new AppControllers(vn.edu.donga.unischedule.service.TestFixtures.createDemo()); }
 
     @Test void invalidProfileAndPasswordDoNotMutateUser() {
         var controllers = controllers();

@@ -122,6 +122,8 @@ public class CourseSectionPanel extends JPanel implements Refreshable {
             actions.add(add);
             actions.add(edit);
             actions.add(assign);
+            SecondaryButton enroll = new SecondaryButton("Đăng ký / hủy học");
+            enroll.addActionListener(event -> manageEnrollment());actions.add(enroll);
         }
         top.add(actions, BorderLayout.SOUTH);
         add(top, BorderLayout.NORTH);
@@ -144,6 +146,19 @@ public class CourseSectionPanel extends JPanel implements Refreshable {
         String status = (String) statusBox.getSelectedItem();
         List<CourseSection> rows = controllers.courseSections().search(user, keyword, semester, department, status);
         tableModel.setRows(rows);
+    }
+    private void manageEnrollment() {
+        int row=table.getSelectedRow();
+        if(row<0) {Dialogs.warning(this,"Chọn lớp học phần trước.");return;}
+        CourseSection section=tableModel.getRowAt(table.convertRowIndexToModel(row));
+        var students=controllers.users().findAll().stream().filter(u->u.getRole()==Role.STUDENT).toArray(vn.edu.donga.unischedule.model.User[]::new);
+        var studentBox=new javax.swing.JComboBox<>(students);
+        var active=new javax.swing.JCheckBox("Đăng ký (bỏ chọn để hủy)",true);
+        var form=new JPanel(new GridLayout(0,1,0,8));form.add(studentBox);form.add(active);
+        if(javax.swing.JOptionPane.showConfirmDialog(this,form,"Đăng ký học - "+section.getCode(),javax.swing.JOptionPane.OK_CANCEL_OPTION)!=javax.swing.JOptionPane.OK_OPTION)return;
+        var selected=(vn.edu.donga.unischedule.model.User)studentBox.getSelectedItem();if(selected==null)return;
+        try {controllers.courseSections().enroll(section.getId(),selected.getId(),active.isSelected());refresh();Dialogs.success(this,"Đã cập nhật đăng ký và sĩ số.");}
+        catch(ValidationException ex){Dialogs.error(this,ex.getMessage());}
     }
 
 

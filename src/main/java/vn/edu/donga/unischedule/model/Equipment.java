@@ -4,6 +4,9 @@ import vn.edu.donga.unischedule.model.Enums.ResourceStatus;
 
 public class Equipment extends Resource {
     private String category;
+    private Long placementId;
+    public Long getPlacementId() { return placementId; }
+    public void setPlacementId(Long id) { placementId=id; }
     private int quantity;
     private String condition;
     private Classroom classroom;

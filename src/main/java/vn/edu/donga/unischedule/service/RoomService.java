@@ -38,7 +38,7 @@ public class RoomService {
                 .anyMatch(existing -> existing.getCode().equalsIgnoreCase(room.getCode())
                         && (room.getId() == null || !existing.getId().equals(room.getId())));
         if (duplicate) {
-            throw new ValidationException("Mã phòng đã tồn tại trong dữ liệu giả.");
+            throw new ValidationException("Mã phòng đã tồn tại trong cơ sở dữ liệu.");
         }
         return roomRepository.save(room);
     }
@@ -81,6 +81,7 @@ public class RoomService {
                                                 int minCapacity, String equipmentKeyword) {
         return roomRepository.findAll().stream()
                 .filter(room -> room.getRoomStatus() == RoomStatus.AVAILABLE)
+                .filter(room -> !(roomRepository instanceof vn.edu.donga.unischedule.repository.jdbc.JdbcRoomRepository jdbc) || !jdbc.hasMaintenance(room.getId(), date))
                 .filter(room -> building == null || building.equals("Tất cả") || room.getBuilding().equals(building))
                 .filter(room -> type == null || room.getRoomType() == type)
                 .filter(room -> minCapacity <= 0 || room.getCapacity() >= minCapacity)
@@ -96,7 +97,7 @@ public class RoomService {
         int schoolDay = date.getDayOfWeek().getValue() + 1;
         ScheduleEntry probe = new ScheduleEntry(-1L, null, room, schoolDay, slot, slot, date, date, null, "");
         for (ScheduleEntry entry : scheduleService.findAll()) {
-            if (entry.getRoom().getId().equals(room.getId()) && conflictService.timeOverlaps(probe, entry)) {
+            if (entry.getStatus() != vn.edu.donga.unischedule.model.Enums.ScheduleStatus.CANCELLED && entry.getRoom().getId().equals(room.getId()) && conflictService.timeOverlaps(probe, entry)) {
                 return false;
             }
         }

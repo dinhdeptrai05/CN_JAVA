@@ -7,6 +7,8 @@ public final class AppControllers {
     private final AuditController audit;
     public AuditController audit() { return audit; }
     private final DashboardController dashboard;
+    private final ReportController reports;
+    public ReportController reports() { return reports; }
     private final AuthController auth;
     private final CatalogController catalog;
     private final ScheduleController schedules;
@@ -20,6 +22,7 @@ public final class AppControllers {
     public AppControllers(AppServices services) {
         audit = new AuditController(services.audit());
         dashboard = new DashboardController(services);
+        reports = new ReportController(services.reports());
         auth = new AuthController(services.auth());
         catalog = new CatalogController(services.catalog());
         schedules = new ScheduleController(services.schedules());

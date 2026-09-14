@@ -10,7 +10,7 @@ import java.util.Arrays;
 public class App {
     public static void main(String[] args) {
         if (Arrays.asList(args).contains("--smoke")) {
-            AppServices services = AppServices.createDemo();
+            AppServices services = AppServices.createJdbc();
             services.auth().login("admin", "123456");
             services.auth().login("daotao", "123456");
             services.auth().login("giangvien", "123456");
@@ -20,7 +20,11 @@ public class App {
         }
         SwingUtilities.invokeLater(() -> {
             ThemeConfig.install();
-            new LoginFrame(new vn.edu.donga.unischedule.controller.AppControllers(AppServices.createDemo())).setVisible(true);
+            try {
+                new LoginFrame(new vn.edu.donga.unischedule.controller.AppControllers(AppServices.createJdbc())).setVisible(true);
+            } catch (vn.edu.donga.unischedule.validation.ValidationException ex) {
+                javax.swing.JOptionPane.showMessageDialog(null, ex.getMessage(), "Kết nối MySQL", javax.swing.JOptionPane.ERROR_MESSAGE);
+            }
         });
     }
 }

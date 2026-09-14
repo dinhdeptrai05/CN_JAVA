@@ -26,7 +26,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 class DemoSmokeTest {
     @Test
     void allDemoAccountsCanLogin() {
-        AppServices services = AppServices.createDemo();
+        AppServices services = vn.edu.donga.unischedule.service.TestFixtures.createDemo();
 
         assertEquals(Role.ADMIN, services.auth().login("admin", "123456").getRole());
         assertEquals(Role.ACADEMIC, services.auth().login("daotao", "123456").getRole());
@@ -36,7 +36,7 @@ class DemoSmokeTest {
 
     @Test
     void mockDataMeetsWeekOneMinimums() {
-        AppServices services = AppServices.createDemo();
+        AppServices services = vn.edu.donga.unischedule.service.TestFixtures.createDemo();
 
         assertTrue(services.users().findAll().size() >= 4);
         assertEquals(3, services.catalog().getDepartments().size());
@@ -52,7 +52,7 @@ class DemoSmokeTest {
 
     @Test
     void conflictsContainRequiredTypes() {
-        AppServices services = AppServices.createDemo();
+        AppServices services = vn.edu.donga.unischedule.service.TestFixtures.createDemo();
         Set<ConflictType> types = services.conflicts().findAllConflicts().stream()
                 .map(conflict -> conflict.getType())
                 .collect(Collectors.toSet());
@@ -64,7 +64,7 @@ class DemoSmokeTest {
 
     @Test
     void roomSearchAndLecturerRequestWorkInMemory() {
-        AppServices services = AppServices.createDemo();
+        AppServices services = vn.edu.donga.unischedule.service.TestFixtures.createDemo();
         User lecturer = services.auth().login("giangvien", "123456");
         int before = services.requests().findForUser(lecturer).size();
 
@@ -84,7 +84,7 @@ class DemoSmokeTest {
     void swingFramesConstructForAllDemoRoles() throws Exception {
         SwingUtilities.invokeAndWait(() -> {
             ThemeConfig.install();
-            AppServices services = AppServices.createDemo();
+            AppServices services = vn.edu.donga.unischedule.service.TestFixtures.createDemo();
             LoginFrame loginFrame = new LoginFrame(new vn.edu.donga.unischedule.controller.AppControllers(services));
             loginFrame.dispose();
             for (String username : new String[]{"admin", "daotao", "giangvien", "sinhvien"}) {

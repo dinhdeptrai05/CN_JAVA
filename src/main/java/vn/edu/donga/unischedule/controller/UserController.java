@@ -38,6 +38,7 @@ public final class UserController {
     public void changePassword(User user, String oldPassword, String password, String confirmation) {
         service.changePassword(user, oldPassword, password, confirmation);
     }
+    public void updateAvatar(User user, java.nio.file.Path path) { service.updateAvatar(user,path); }
     public User prepareUser(User editing, Role role, String username, String fullName, String email, String phone, UserStatus status) {
         return service.prepareUser(editing, role, username, fullName, email, phone, status);
     }

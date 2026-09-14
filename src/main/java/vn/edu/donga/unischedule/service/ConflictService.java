@@ -62,6 +62,10 @@ public class ConflictService {
     }
 
     public void markResolved(String conflictId) {
+        if(scheduleRepository instanceof vn.edu.donga.unischedule.repository.jdbc.JdbcScheduleRepository) {
+            if(findAllConflicts().stream().anyMatch(c->c.getId().equals(conflictId))) throw new vn.edu.donga.unischedule.validation.ValidationException("Cần sửa hoặc hủy lịch gây trùng trước khi xác nhận đã xử lý.");
+            return;
+        }
         statusByConflictId.put(conflictId, ConflictStatus.RESOLVED);
     }
 

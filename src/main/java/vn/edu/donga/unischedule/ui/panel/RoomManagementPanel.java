@@ -161,7 +161,7 @@ public class RoomManagementPanel extends JPanel implements Refreshable {
     private void rebuildStats() {
         statsPanel.removeAll();
         List<Classroom> rooms = controllers.rooms().findAll();
-        statsPanel.add(new StatCard("PH", "Tổng số phòng", String.valueOf(rooms.size()), "Trong dữ liệu demo", AppConfig.PRIMARY));
+        statsPanel.add(new StatCard("PH", "Tổng số phòng", String.valueOf(rooms.size()), "Trong hệ thống", AppConfig.PRIMARY));
         statsPanel.add(new StatCard("TR", "Phòng trống", String.valueOf(count(RoomStatus.AVAILABLE)), "Sẵn sàng", AppConfig.SUCCESS));
         statsPanel.add(new StatCard("SD", "Đang sử dụng", String.valueOf(count(RoomStatus.IN_USE)), "Có lịch học", AppConfig.WARNING));
         statsPanel.add(new StatCard("BT", "Bảo trì", String.valueOf(count(RoomStatus.MAINTENANCE)), "Cần xử lý", AppConfig.DANGER));

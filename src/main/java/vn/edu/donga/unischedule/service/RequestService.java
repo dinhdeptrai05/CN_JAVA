@@ -25,6 +25,7 @@ public class RequestService {
                     .toList();
         }
         if (user.getRole() == Role.ADMIN) {
+            if (requestRepository instanceof vn.edu.donga.unischedule.repository.jdbc.JdbcRequestRepository) return requestRepository.findAll().stream().filter(r -> r.getType()==RequestType.BORROW_EQUIPMENT || r.getType()==RequestType.REPORT_DAMAGE).toList();
             return requestRepository.findAll().stream()
                     .filter(request -> request.getType() == RequestType.CHANGE_ROOM
                             || request.getType() == RequestType.BORROW_EQUIPMENT
@@ -33,6 +34,7 @@ public class RequestService {
                     .toList();
         }
         if (user.getRole() == Role.ACADEMIC) {
+            if (requestRepository instanceof vn.edu.donga.unischedule.repository.jdbc.JdbcRequestRepository) return requestRepository.findAll().stream().filter(r -> r.getType()==RequestType.CHANGE_SCHEDULE || r.getType()==RequestType.CHANGE_ROOM || r.getType()==RequestType.USE_ROOM).toList();
             return requestRepository.findAll().stream()
                     .filter(request -> request.getType() == RequestType.CHANGE_SCHEDULE)
                     .toList();
@@ -46,6 +48,7 @@ public class RequestService {
     }
 
     public void approve(ChangeRequest request, User actor) {
+        if (requestRepository instanceof vn.edu.donga.unischedule.repository.jdbc.JdbcRequestRepository jdbc) { jdbc.process(request,actor,true,null); return; }
         ensureCanProcess(request, actor);
         request.setStatus(RequestStatus.APPROVED);
         request.setResponseReason("Đã duyệt trong chế độ demo.");
@@ -53,6 +56,7 @@ public class RequestService {
     }
 
     public void reject(ChangeRequest request, User actor, String reason) {
+        if (requestRepository instanceof vn.edu.donga.unischedule.repository.jdbc.JdbcRequestRepository jdbc) { jdbc.process(request,actor,false,reason); return; }
         ensureCanProcess(request, actor);
         Validator.reason(reason, "Lý do từ chối");
         request.setStatus(RequestStatus.REJECTED);
@@ -61,6 +65,7 @@ public class RequestService {
     }
 
     public boolean canProcess(ChangeRequest request, User actor) {
+        if (requestRepository instanceof vn.edu.donga.unischedule.repository.jdbc.JdbcRequestRepository jdbc) return jdbc.canProcess(request,actor);
         if (request.getStatus() != RequestStatus.PENDING) {
             return false;
         }

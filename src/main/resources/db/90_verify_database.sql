@@ -1,0 +1,4 @@
+SELECT table_name,engine,table_collation FROM information_schema.tables WHERE table_schema=DATABASE() AND table_type='BASE TABLE';
+SELECT r.code,COUNT(ur.user_id) total_users FROM roles r LEFT JOIN user_roles ur ON ur.role_id=r.id GROUP BY r.id,r.code;
+SELECT cs.code,cs.student_count,COUNT(e.id) actual_count FROM course_sections cs LEFT JOIN student_enrollments e ON e.course_section_id=cs.id AND e.status='ACTIVE' GROUP BY cs.id,cs.code,cs.student_count HAVING cs.student_count<>actual_count;
+SELECT a.id,b.id FROM vw_schedule_details a JOIN vw_schedule_details b ON a.id<b.id AND a.day_of_week=b.day_of_week AND a.start_date<=b.end_date AND b.start_date<=a.end_date AND a.start_order<=b.end_order AND b.start_order<=a.end_order WHERE a.status<>'CANCELLED' AND b.status<>'CANCELLED' AND (a.classroom_id=b.classroom_id OR a.lecturer_id=b.lecturer_id OR a.course_section_id=b.course_section_id);

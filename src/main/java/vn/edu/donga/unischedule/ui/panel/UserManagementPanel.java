@@ -46,7 +46,7 @@ public class UserManagementPanel extends JPanel implements Refreshable {
                 User::getUsername,
                 User::getEmail,
                 user -> user.getRole().getDisplayName(),
-                user -> user.getLastLogin().toLocalDate().format(DateUtils.DATE_FORMAT),
+                user -> user.getLastLogin()==null ? "Chưa đăng nhập" : user.getLastLogin().toLocalDate().format(DateUtils.DATE_FORMAT),
                 User::getStatus);
         table = new JTable(tableModel);
         TableUtils.style(table);
@@ -139,7 +139,7 @@ public class UserManagementPanel extends JPanel implements Refreshable {
             try {
                 controllers.users().save(user);
                 refresh();
-                Dialogs.success(this, "Đã thêm tài khoản demo với mật khẩu 123456.");
+                Dialogs.success(this, "Đã thêm tài khoản với mật khẩu 123456.");
             } catch (ValidationException ex) {
                 Dialogs.error(this, ex.getMessage());
             }
@@ -177,7 +177,7 @@ public class UserManagementPanel extends JPanel implements Refreshable {
         try {
             User user = selectedUser();
             controllers.users().resetPassword(user);
-            Dialogs.success(this, "Mật khẩu demo đã được đặt lại thành 123456.");
+            Dialogs.success(this, "Mật khẩu đã được đặt lại thành 123456.");
         } catch (ValidationException ex) {
             Dialogs.error(this, ex.getMessage());
         }

@@ -31,8 +31,6 @@ public class LoginFrame extends JFrame {
     private final JTextField usernameField = new JTextField();
     private final JPasswordField passwordField = new JPasswordField();
     private final JLabel errorLabel = new JLabel(" ");
-    private final JComboBox<String> demoCombo = new JComboBox<>();
-    private final Map<String, String[]> demoAccounts = new LinkedHashMap<>();
 
     public LoginFrame(AppControllers controllers) {
         super("Đăng nhập - " + AppConfig.APP_NAME);
@@ -41,16 +39,8 @@ public class LoginFrame extends JFrame {
         setMinimumSize(new Dimension(980, 640));
         setSize(1080, 700);
         setLocationRelativeTo(null);
-        buildDemoAccounts();
-        buildUi();
-    }
 
-    private void buildDemoAccounts() {
-        demoAccounts.put("Quản trị viên - Nguyễn Quản Trị", new String[]{"admin", "123456"});
-        demoAccounts.put("Phòng đào tạo - Trần Thu Hà", new String[]{"daotao", "123456"});
-        demoAccounts.put("Giảng viên - Phạm Anh Tuấn", new String[]{"giangvien", "123456"});
-        demoAccounts.put("Sinh viên - Nguyễn Hoàng Nam", new String[]{"sinhvien", "123456"});
-        demoAccounts.keySet().forEach(demoCombo::addItem);
+        buildUi();
     }
 
     private void buildUi() {
@@ -95,12 +85,6 @@ public class LoginFrame extends JFrame {
         card.add(subtitle, gbc);
 
         gbc.gridy++;
-        card.add(label("Tài khoản demo"), gbc);
-        gbc.gridy++;
-        demoCombo.addActionListener(event -> fillSelectedDemo());
-        card.add(demoCombo, gbc);
-
-        gbc.gridy++;
         card.add(label("Tên đăng nhập"), gbc);
         gbc.gridy++;
         usernameField.putClientProperty("JTextField.placeholderText", "admin");
@@ -111,7 +95,7 @@ public class LoginFrame extends JFrame {
         gbc.gridy++;
         JPanel passwordPanel = new JPanel(new BorderLayout(8, 0));
         passwordPanel.setOpaque(false);
-        passwordField.putClientProperty("JTextField.placeholderText", "123456");
+        passwordField.putClientProperty("JTextField.placeholderText", "Mật khẩu");
         SecondaryButton toggleButton = new SecondaryButton("Hiện");
         toggleButton.addActionListener(event -> togglePassword(toggleButton));
         passwordPanel.add(passwordField, BorderLayout.CENTER);
@@ -133,7 +117,7 @@ public class LoginFrame extends JFrame {
         card.add(loginButton, gbc);
         getRootPane().setDefaultButton(loginButton);
 
-        fillSelectedDemo();
+
     }
 
     private JLabel label(String text) {
@@ -141,17 +125,6 @@ public class LoginFrame extends JFrame {
         label.setForeground(AppConfig.TEXT);
         label.setFont(label.getFont().deriveFont(Font.BOLD));
         return label;
-    }
-
-    private void fillSelectedDemo() {
-        String key = (String) demoCombo.getSelectedItem();
-        if (key == null) {
-            return;
-        }
-        String[] account = demoAccounts.get(key);
-        usernameField.setText(account[0]);
-        passwordField.setText(account[1]);
-        errorLabel.setText(" ");
     }
 
     private void togglePassword(SecondaryButton button) {

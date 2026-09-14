@@ -17,16 +17,25 @@ public class CourseSectionService {
     public List<CourseSection> findAll() {
         return courseSectionRepository.findAll();
     }
+    public List<CourseSection> findForUser(vn.edu.donga.unischedule.model.User user) {
+        if(courseSectionRepository instanceof vn.edu.donga.unischedule.repository.jdbc.JdbcCourseSectionRepository jdbc) return jdbc.findForUser(user);
+        if(user.getRole()==vn.edu.donga.unischedule.model.Enums.Role.LECTURER) return findAll().stream().filter(s->s.getLecturer()!=null && s.getLecturer().getId().equals(user.getId())).toList();
+        return findAll();
+    }
+    public void enroll(Long sectionId,Long studentId,boolean active) {
+        if(courseSectionRepository instanceof vn.edu.donga.unischedule.repository.jdbc.JdbcCourseSectionRepository jdbc) jdbc.enroll(sectionId,studentId,active);
+        else throw new ValidationException("Đăng ký học cần kết nối cơ sở dữ liệu.");
+    }
 
     public CourseSection save(CourseSection section) {
         Validator.required(section.getCode(), "Mã lớp học phần");
         Validator.positive(section.getCapacity(), "Sức chứa dự kiến");
-        Validator.positive(section.getStudentCount(), "Sĩ số");
+        if (section.getStudentCount() < 0) throw new ValidationException("Sĩ số không được âm.");
         boolean duplicate = courseSectionRepository.findAll().stream()
                 .anyMatch(existing -> existing.getCode().equalsIgnoreCase(section.getCode())
                         && (section.getId() == null || !existing.getId().equals(section.getId())));
         if (duplicate) {
-            throw new ValidationException("Mã lớp học phần đã tồn tại trong dữ liệu giả.");
+            throw new ValidationException("Mã lớp học phần đã tồn tại trong cơ sở dữ liệu.");
         }
         return courseSectionRepository.save(section);
     }

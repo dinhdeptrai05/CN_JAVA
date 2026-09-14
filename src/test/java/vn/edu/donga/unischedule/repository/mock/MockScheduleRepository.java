@@ -50,3 +50,4 @@ public class MockScheduleRepository implements ScheduleRepository {
         return store.schedules().removeIf(entry -> entry.getId().equals(id));
     }
 }
+

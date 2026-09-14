@@ -13,7 +13,7 @@ flowchart LR
     V --> C
     C --> S[Model: service]
     S --> R[Model: repository]
-    R --> D[Dữ liệu mock]
+    R --> D[MySQL 8.4 qua JDBC]
     C --> E[Entity / kết quả truy vấn]
     E --> V
 ```
@@ -26,7 +26,7 @@ flowchart LR
 | Controller | `controller` | Nhận yêu cầu từ View, chuẩn bị bản nháp, lọc dữ liệu, tính dữ liệu dashboard và gọi Service. Không phụ thuộc Swing. |
 | Entity | `model` | User, CourseSection, ScheduleEntry, Classroom, ChangeRequest, AuditEntry và các kiểu nghiệp vụ. |
 | Service | `service` | Kiểm tra nghiệp vụ và cập nhật dữ liệu: xung đột, quyền duyệt yêu cầu, mật khẩu, hồ sơ, số lượng thiết bị, phân công giảng viên. |
-| Repository | `repository`, `repository.mock` | Truy xuất dữ liệu và triển khai lưu trữ trong bộ nhớ. CatalogService truy cập CatalogRepository thay vì MockDataStore trực tiếp. |
+| Repository | `repository`, `repository.jdbc` | Truy xuất MySQL bằng PreparedStatement. JdbcDatabase chia sẻ connection cho các thao tác trong transaction; các điểm ghi kiểm tra lại quyền và dữ liệu dưới khóa. |
 | Khởi tạo | `App`, `AppServices`, `AppControllers` | Tạo một bộ Model dùng chung, nối các Service với Controller và truyền Controller vào View. |
 
 `ui.model.GenericTableModel` là adapter dữ liệu cho JTable, không phải tầng nghiệp vụ Model. `FormController` tạo entity nháp chưa lưu; `DashboardController.Metric` và `BuildingUsage` là dữ liệu kết quả không chứa màu AWT hay component Swing.
@@ -46,7 +46,7 @@ ActionListener, định dạng nhãn, chọn cell theo ngày/ca để vẽ lịc
 - Quy tắc đổi mật khẩu chuyển vào UserService và được gọi qua UserController.
 - Form lịch không còn âm thầm thay giảng viên của lớp học phần. Giảng viên hiển thị theo lớp đã chọn; việc thay phân công thực hiện ở màn hình Lớp học phần.
 - Bản nháp sửa tài khoản giữ mã giảng viên, khoa, mã sinh viên và lớp của tài khoản hiện có khi giữ nguyên vai trò.
-- Nhật ký mock được quản lý bởi AuditService; bấm tải lại không tạo thời gian ngẫu nhiên mới.
+- Nhật ký được đọc từ audit_logs và chỉ được ghi khi transaction nghiệp vụ thành công.
 
 ## Kiểm thử
 
@@ -56,4 +56,4 @@ Chạy `mvn test` từ thư mục dự án.
 - `ControllerTest`: kiểm tra lọc dữ liệu theo vai trò, đổi mật khẩu, cập nhật sai không làm thay đổi dữ liệu, bản nháp không tác động dữ liệu chung, giữ thông tin giảng viên và quyền duyệt yêu cầu.
 - `DemoSmokeTest`, `UiRenderTest`: giữ các kiểm thử chức năng và ảnh render giao diện hiện có.
 
-Đây vẫn là demo dữ liệu trong bộ nhớ. Nhật ký là dữ liệu minh họa, chưa có JDBC, transaction cơ sở dữ liệu hay lưu dữ liệu giữa các lần chạy. Việc ẩn menu trên Swing không thay thế kiểm soát quyền ở nghiệp vụ; các luồng duyệt yêu cầu hiện kiểm tra quyền trong RequestService.
+Ứng dụng chạy JDBC/MySQL. Mock chỉ được sử dụng bởi test fixtures trong src/test. Xem [thiết kế cơ sở dữ liệu](../README_DATABASE.md) cho schema, giao dịch, phân quyền và hướng dẫn vận hành.

@@ -222,7 +222,7 @@ public class DashboardPanel extends JPanel implements Refreshable {
             JLabel name = new JLabel("<html><b>" + request.getRequester().getFullName() + "</b><br>" + request.getType().getDisplayName() + "</html>");
             name.setFont(name.getFont().deriveFont(11f));
             JPanel person = new JPanel(new BorderLayout(8, 0)); person.setOpaque(false);
-            person.add(new vn.edu.donga.unischedule.ui.component.Avatar(request.getRequester().getId(), request.getRequester().getFullName(), 30), BorderLayout.WEST);
+            person.add(new vn.edu.donga.unischedule.ui.component.Avatar(request.getRequester(), 30), BorderLayout.WEST);
             person.add(name, BorderLayout.CENTER); row.add(person, BorderLayout.NORTH);
             JLabel reason = new JLabel("<html><div style='width:220px'><b>Lý do:</b> " + request.getReason() + "</div></html>");
             reason.setFont(reason.getFont().deriveFont(11f)); reason.setForeground(AppConfig.MUTED); row.add(reason, BorderLayout.CENTER);

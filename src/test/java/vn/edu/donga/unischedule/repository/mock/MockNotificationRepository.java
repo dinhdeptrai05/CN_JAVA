@@ -34,3 +34,4 @@ public class MockNotificationRepository implements NotificationRepository {
         return store.notifications().removeIf(notification -> notification.getId().equals(id));
     }
 }
+

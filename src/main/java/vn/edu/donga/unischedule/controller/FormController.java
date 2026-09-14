@@ -17,8 +17,9 @@ public final class FormController {
     }
     public static Equipment equipment(Equipment editing, String code, String name, String category, String quantity,
                                       String condition, Classroom room, ResourceStatus status) {
-        return new Equipment(editing == null ? null : editing.getId(), code.trim(), name.trim(), category.trim(),
+        Equipment result = new Equipment(editing == null ? null : editing.getId(), code.trim(), name.trim(), category.trim(),
                 Integer.parseInt(quantity.trim()), condition.trim(), room, status);
+        if(editing!=null) result.setPlacementId(editing.getPlacementId());return result;
     }
     public static CourseSection section(CourseSection editing, String code, Course course, Semester semester,
                                         Lecturer lecturer, String capacity, String studentCount, CourseSectionStatus status) {

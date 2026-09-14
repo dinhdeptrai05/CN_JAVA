@@ -1,10 +1,10 @@
 # UniSchedule
 
-Ứng dụng desktop demo tuần 1 cho đề tài quản lý thời khóa biểu và tài nguyên phòng học.
+Ứng dụng desktop Java Swing, JDBC và MySQL cho đề tài quản lý thời khóa biểu và tài nguyên phòng học.
 
 ## Trạng thái triển khai
 
-Hiện tại: đã triển khai giao diện Java Swing demo tuần 1 dùng dữ liệu giả trong bộ nhớ. Chưa kết nối JDBC/MySQL, chưa lưu dữ liệu sau khi đóng ứng dụng.
+Ứng dụng đọc/ghi MySQL bằng JDBC, có đăng nhập bằng mật khẩu băm, transaction, nhật ký, thông báo và cập nhật ảnh hồ sơ. Xem [hướng dẫn database và chạy ứng dụng](README_DATABASE.md). Mock chỉ còn trong thư mục test.
 
 ## Công nghệ
 
@@ -16,19 +16,20 @@ Dự án được tổ chức theo MVC: `ui` (View) gọi `controller`; Controll
 - FlatLaf
 - Heroicons outline (SVG đóng gói trong ứng dụng)
 - Poppins Regular/Medium/SemiBold/Bold, có font dự phòng cho ký tự tiếng Việt mà Poppins không hỗ trợ
-- MySQL Connector/J được khai báo để chuẩn bị cho giai đoạn sau
+- MySQL 8.4 và MySQL Connector/J
 
 ## Chạy ứng dụng
 
 ```bash
-mvn clean compile
-mvn exec:java
+./scripts/run-local.ps1 # bản MySQL riêng đã cấu hình trên máy này
+mvn exec:java # sau khi cấu hình MySQL theo README_DATABASE.md
 ```
 
 ## Màn hình đã có
 
-- Đăng nhập và chọn nhanh tài khoản demo.
+- Đăng nhập từ tài khoản lưu trong MySQL.
 - Dashboard theo vai trò.
+- Báo cáo thống kê cho Admin/Phòng đào tạo: sử dụng phòng, khối lượng giảng dạy, sĩ số lớp, yêu cầu; lọc ngày/học kỳ/khoa, xuất CSV và bản in HTML. Xem [hướng dẫn báo cáo](docs/REPORTS.md).
 - Thời khóa biểu tuần dạng lịch và dạng bảng.
 - Dialog thêm/sửa lịch có validation và kiểm tra xung đột.
 - Danh sách xung đột và dialog so sánh hai lịch.
@@ -40,7 +41,7 @@ mvn exec:java
 - Tra cứu phòng trống dạng card hoặc bảng.
 - Thông báo.
 - Hồ sơ và cài đặt.
-- Nhật ký hoạt động demo.
+- Nhật ký hoạt động lưu trong MySQL.
 
 ## Kiểm chứng
 
@@ -56,7 +57,7 @@ Kiểm thử render tạo ảnh trong `target/ui-previews`: màn hình chính �
 
 Giao diện được điều chỉnh theo `screen.png` và `code.html` trong `stitch_prompt_ui_generator.zip`: sidebar trắng 256px, nền `#F8FAFC`, màu chính `#5850EC`, trạng thái pastel, dashboard hai cột, khoảng cách 16/24/32px và biểu mẫu sáng. Các màn hình quản lý dùng chung hệ màu, typography và thành phần Swing.
 
-Số liệu lấy từ mock service, không sao chép các con số minh họa trong ảnh. Các ảnh avatar từ HTML tham chiếu chỉ dùng minh họa cho tài khoản demo. Font và icon được lưu cục bộ trong `src/main/resources`, kèm giấy phép OFL/MIT, không cần tải tài nguyên giao diện khi chạy.
+Số liệu lấy từ MySQL. Ảnh hồ sơ được người dùng cập nhật và lưu trong database. Font và icon được lưu cục bộ trong `src/main/resources`, kèm giấy phép OFL/MIT, không cần tải tài nguyên giao diện khi chạy.
 
 ## Tài khoản demo
 
@@ -69,8 +70,6 @@ Mật khẩu chung: `123456`
 | giangvien | LECTURER | Phạm Anh Tuấn |
 | sinhvien | STUDENT | Nguyễn Hoàng Nam |
 
-## Giai đoạn sau
+## Cơ sở dữ liệu
 
-- Thiết kế schema MySQL, seed dữ liệu và DAO JDBC.
-- Thay mock repository bằng JDBC repository.
-- Mã hóa mật khẩu, transaction, audit log thật và kiểm thử tự động.
+Xem [README_DATABASE.md](README_DATABASE.md) để tạo schema, cấu hình kết nối, quản lý dữ liệu seed và chạy kiểm thử JDBC.

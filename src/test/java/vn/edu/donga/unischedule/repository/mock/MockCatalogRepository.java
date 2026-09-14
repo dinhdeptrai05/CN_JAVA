@@ -15,3 +15,4 @@ public final class MockCatalogRepository implements CatalogRepository {
         return store.users().stream().filter(Lecturer.class::isInstance).map(Lecturer.class::cast).toList();
     }
 }
+

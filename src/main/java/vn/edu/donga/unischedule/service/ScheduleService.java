@@ -31,6 +31,7 @@ public class ScheduleService {
     }
 
     public List<ScheduleEntry> findByWeekForUser(LocalDate weekStart, User user) {
+        if (scheduleRepository instanceof vn.edu.donga.unischedule.repository.jdbc.JdbcScheduleRepository jdbc) return jdbc.findForUser(weekStart, user);
         List<ScheduleEntry> entries = scheduleRepository.findByWeek(weekStart);
         if (user.getRole() == Role.ADMIN || user.getRole() == Role.ACADEMIC) {
             return entries;
@@ -68,7 +69,8 @@ public class ScheduleService {
         if (entry.getStartSlot() == null || entry.getEndSlot() == null) {
             throw new ValidationException("Ca bắt đầu và ca kết thúc không được để trống.");
         }
-        if (entry.getStartSlot().getOrder() >= entry.getEndSlot().getOrder()) {
+        if (entry.getDayOfWeek() < 2 || entry.getDayOfWeek() > 8) throw new ValidationException("Ngày trong tuần không hợp lệ.");
+        if (entry.getStartSlot().getOrder() > entry.getEndSlot().getOrder()) {
             throw new ValidationException("Ca kết thúc phải sau ca bắt đầu.");
         }
         if (entry.getStartDate() == null || entry.getEndDate() == null) {

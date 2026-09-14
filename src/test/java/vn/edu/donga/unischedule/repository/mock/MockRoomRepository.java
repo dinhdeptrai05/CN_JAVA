@@ -66,3 +66,4 @@ public class MockRoomRepository implements RoomRepository {
         return equipment;
     }
 }
+

@@ -47,4 +47,11 @@ public class Course {
     public String toString() {
         return code + " - " + name;
     }
+
+    @Override public boolean equals(Object other) {
+        if(this==other)return true;
+        if(other==null || getClass()!=other.getClass())return false;
+        return getId()!=null && getId().equals(((Course)other).getId());
+    }
+    @Override public int hashCode() { return getClass().hashCode(); }
 }

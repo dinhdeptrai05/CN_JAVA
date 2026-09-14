@@ -41,3 +41,4 @@ public class MockRequestRepository implements RequestRepository {
         return store.requests().removeIf(request -> request.getId().equals(id));
     }
 }
+

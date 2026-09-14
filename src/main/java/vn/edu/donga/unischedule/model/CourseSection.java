@@ -92,4 +92,11 @@ public class CourseSection {
     public String toString() {
         return code + " - " + course.getName();
     }
+
+    @Override public boolean equals(Object other) {
+        if(this==other)return true;
+        if(other==null || getClass()!=other.getClass())return false;
+        return getId()!=null && getId().equals(((CourseSection)other).getId());
+    }
+    @Override public int hashCode() { return getClass().hashCode(); }
 }

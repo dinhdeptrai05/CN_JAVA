@@ -41,3 +41,4 @@ public class MockCourseSectionRepository implements CourseSectionRepository {
         return store.courseSections().removeIf(section -> section.getId().equals(id));
     }
 }
+

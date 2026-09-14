@@ -39,6 +39,8 @@ public class CourseSectionDialog extends JDialog {
     public CourseSectionDialog(JFrame owner, AppControllers controllers, CourseSection editing) {
         super(owner, editing == null ? "Thêm lớp học phần" : "Sửa lớp học phần", true);
         this.editing = editing;
+        studentCountField.setEditable(false);
+        studentCountField.setToolTipText("Tự động tính từ danh sách sinh viên đăng ký");
         controllers.catalog().getCourses().forEach(courseBox::addItem);
         controllers.catalog().getSemesters().forEach(semesterBox::addItem);
         controllers.catalog().getLecturers().forEach(lecturerBox::addItem);
@@ -97,7 +99,7 @@ public class CourseSectionDialog extends JDialog {
     private void fill(CourseSection section) {
         if (section == null) {
             capacityField.setText("50");
-            studentCountField.setText("40");
+            studentCountField.setText("0");
             return;
         }
         codeField.setText(section.getCode());

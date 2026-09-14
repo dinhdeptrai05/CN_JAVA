@@ -52,7 +52,7 @@ public class ProfilePanel extends JPanel implements Refreshable {
         profile.setBorder(BorderFactory.createEmptyBorder(22, 24, 22, 24));
         profile.setPreferredSize(new java.awt.Dimension(240, 0));
         JPanel identity = new JPanel(new FlowLayout(FlowLayout.LEFT)); identity.setOpaque(false);
-        identity.add(new vn.edu.donga.unischedule.ui.component.Avatar(user.getId(), user.getFullName(), 64));
+        identity.add(new vn.edu.donga.unischedule.ui.component.Avatar(user, 64));
         profile.add(identity, BorderLayout.NORTH);
         JPanel facts = new JPanel();
         facts.setLayout(new javax.swing.BoxLayout(facts, javax.swing.BoxLayout.Y_AXIS));
@@ -62,6 +62,12 @@ public class ProfilePanel extends JPanel implements Refreshable {
         facts.add(new JLabel("<html>Vai trò:<br><b>" + user.getRole().getDisplayName() + "</b></html>"));
         facts.add(javax.swing.Box.createVerticalStrut(16));
         facts.add(new JLabel("Username: " + user.getUsername()));
+        facts.add(javax.swing.Box.createVerticalStrut(16));
+        SecondaryButton photo = new SecondaryButton("Đổi ảnh hồ sơ");
+        photo.addActionListener(event -> choosePhoto());facts.add(photo);
+        facts.add(javax.swing.Box.createVerticalStrut(8));
+        SecondaryButton removePhoto = new SecondaryButton("Xóa ảnh hồ sơ");
+        removePhoto.addActionListener(event -> savePhoto(null));facts.add(removePhoto);
         profile.add(facts, BorderLayout.CENTER);
         add(profile, BorderLayout.WEST);
 
@@ -78,7 +84,6 @@ public class ProfilePanel extends JPanel implements Refreshable {
         addRow(card, gbc, "Họ tên", fullNameField);
         addRow(card, gbc, "Email", emailField);
         addRow(card, gbc, "Số điện thoại", phoneField);
-        addRow(card, gbc, "Giao diện", themeBox);
         JPanel actions = new JPanel(new FlowLayout(FlowLayout.RIGHT));
         actions.setOpaque(false);
         PrimaryButton save = new PrimaryButton("Cập nhật hồ sơ");
@@ -151,11 +156,7 @@ public class ProfilePanel extends JPanel implements Refreshable {
     private void updateProfile() {
         try {
             controllers.users().updateProfile(user, fullNameField.getText(), emailField.getText(), phoneField.getText());
-            if ("Tối".equals(themeBox.getSelectedItem())) {
-                Dialogs.warning(this, "Chế độ tối được mô phỏng trong tuần 1 và sẽ lưu thật ở giai đoạn sau.");
-            } else {
-                Dialogs.success(this, "Đã cập nhật hồ sơ cá nhân.");
-            }
+            Dialogs.success(this, "Đã cập nhật hồ sơ cá nhân.");
         } catch (ValidationException ex) {
             Dialogs.error(this, ex.getMessage());
         }
@@ -174,7 +175,7 @@ public class ProfilePanel extends JPanel implements Refreshable {
         oldPasswordField.setText("");
         newPasswordField.setText("");
         confirmPasswordField.setText("");
-        Dialogs.success(this, "Đã đổi mật khẩu trong dữ liệu demo.");
+        Dialogs.success(this, "Đã đổi mật khẩu.");
     }
 
     private String initials(String fullName) {
@@ -183,5 +184,20 @@ public class ProfilePanel extends JPanel implements Refreshable {
             return parts[0].substring(0, 1).toUpperCase();
         }
         return (parts[parts.length - 2].substring(0, 1) + parts[parts.length - 1].substring(0, 1)).toUpperCase();
+    }
+    private void choosePhoto() {
+        var chooser=new javax.swing.JFileChooser();
+        chooser.setFileFilter(new javax.swing.filechooser.FileNameExtensionFilter("Ảnh PNG, JPEG (tối đa 5 MB)","png","jpg","jpeg"));
+        chooser.setAcceptAllFileFilterUsed(false);
+        if(chooser.showOpenDialog(this)==javax.swing.JFileChooser.APPROVE_OPTION) savePhoto(chooser.getSelectedFile().toPath());
+    }
+    private void savePhoto(java.nio.file.Path path) {
+        new javax.swing.SwingWorker<Void,Void>() {
+            protected Void doInBackground() { controllers.users().updateAvatar(user,path);return null; }
+            protected void done() {
+                try { get();javax.swing.SwingUtilities.getWindowAncestor(ProfilePanel.this).repaint();Dialogs.success(ProfilePanel.this,"Đã cập nhật ảnh hồ sơ."); }
+                catch(Exception ex) { Dialogs.error(ProfilePanel.this,ex.getCause()==null?ex.getMessage():ex.getCause().getMessage()); }
+            }
+        }.execute();
     }
 }

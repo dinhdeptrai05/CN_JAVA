@@ -30,10 +30,11 @@ public class NotificationService {
     }
 
     public void markRead(Notification notification) {
-        notification.setRead(true);
+        boolean previous=notification.isRead();notification.setRead(true);
+        try { notificationRepository.save(notification); } catch(RuntimeException ex) {notification.setRead(previous);throw ex;}
     }
 
     public void markAllRead(User user) {
-        findForUser(user).forEach(notification -> notification.setRead(true));
+        findForUser(user).forEach(this::markRead);
     }
 }

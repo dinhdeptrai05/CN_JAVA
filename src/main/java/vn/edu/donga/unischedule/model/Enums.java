@@ -28,7 +28,7 @@ public final class Enums {
 
     public enum UserStatus {
         ACTIVE("Hoạt động"),
-        LOCKED("Đã khóa");
+        LOCKED("Đã khóa"), INACTIVE("Ngừng hoạt động");
 
         private final String displayName;
 
@@ -111,7 +111,7 @@ public final class Enums {
     public enum CourseSectionStatus {
         UNSCHEDULED("Chưa xếp lịch"),
         SCHEDULED("Đã xếp lịch"),
-        CONFLICTED("Có xung đột");
+        CONFLICTED("Có xung đột"), CLOSED("Đã đóng"), CANCELLED("Đã hủy");
 
         private final String displayName;
 

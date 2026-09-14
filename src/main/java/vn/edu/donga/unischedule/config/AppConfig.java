@@ -4,7 +4,7 @@ import java.awt.Color;
 
 public final class AppConfig {
     public static final String APP_NAME = "UniSchedule";
-    public static final String STATUS_TEXT = "Chế độ demo - dữ liệu giả";
+    public static final String STATUS_TEXT = "MySQL · JDBC";
     public static final Color PRIMARY = Color.decode("#5850EC");
     public static final Color SIDEBAR = Color.WHITE;
     public static final Color BACKGROUND = Color.decode("#F8FAFC");

@@ -46,4 +46,11 @@ public abstract class Resource {
     public void setStatus(ResourceStatus status) {
         this.status = status;
     }
+
+    @Override public boolean equals(Object other) {
+        if(this==other)return true;
+        if(other==null || getClass()!=other.getClass())return false;
+        return getId()!=null && getId().equals(((Resource)other).getId());
+    }
+    @Override public int hashCode() { return getClass().hashCode(); }
 }

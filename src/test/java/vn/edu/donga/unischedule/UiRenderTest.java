@@ -21,7 +21,7 @@ class UiRenderTest {
             assertTrue(UIManager.getFont("defaultFont").canDisplayUpTo("Thời khóa biểu Nguyễn") < 0);
             var icon = (com.formdev.flatlaf.extras.FlatSVGIcon) HeroIcons.of("calendar-days", 24, Color.BLACK);
             assertTrue(icon.hasFound());
-            AppServices services = AppServices.createDemo();
+            AppServices services = vn.edu.donga.unischedule.service.TestFixtures.createDemo();
             MainFrame frame = new MainFrame(new vn.edu.donga.unischedule.controller.AppControllers(services), services.auth().login("daotao", "123456"));
             try {
                 frame.addNotify();

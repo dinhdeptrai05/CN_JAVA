@@ -40,7 +40,7 @@ public class AuditLogPanel extends JPanel implements Refreshable {
         PrimaryButton refresh = new PrimaryButton("Làm mới");
         refresh.addActionListener(event -> {
             refresh();
-            Dialogs.success(this, "Nhật ký demo đã được tải lại.");
+            Dialogs.success(this, "Nhật ký hoạt động đã được tải lại.");
         });
         actions.add(refresh);
         add(actions, BorderLayout.NORTH);

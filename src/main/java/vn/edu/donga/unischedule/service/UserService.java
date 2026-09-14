@@ -34,7 +34,7 @@ public class UserService {
                 .anyMatch(existing -> existing.getUsername().equalsIgnoreCase(user.getUsername())
                         && (user.getId() == null || !existing.getId().equals(user.getId())));
         if (duplicate) {
-            throw new ValidationException("Username đã tồn tại trong dữ liệu giả.");
+            throw new ValidationException("Username đã tồn tại trong cơ sở dữ liệu.");
         }
         return userRepository.save(user);
     }
@@ -63,6 +63,7 @@ public class UserService {
     public void updateProfile(User user, String fullName, String email, String phone) {
         Validator.required(fullName, "Họ tên");
         Validator.email(email);
+        if(userRepository instanceof vn.edu.donga.unischedule.repository.jdbc.JdbcUserRepository jdbc) {jdbc.updateProfile(user,fullName.trim(),email.trim(),phone.trim());return;}
         user.setFullName(fullName.trim());
         user.setEmail(email.trim());
         user.setPhone(phone.trim());
@@ -70,11 +71,14 @@ public class UserService {
     }
 
     public void changePassword(User user, String oldPassword, String password, String confirmation) {
-        if (!user.getPassword().equals(oldPassword)) throw new ValidationException("Mật khẩu hiện tại không đúng.");
+        String stored=userRepository.findById(user.getId()).orElseThrow().getPassword();
+        boolean valid=vn.edu.donga.unischedule.util.PasswordHasher.isHash(stored)
+            ? vn.edu.donga.unischedule.util.PasswordHasher.verify(oldPassword,stored) : stored.equals(oldPassword);
+        if (!valid) throw new ValidationException("Mật khẩu hiện tại không đúng.");
         if (password == null || password.length() < 6) throw new ValidationException("Mật khẩu mới phải có ít nhất 6 ký tự.");
         if (!password.equals(confirmation)) throw new ValidationException("Mật khẩu nhập lại không khớp.");
-        user.setPassword(password);
-        userRepository.save(user);
+        String previous=user.getPassword();user.setPassword(password);
+        try { userRepository.save(user); } catch (RuntimeException ex) { user.setPassword(previous);throw ex; }
     }
 
     public User prepareUser(User editing, Role role, String username, String fullName, String email, String phone, UserStatus status) {
@@ -82,6 +86,7 @@ public class UserService {
         if (editing != null) {
             draft.setId(editing.getId());
             draft.setPassword(editing.getPassword());
+            draft.setAvatarData(editing.getAvatarData());
             if (draft instanceof Lecturer target && editing instanceof Lecturer original) {
                 target.setDepartment(original.getDepartment()); target.setLecturerCode(original.getLecturerCode());
             }
@@ -91,5 +96,11 @@ public class UserService {
         }
         draft.setStatus(status);
         return draft;
+    }
+
+    public void updateAvatar(User user, java.nio.file.Path path) {
+        byte[] data=path==null?null:vn.edu.donga.unischedule.util.ProfileImages.read(path);
+        if(userRepository instanceof vn.edu.donga.unischedule.repository.jdbc.JdbcUserRepository jdbc) jdbc.saveAvatar(user,data);
+        else { user.setAvatarData(data);userRepository.save(user); }
     }
 }

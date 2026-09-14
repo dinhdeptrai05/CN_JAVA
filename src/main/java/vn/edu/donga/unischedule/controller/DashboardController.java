@@ -19,11 +19,11 @@ public final class DashboardController {
         List<Metric> stats = new ArrayList<>();
 
         long available = services.rooms().findAll().stream().filter(room -> room.getRoomStatus() == RoomStatus.AVAILABLE).count();
-        long inUse = services.rooms().findAll().stream().filter(room -> room.getRoomStatus() == RoomStatus.IN_USE).count();
+        long inUse = usedRoomIds().size();
         long maintenance = services.rooms().findAll().stream().filter(room -> room.getRoomStatus() == RoomStatus.MAINTENANCE).count();
         long pending = services.requests().findForUser(user).stream().filter(request -> request.getStatus() == RequestStatus.PENDING).count();
         if (user.getRole() == Role.ADMIN) {
-            stats.add(new Metric("ND", "Tài khoản", String.valueOf(services.users().findAll().size()), "Người dùng demo", Tone.PRIMARY));
+            stats.add(new Metric("ND", "Tài khoản", String.valueOf(services.users().findAll().size()), "Người dùng hệ thống", Tone.PRIMARY));
             stats.add(new Metric("TR", "Phòng trống", String.valueOf(available), "Sẵn sàng sử dụng", Tone.SUCCESS));
             stats.add(new Metric("SD", "Đang dùng", String.valueOf(inUse), "Có lịch trong tuần", Tone.WARNING));
             stats.add(new Metric("BT", "Bảo trì", String.valueOf(maintenance), "Cần theo dõi", Tone.DANGER));
@@ -61,11 +61,16 @@ public final class DashboardController {
     }
     public List<BuildingUsage> usage() {
         List<Classroom> all = services.rooms().findAll();
+        var usedIds=usedRoomIds();
         return all.stream().map(Classroom::getBuilding).distinct().map(building -> {
             var rooms = all.stream().filter(room -> room.getBuilding().equals(building)).toList();
-            long used = rooms.stream().filter(room -> room.getRoomStatus() == RoomStatus.IN_USE).count();
+            long used = rooms.stream().filter(room -> usedIds.contains(room.getId())).count();
             return new BuildingUsage(building, used, rooms.size(), rooms.isEmpty() ? 0 : (int) (used * 100 / rooms.size()));
         }).toList();
+    }
+    private java.util.Set<Long> usedRoomIds() {
+        var start=DateUtils.currentWeekMonday();var end=start.plusDays(6);
+        return services.schedules().findAll().stream().filter(s->s.getStatus()==ScheduleStatus.PUBLISHED && !s.getStartDate().isAfter(end) && !s.getEndDate().isBefore(start)).map(s->s.getRoom().getId()).collect(java.util.stream.Collectors.toSet());
     }
     public List<Conflict> urgentConflicts() {
         return services.conflicts().findAllConflicts().stream().filter(c -> c.getStatus() != ConflictStatus.RESOLVED).limit(2).toList();
@@ -77,4 +82,3 @@ public final class DashboardController {
         return services.notifications().findForUser(user).stream().limit(5).toList();
     }
 }
-

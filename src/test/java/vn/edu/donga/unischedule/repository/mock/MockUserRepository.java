@@ -48,3 +48,4 @@ public class MockUserRepository implements UserRepository {
         return store.users().removeIf(user -> user.getId().equals(id));
     }
 }
+

@@ -280,7 +280,7 @@ public class TimetablePanel extends JPanel implements Refreshable {
             try {
                 controllers.schedules().save(entry);
                 refresh();
-                Dialogs.success(this, "Đã thêm lịch học vào dữ liệu giả.");
+                Dialogs.success(this, "Đã thêm lịch học vào cơ sở dữ liệu.");
             } catch (ValidationException ex) {
                 Dialogs.error(this, ex.getMessage());
             }
@@ -307,7 +307,7 @@ public class TimetablePanel extends JPanel implements Refreshable {
     private void deleteSchedule() {
         try {
             ScheduleEntry entry = selectedEntry();
-            if (Dialogs.confirm(this, "Xóa lịch " + entry.getCourseSection().getCode() + " khỏi dữ liệu giả?")) {
+            if (Dialogs.confirm(this, "Xóa lịch " + entry.getCourseSection().getCode() + " (hủy lịch)?")) {
                 controllers.schedules().delete(entry.getId());
                 refresh();
                 Dialogs.success(this, "Đã xóa lịch học.");

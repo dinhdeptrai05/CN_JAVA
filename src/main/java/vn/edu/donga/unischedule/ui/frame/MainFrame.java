@@ -94,6 +94,7 @@ public class MainFrame extends JFrame implements ScreenNavigator {
         JPanel menu = new JPanel(new GridLayout(0, 1, 0, 4));
         menu.setOpaque(false);
         addMenu(menu, "dashboard", "Dashboard", true);
+        addMenu(menu, "reports", "Báo cáo thống kê", currentUser.getRole()==Role.ADMIN || currentUser.getRole()==Role.ACADEMIC);
         addMenu(menu, "timetable", "Thời khóa biểu", true);
         addMenu(menu, "conflicts", "Xung đột", currentUser.getRole() == Role.ADMIN || currentUser.getRole() == Role.ACADEMIC);
         addMenu(menu, "courseSections", "Lớp học phần", true);
@@ -142,7 +143,7 @@ public class MainFrame extends JFrame implements ScreenNavigator {
         notificationButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         notificationButton.addActionListener(event -> showScreen("notifications"));
         right.add(notificationButton);
-        Avatar avatar = new Avatar(currentUser.getId(), currentUser.getFullName(), 34);
+        Avatar avatar = new Avatar(currentUser, 34);
         right.add(avatar);
         topbar.add(right, BorderLayout.EAST);
         return topbar;
@@ -160,6 +161,7 @@ public class MainFrame extends JFrame implements ScreenNavigator {
 
     private void registerScreens() {
         addScreen("dashboard", "Tổng quan điều hành", new DashboardPanel(controllers, currentUser, this));
+        if(currentUser.getRole()==Role.ADMIN || currentUser.getRole()==Role.ACADEMIC) addScreen("reports", "Báo cáo thống kê", new ReportPanel(controllers,currentUser));
         timetableScreen = new TimetablePanel(controllers, currentUser);
         addScreen("timetable", "Thời khóa biểu", timetableScreen);
         addScreen("conflicts", "Xung đột thời khóa biểu", new ConflictPanel(controllers));
@@ -167,8 +169,8 @@ public class MainFrame extends JFrame implements ScreenNavigator {
         addScreen("rooms", "Phòng và thiết bị", new RoomManagementPanel(controllers, currentUser));
         addScreen("requests", "Quản lý yêu cầu", new RequestManagementPanel(controllers, currentUser));
         addScreen("roomSearch", "Tra cứu phòng trống", new RoomSearchPanel(controllers, currentUser));
-        addScreen("users", "Quản lý người dùng", new UserManagementPanel(controllers));
-        addScreen("audit", "Nhật ký hoạt động", new AuditLogPanel(controllers.audit()));
+        if(currentUser.getRole()==vn.edu.donga.unischedule.model.Enums.Role.ADMIN) addScreen("users", "Quản lý người dùng", new UserManagementPanel(controllers));
+        if(currentUser.getRole()==vn.edu.donga.unischedule.model.Enums.Role.ADMIN || currentUser.getRole()==vn.edu.donga.unischedule.model.Enums.Role.ACADEMIC) addScreen("audit", "Nhật ký hoạt động", new AuditLogPanel(controllers.audit()));
         addScreen("notifications", "Thông báo", new NotificationPanel(controllers, currentUser, this));
         addScreen("profile", "Hồ sơ và cài đặt", new ProfilePanel(controllers, currentUser));
     }
@@ -198,6 +200,7 @@ public class MainFrame extends JFrame implements ScreenNavigator {
             case "rooms" -> "building-office-2"; case "requests" -> "check-circle";
             case "roomSearch" -> "magnifying-glass"; case "users" -> "users";
             case "audit" -> "clipboard-document-list"; case "notifications" -> "bell";
+            case "reports" -> "document-text";
             default -> "cog-6-tooth";
         };
         button.setIcon(HeroIcons.of(icon, 18, AppConfig.MUTED));

@@ -7,6 +7,12 @@ import java.time.LocalDateTime;
 
 public abstract class User {
     private Long id;
+    private byte[] avatarData;
+    public byte[] getAvatarData() { return avatarData == null ? null : avatarData.clone(); }
+    private final java.beans.PropertyChangeSupport changes = new java.beans.PropertyChangeSupport(this);
+    public void addAvatarListener(java.beans.PropertyChangeListener listener) { changes.addPropertyChangeListener("avatar",listener); }
+    public void removeAvatarListener(java.beans.PropertyChangeListener listener) { changes.removePropertyChangeListener("avatar",listener); }
+    public void setAvatarData(byte[] data) { byte[] old=avatarData;avatarData = data == null ? null : data.clone();changes.firePropertyChange("avatar",old,avatarData); }
     private String username;
     private String password;
     private String fullName;
@@ -26,7 +32,7 @@ public abstract class User {
         this.phone = phone;
         this.role = role;
         this.status = status;
-        this.lastLogin = LocalDateTime.now().minusDays(1);
+        this.lastLogin = null;
     }
 
     public Long getId() {
@@ -105,4 +111,11 @@ public abstract class User {
     public String toString() {
         return fullName;
     }
+
+    @Override public boolean equals(Object other) {
+        if(this==other)return true;
+        if(other==null || getClass()!=other.getClass())return false;
+        return getId()!=null && getId().equals(((User)other).getId());
+    }
+    @Override public int hashCode() { return getClass().hashCode(); }
 }

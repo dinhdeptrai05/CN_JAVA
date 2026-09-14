@@ -1,0 +1,10 @@
+CREATE INDEX idx_users_department_status ON users(department_id,status);
+CREATE INDEX idx_sections_semester_status ON course_sections(semester_id,status);
+CREATE INDEX idx_enrollments_student_status ON student_enrollments(student_id,status);
+CREATE INDEX idx_assignments_lecturer ON lecturer_assignments(lecturer_id,course_section_id);
+CREATE INDEX idx_schedules_room_time ON schedules(classroom_id,day_of_week,start_date,end_date,start_slot_id,end_slot_id);
+CREATE INDEX idx_schedules_assignment_time ON schedules(lecturer_assignment_id,day_of_week,start_date,end_date,start_slot_id,end_slot_id);
+CREATE INDEX idx_schedules_section_time ON schedules(course_section_id,day_of_week,start_date,end_date,start_slot_id,end_slot_id);
+CREATE INDEX idx_requests_status_type ON change_requests(status,request_type,created_at);
+CREATE INDEX idx_notifications_user_read ON notifications(user_id,is_read,created_at);
+CREATE INDEX idx_maintenance_room_status ON maintenance_records(classroom_id,status,start_date,end_date);

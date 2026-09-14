@@ -1,15 +1,8 @@
 package vn.edu.donga.unischedule.service;
 
-import vn.edu.donga.unischedule.repository.mock.MockCourseSectionRepository;
-import vn.edu.donga.unischedule.repository.mock.MockDataStore;
-import vn.edu.donga.unischedule.repository.mock.MockNotificationRepository;
-import vn.edu.donga.unischedule.repository.mock.MockRequestRepository;
-import vn.edu.donga.unischedule.repository.mock.MockRoomRepository;
-import vn.edu.donga.unischedule.repository.mock.MockScheduleRepository;
-import vn.edu.donga.unischedule.repository.mock.MockUserRepository;
 
 public class AppServices {
-    private final AuditService auditService = new AuditService();
+    private AuditService auditService = new AuditService();
     public AuditService audit() { return auditService; }
     private final CatalogService catalogService;
     private final AuthService authService;
@@ -20,8 +13,10 @@ public class AppServices {
     private final UserService userService;
     private final CourseSectionService courseSectionService;
     private final NotificationService notificationService;
+    private ReportService reportService;
+    public ReportService reports() { return reportService; }
 
-    private AppServices(CatalogService catalogService, AuthService authService, ScheduleService scheduleService,
+    public AppServices(CatalogService catalogService, AuthService authService, ScheduleService scheduleService,
                         ConflictService conflictService, RoomService roomService, RequestService requestService,
                         UserService userService, CourseSectionService courseSectionService,
                         NotificationService notificationService) {
@@ -34,23 +29,24 @@ public class AppServices {
         this.userService = userService;
         this.courseSectionService = courseSectionService;
         this.notificationService = notificationService;
+        this.reportService = new ReportService(user -> new vn.edu.donga.unischedule.model.Report.Source(scheduleService.findAll(),roomService.findAll(),catalogService.getTimeSlots(),courseSectionService.findAll(),requestService.findForUser(user)));
     }
 
-    public static AppServices createDemo() {
-        MockDataStore store = new MockDataStore();
-        CatalogService catalog = new CatalogService(new vn.edu.donga.unischedule.repository.mock.MockCatalogRepository(store));
-        MockUserRepository userRepository = new MockUserRepository(store);
-        MockScheduleRepository scheduleRepository = new MockScheduleRepository(store);
-        MockRoomRepository roomRepository = new MockRoomRepository(store);
-        ConflictService conflict = new ConflictService(scheduleRepository);
-        ScheduleService schedule = new ScheduleService(scheduleRepository, conflict);
-        RoomService room = new RoomService(roomRepository, schedule, conflict);
-        RequestService request = new RequestService(new MockRequestRepository(store));
-        UserService user = new UserService(userRepository, catalog);
-        CourseSectionService section = new CourseSectionService(new MockCourseSectionRepository(store));
-        NotificationService notification = new NotificationService(new MockNotificationRepository(store));
-        return new AppServices(catalog, new MockAuthService(userRepository), schedule, conflict, room,
-                request, user, section, notification);
+    public static AppServices createJdbc() {
+        var db=new vn.edu.donga.unischedule.repository.jdbc.JdbcDatabase(new vn.edu.donga.unischedule.repository.jdbc.ConnectionFactory());
+        db.scalar("SELECT COUNT(*) FROM roles");
+        var catalog=new CatalogService(new vn.edu.donga.unischedule.repository.jdbc.JdbcCatalogRepository(db));
+        var users=new vn.edu.donga.unischedule.repository.jdbc.JdbcUserRepository(db);
+        var schedules=new vn.edu.donga.unischedule.repository.jdbc.JdbcScheduleRepository(db);
+        var conflicts=new ConflictService(schedules);
+        var scheduleService=new ScheduleService(schedules,conflicts);
+        var services=new AppServices(catalog,new JdbcAuthService(db),scheduleService,conflicts,
+            new RoomService(new vn.edu.donga.unischedule.repository.jdbc.JdbcRoomRepository(db),scheduleService,conflicts),
+            new RequestService(new vn.edu.donga.unischedule.repository.jdbc.JdbcRequestRepository(db)),new UserService(users,catalog),
+            new CourseSectionService(new vn.edu.donga.unischedule.repository.jdbc.JdbcCourseSectionRepository(db)),
+            new NotificationService(new vn.edu.donga.unischedule.repository.jdbc.JdbcNotificationRepository(db)));
+        services.auditService=new AuditService(db);
+        services.reportService=new ReportService(new vn.edu.donga.unischedule.repository.jdbc.JdbcReportRepository(db));return services;
     }
 
     public CatalogService catalog() {

@@ -17,8 +17,7 @@ public final class CourseSectionController {
     public CourseSection save(CourseSection section) { return service.save(section); }
 
     public List<CourseSection> search(User user, String keyword, String semester, String department, String status) {
-        return service.findAll().stream()
-                .filter(section -> allowedForRole(section, user))
+        return service.findForUser(user).stream()
                 .filter(section -> semester == null || semester.startsWith("Tất cả") || section.getSemester().getName().equals(semester))
                 .filter(section -> department == null || department.startsWith("Tất cả") || section.getCourse().getDepartment().getName().equals(department))
                 .filter(section -> status == null || status.startsWith("Tất cả") || section.getStatus().getDisplayName().equals(status))
@@ -34,4 +33,5 @@ public final class CourseSectionController {
         return true;
     }
     public void assignLecturer(CourseSection section, Lecturer lecturer) { service.assignLecturer(section, lecturer); }
+    public void enroll(Long sectionId,Long studentId,boolean active) { service.enroll(sectionId,studentId,active); }
 }
