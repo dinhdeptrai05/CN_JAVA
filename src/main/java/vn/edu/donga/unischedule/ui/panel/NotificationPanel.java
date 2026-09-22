@@ -8,6 +8,7 @@ import vn.edu.donga.unischedule.controller.AppControllers;
 import vn.edu.donga.unischedule.ui.component.PrimaryButton;
 import vn.edu.donga.unischedule.ui.component.SearchField;
 import vn.edu.donga.unischedule.ui.component.SecondaryButton;
+import vn.edu.donga.unischedule.ui.component.UiTasks;
 import vn.edu.donga.unischedule.ui.model.GenericTableModel;
 import vn.edu.donga.unischedule.util.Dialogs;
 import vn.edu.donga.unischedule.util.TableUtils;
@@ -99,9 +100,10 @@ public class NotificationPanel extends JPanel implements Refreshable {
         open.addActionListener(event -> openTarget());
         markOne.addActionListener(event -> markSelectedRead());
         markAll.addActionListener(event -> {
-            controllers.notifications().markAllRead(user);
-            refresh();
-            Dialogs.success(this, "Đã đánh dấu tất cả thông báo là đã đọc.");
+            UiTasks.run(this, "Đang đánh dấu thông báo…", () -> controllers.notifications().markAllRead(user), () -> {
+                refresh();
+                Dialogs.success(this, "Đã đánh dấu tất cả thông báo là đã đọc.");
+            });
         });
         actions.add(open);
         actions.add(markOne);
@@ -138,9 +140,11 @@ public class NotificationPanel extends JPanel implements Refreshable {
 
     private void markSelectedRead() {
         try {
-            controllers.notifications().markRead(selectedNotification());
-            refresh();
-            Dialogs.success(this, "Đã đánh dấu thông báo là đã đọc.");
+            Notification notification=selectedNotification();
+            UiTasks.run(this, "Đang đánh dấu thông báo…", () -> controllers.notifications().markRead(notification), () -> {
+                refresh();
+                Dialogs.success(this, "Đã đánh dấu thông báo là đã đọc.");
+            });
         } catch (ValidationException ex) {
             Dialogs.error(this, ex.getMessage());
         }
@@ -149,9 +153,10 @@ public class NotificationPanel extends JPanel implements Refreshable {
     private void openTarget() {
         try {
             Notification notification = selectedNotification();
-            controllers.notifications().markRead(notification);
-            refresh();
-            navigator.showScreen(notification.getTargetScreen());
+            UiTasks.run(this, "Đang mở thông báo…", () -> controllers.notifications().markRead(notification), () -> {
+                refresh();
+                navigator.showScreen(notification.getTargetScreen());
+            });
         } catch (ValidationException ex) {
             Dialogs.error(this, ex.getMessage());
         }

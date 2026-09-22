@@ -3,6 +3,7 @@ package vn.edu.donga.unischedule;
 import org.junit.jupiter.api.Test;
 import vn.edu.donga.unischedule.model.ChangeRequest;
 import vn.edu.donga.unischedule.model.User;
+import vn.edu.donga.unischedule.model.RoomAvailability;
 import vn.edu.donga.unischedule.model.Enums.ConflictType;
 import vn.edu.donga.unischedule.model.Enums.Priority;
 import vn.edu.donga.unischedule.model.Enums.RequestStatus;
@@ -47,7 +48,9 @@ class DemoSmokeTest {
         assertTrue(services.rooms().findAll().size() >= 12);
         assertTrue(services.rooms().findAllEquipment().size() >= 15);
         assertTrue(services.schedules().findAll().size() >= 20);
-        assertTrue(services.requests().findForUser(services.auth().login("admin", "123456")).size() >= 4);
+        assertTrue(services.requests().findForUser(services.auth().login("admin", "123456")).size() >= 2);
+        assertTrue(services.requests().findForUser(services.auth().login("daotao", "123456")).stream()
+                .anyMatch(request -> request.getType() == RequestType.USE_ROOM));
     }
 
     @Test
@@ -66,18 +69,39 @@ class DemoSmokeTest {
     void roomSearchAndLecturerRequestWorkInMemory() {
         AppServices services = vn.edu.donga.unischedule.service.TestFixtures.createDemo();
         User lecturer = services.auth().login("giangvien", "123456");
+        var source = services.schedules().findByWeekForUser(LocalDate.now().with(java.time.temporal.TemporalAdjusters.previousOrSame(java.time.DayOfWeek.MONDAY)), lecturer).get(0);
         int before = services.requests().findForUser(lecturer).size();
 
         assertFalse(services.rooms().searchAvailableRooms(LocalDate.now(), services.catalog().getTimeSlots().get(0),
                 "Tất cả", null, 30, "").isEmpty());
 
-        ChangeRequest request = new ChangeRequest(null, lecturer, RequestType.USE_ROOM, null,
+        ChangeRequest request = new ChangeRequest(null, lecturer, RequestType.USE_ROOM, source,
                 services.rooms().findAll().get(0), LocalDate.now().plusDays(1), services.catalog().getTimeSlots().get(0),
                 "", 0, "Yêu cầu kiểm tra luồng gửi mượn phòng demo.", Priority.NORMAL,
                 RequestStatus.PENDING, LocalDateTime.now());
         services.requests().create(request);
 
         assertEquals(before + 1, services.requests().findForUser(lecturer).size());
+    }
+
+    @Test
+    void roomSearchShowsScheduledStudentCountAndUnavailableRooms() {
+        AppServices services = vn.edu.donga.unischedule.service.TestFixtures.createDemo();
+        LocalDate monday = LocalDate.now().with(java.time.temporal.TemporalAdjusters.previousOrSame(java.time.DayOfWeek.MONDAY));
+        LocalDate tuesday = monday.plusDays(1);
+        var firstSlot = services.catalog().getTimeSlots().get(0);
+        var results = services.rooms().searchRoomAvailability(tuesday, firstSlot, null, null, 0, "");
+        var occupied = results.stream().filter(result -> result.room().getCode().equals("A101")).findFirst().orElseThrow();
+        assertEquals(RoomAvailability.Status.OCCUPIED, occupied.status());
+        assertEquals(35, occupied.registeredStudents());
+        assertTrue(occupied.classes().contains("IT101"));
+        var maintenance = results.stream().filter(result -> result.room().getCode().equals("B204")).findFirst().orElseThrow();
+        assertEquals(RoomAvailability.Status.MAINTENANCE, maintenance.status());
+        var free = results.stream().filter(result -> result.room().getCode().equals("A303")).findFirst().orElseThrow();
+        assertEquals(RoomAvailability.Status.FREE, free.status());
+        assertEquals(0, free.registeredStudents());
+        assertFalse(services.rooms().searchAvailableRooms(tuesday, firstSlot, null, null, 0, "")
+                .stream().anyMatch(room -> room.getCode().equals("A101")));
     }
 
     @Test

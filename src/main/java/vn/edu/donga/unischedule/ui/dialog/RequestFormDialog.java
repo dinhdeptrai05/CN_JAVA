@@ -31,7 +31,7 @@ import java.util.Optional;
 
 public class RequestFormDialog extends JDialog {
     private final JComboBox<RequestType> typeBox = new JComboBox<>(new RequestType[]{
-            RequestType.CHANGE_SCHEDULE, RequestType.CHANGE_ROOM, RequestType.BORROW_EQUIPMENT, RequestType.USE_ROOM
+            RequestType.CHANGE_SCHEDULE, RequestType.CHANGE_ROOM, RequestType.BORROW_EQUIPMENT
     });
     private final JComboBox<ScheduleEntry> scheduleBox = new JComboBox<>();
     private final JComboBox<Classroom> roomBox = new JComboBox<>();

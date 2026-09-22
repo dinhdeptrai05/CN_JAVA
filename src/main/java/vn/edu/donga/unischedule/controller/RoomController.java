@@ -25,6 +25,7 @@ public final class RoomController {
     public void toggleMaintenance(Classroom room) { service.toggleMaintenance(room); }
 
     public List<Classroom> searchAvailableRooms(LocalDate date, TimeSlot slot, String building, RoomType type, int minCapacity, String equipmentKeyword) { return service.searchAvailableRooms(date, slot, building, type, minCapacity, equipmentKeyword); }
+    public List<RoomAvailability> searchRoomAvailability(LocalDate date, TimeSlot slot, String building, RoomType type, int minCapacity, String equipmentKeyword) { return service.searchRoomAvailability(date, slot, building, type, minCapacity, equipmentKeyword); }
 
     public List<Classroom> search(String keyword, String building, String type, int minCapacity, String status) {
         return service.findAll().stream()

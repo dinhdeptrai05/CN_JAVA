@@ -5,6 +5,7 @@ import vn.edu.donga.unischedule.model.*;
 import vn.edu.donga.unischedule.service.AppServices;
 import vn.edu.donga.unischedule.repository.jdbc.*;
 import vn.edu.donga.unischedule.controller.AppControllers;
+import vn.edu.donga.unischedule.controller.ReportController.ExportFormat;
 import vn.edu.donga.unischedule.ui.panel.ReportPanel;
 import vn.edu.donga.unischedule.validation.ValidationException;
 import java.nio.file.*;
@@ -34,7 +35,7 @@ class ReportIntegrationTest {
                 try{Path path=Path.of("target","jdbc-previews","reports.png");Files.createDirectories(path.getParent());javax.imageio.ImageIO.write(picture,"png",path.toFile());}catch(java.io.IOException e){throw new AssertionError(e);}
             }finally{frame.dispose();}
         });
-        Path export=Path.of("target","jdbc-previews","report.html");controllers.reports().export(result,0,export,true);assertTrue(Files.size(export)>1000);
+        Path export=Path.of("target","jdbc-previews","report.pdf");controllers.reports().export(result,export,ExportFormat.PDF);assertTrue(Files.size(export)>1000);
     }
     private static void layout(java.awt.Container c){c.doLayout();for(var child:c.getComponents())if(child instanceof java.awt.Container nested)layout(nested);}
 }

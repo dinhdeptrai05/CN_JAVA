@@ -42,7 +42,7 @@ public final class JdbcCourseSectionRepository implements CourseSectionRepositor
             var assignments=db.query("SELECT id FROM lecturer_assignments WHERE course_section_id=? ORDER BY id",r->r.getLong(1),id);
             if(assignments.isEmpty()) db.update("INSERT INTO lecturer_assignments(course_section_id,lecturer_id) VALUES (?,?)",id,s.getLecturer().getId());
             else db.update("UPDATE lecturer_assignments SET lecturer_id=? WHERE id=?",s.getLecturer().getId(),assignments.get(0));
-            db.audit("SAVE_SECTION","course_sections",id); return new long[]{id,count};
+            db.audit(s.getId()==null?"CREATE_SECTION":s.getStatus()==CourseSectionStatus.CANCELLED?"CANCEL_SECTION":"UPDATE_SECTION","course_sections",id); return new long[]{id,count};
         }); s.setId(result[0]);s.setStudentCount((int)result[1]);return s;
     }
     public boolean deleteById(Long id) { var item=findById(id); if(item.isEmpty()) return false; item.get().setStatus(CourseSectionStatus.CANCELLED); save(item.get()); return true; }

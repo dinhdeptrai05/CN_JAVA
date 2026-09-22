@@ -11,6 +11,7 @@ import vn.edu.donga.unischedule.controller.AppControllers;
 import vn.edu.donga.unischedule.ui.component.PrimaryButton;
 import vn.edu.donga.unischedule.ui.component.SearchField;
 import vn.edu.donga.unischedule.ui.component.SecondaryButton;
+import vn.edu.donga.unischedule.ui.component.UiTasks;
 import vn.edu.donga.unischedule.ui.dialog.CourseSectionDialog;
 import vn.edu.donga.unischedule.ui.model.GenericTableModel;
 import vn.edu.donga.unischedule.ui.renderer.BadgeRenderer;
@@ -157,8 +158,9 @@ public class CourseSectionPanel extends JPanel implements Refreshable {
         var form=new JPanel(new GridLayout(0,1,0,8));form.add(studentBox);form.add(active);
         if(javax.swing.JOptionPane.showConfirmDialog(this,form,"Đăng ký học - "+section.getCode(),javax.swing.JOptionPane.OK_CANCEL_OPTION)!=javax.swing.JOptionPane.OK_OPTION)return;
         var selected=(vn.edu.donga.unischedule.model.User)studentBox.getSelectedItem();if(selected==null)return;
-        try {controllers.courseSections().enroll(section.getId(),selected.getId(),active.isSelected());refresh();Dialogs.success(this,"Đã cập nhật đăng ký và sĩ số.");}
-        catch(ValidationException ex){Dialogs.error(this,ex.getMessage());}
+        boolean enrolled=active.isSelected();
+        UiTasks.run(this,"Đang cập nhật đăng ký học…",()->controllers.courseSections().enroll(section.getId(),selected.getId(),enrolled),
+                ()->{refresh();Dialogs.success(this,"Đã cập nhật đăng ký và sĩ số.");});
     }
 
 
@@ -172,26 +174,20 @@ public class CourseSectionPanel extends JPanel implements Refreshable {
 
     private void addSection() {
         CourseSectionDialog.showDialog(this, controllers, null).ifPresent(section -> {
-            try {
-                controllers.courseSections().save(section);
+            UiTasks.run(this, "Đang lưu lớp học phần…", () -> controllers.courseSections().save(section), () -> {
                 refresh();
                 Dialogs.success(this, "Đã thêm lớp học phần.");
-            } catch (ValidationException ex) {
-                Dialogs.error(this, ex.getMessage());
-            }
+            });
         });
     }
 
     private void editSection() {
         try {
             CourseSectionDialog.showDialog(this, controllers, selectedSection()).ifPresent(section -> {
-                try {
-                    controllers.courseSections().save(section);
+                UiTasks.run(this, "Đang cập nhật lớp học phần…", () -> controllers.courseSections().save(section), () -> {
                     refresh();
                     Dialogs.success(this, "Đã cập nhật lớp học phần.");
-                } catch (ValidationException ex) {
-                    Dialogs.error(this, ex.getMessage());
-                }
+                });
             });
         } catch (ValidationException ex) {
             Dialogs.error(this, ex.getMessage());
@@ -207,9 +203,9 @@ public class CourseSectionPanel extends JPanel implements Refreshable {
             int result = JOptionPane.showConfirmDialog(this, lecturerBox, "Chọn giảng viên",
                     JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
             if (result == JOptionPane.OK_OPTION) {
-                controllers.courseSections().assignLecturer(section, (Lecturer) lecturerBox.getSelectedItem());
-                refresh();
-                Dialogs.success(this, "Đã phân công giảng viên cho lớp học phần.");
+                Lecturer lecturer=(Lecturer) lecturerBox.getSelectedItem();
+                UiTasks.run(this,"Đang phân công giảng viên…",()->controllers.courseSections().assignLecturer(section,lecturer),
+                        ()->{refresh();Dialogs.success(this,"Đã phân công giảng viên cho lớp học phần.");});
             }
         } catch (ValidationException ex) {
             Dialogs.error(this, ex.getMessage());

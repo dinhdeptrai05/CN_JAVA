@@ -9,6 +9,7 @@ import vn.edu.donga.unischedule.model.Enums.Role;
 import vn.edu.donga.unischedule.controller.AppControllers;
 import vn.edu.donga.unischedule.ui.component.PrimaryButton;
 import vn.edu.donga.unischedule.ui.component.SecondaryButton;
+import vn.edu.donga.unischedule.ui.component.UiTasks;
 import vn.edu.donga.unischedule.ui.model.GenericTableModel;
 import vn.edu.donga.unischedule.util.DateUtils;
 import vn.edu.donga.unischedule.util.Dialogs;
@@ -127,13 +128,10 @@ public class RoomDetailDialog extends JDialog {
 
     private void addEquipment() {
         EquipmentDialog.showDialog(this, room, null).ifPresent(item -> {
-            try {
-                controllers.rooms().saveEquipment(item);
+            UiTasks.run(this, "Đang thêm thiết bị…", () -> controllers.rooms().saveEquipment(item), () -> {
                 refreshEquipment();
                 Dialogs.success(this, "Đã thêm thiết bị vào phòng.");
-            } catch (ValidationException ex) {
-                Dialogs.error(this, ex.getMessage());
-            }
+            });
         });
     }
 
@@ -144,9 +142,11 @@ public class RoomDetailDialog extends JDialog {
             if (input == null) {
                 return;
             }
-            controllers.rooms().updateEquipmentQuantity(item, input);
-            refreshEquipment();
-            Dialogs.success(this, "Đã cập nhật số lượng thiết bị.");
+            Integer.parseInt(input.trim());
+            UiTasks.run(this, "Đang cập nhật thiết bị…", () -> controllers.rooms().updateEquipmentQuantity(item, input), () -> {
+                refreshEquipment();
+                Dialogs.success(this, "Đã cập nhật số lượng thiết bị.");
+            });
         } catch (NumberFormatException ex) {
             Dialogs.error(this, "Số lượng phải là số nguyên dương.");
         } catch (ValidationException ex) {
@@ -157,9 +157,10 @@ public class RoomDetailDialog extends JDialog {
     private void markBroken() {
         try {
             Equipment item = selectedEquipment();
-            controllers.rooms().markEquipmentBroken(item);
-            refreshEquipment();
-            Dialogs.warning(this, "Đã đánh dấu thiết bị bị hỏng.");
+            UiTasks.run(this, "Đang báo hỏng thiết bị…", () -> controllers.rooms().markEquipmentBroken(item), () -> {
+                refreshEquipment();
+                Dialogs.success(this, "Đã đánh dấu thiết bị bị hỏng.");
+            });
         } catch (ValidationException ex) {
             Dialogs.error(this, ex.getMessage());
         }

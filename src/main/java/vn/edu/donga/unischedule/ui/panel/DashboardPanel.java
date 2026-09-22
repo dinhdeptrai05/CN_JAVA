@@ -10,6 +10,8 @@ import vn.edu.donga.unischedule.model.Enums.RoomStatus;
 import vn.edu.donga.unischedule.controller.AppControllers;
 import vn.edu.donga.unischedule.ui.component.RoundedPanel;
 import vn.edu.donga.unischedule.ui.component.StatCard;
+import vn.edu.donga.unischedule.ui.component.UiTasks;
+import vn.edu.donga.unischedule.util.Dialogs;
 import vn.edu.donga.unischedule.ui.model.GenericTableModel;
 import vn.edu.donga.unischedule.util.DateUtils;
 import vn.edu.donga.unischedule.util.TableUtils;
@@ -228,7 +230,9 @@ public class DashboardPanel extends JPanel implements Refreshable {
             reason.setFont(reason.getFont().deriveFont(11f)); reason.setForeground(AppConfig.MUTED); row.add(reason, BorderLayout.CENTER);
             if (controllers.requests().canProcess(request, user)) {
                 javax.swing.JButton approve = new vn.edu.donga.unischedule.ui.component.PrimaryButton("Duyệt yêu cầu");
-                approve.addActionListener(e -> { controllers.requests().approve(request, user); refresh(); });
+                approve.addActionListener(e -> UiTasks.run(this, "Đang duyệt yêu cầu…",
+                        () -> controllers.requests().approve(request, user),
+                        () -> { refresh(); Dialogs.success(this, "Đã duyệt yêu cầu."); }));
                 row.add(approve, BorderLayout.SOUTH);
             } else row.add(new vn.edu.donga.unischedule.ui.component.StatusBadge(request.getStatus()), BorderLayout.SOUTH);
             row.setBorder(BorderFactory.createEmptyBorder(6, 0, 16, 0)); panel.add(row);

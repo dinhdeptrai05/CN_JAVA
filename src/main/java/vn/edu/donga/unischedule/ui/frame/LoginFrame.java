@@ -6,6 +6,7 @@ import vn.edu.donga.unischedule.controller.AppControllers;
 import vn.edu.donga.unischedule.ui.component.PrimaryButton;
 import vn.edu.donga.unischedule.ui.component.RoundedPanel;
 import vn.edu.donga.unischedule.ui.component.SecondaryButton;
+import vn.edu.donga.unischedule.ui.component.UiTasks;
 import vn.edu.donga.unischedule.validation.ValidationException;
 
 import javax.swing.BorderFactory;
@@ -138,13 +139,13 @@ public class LoginFrame extends JFrame {
     }
 
     private void login() {
-        try {
-            User user = controllers.auth().login(usernameField.getText(), new String(passwordField.getPassword()));
+        String username = usernameField.getText();
+        String password = new String(passwordField.getPassword());
+        errorLabel.setText(" ");
+        UiTasks.run(this, "Đang đăng nhập…", () -> controllers.auth().login(username, password), user -> {
             MainFrame mainFrame = new MainFrame(controllers, user);
             mainFrame.setVisible(true);
             dispose();
-        } catch (ValidationException ex) {
-            errorLabel.setText(ex.getMessage());
-        }
+        }, error -> errorLabel.setText(UiTasks.message(error)));
     }
 }

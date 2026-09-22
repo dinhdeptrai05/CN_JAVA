@@ -129,7 +129,7 @@ public final class Enums {
         CHANGE_ROOM("Đổi phòng"),
         BORROW_EQUIPMENT("Mượn thiết bị"),
         REPORT_DAMAGE("Báo hỏng"),
-        USE_ROOM("Mượn phòng");
+        USE_ROOM("Học bù / sử dụng phòng");
 
         private final String displayName;
 

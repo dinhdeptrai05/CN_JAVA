@@ -10,6 +10,7 @@ import vn.edu.donga.unischedule.controller.AppControllers;
 import vn.edu.donga.unischedule.ui.component.PrimaryButton;
 import vn.edu.donga.unischedule.ui.component.SearchField;
 import vn.edu.donga.unischedule.ui.component.SecondaryButton;
+import vn.edu.donga.unischedule.ui.component.UiTasks;
 import vn.edu.donga.unischedule.ui.component.StatCard;
 import vn.edu.donga.unischedule.ui.dialog.RoomDetailDialog;
 import vn.edu.donga.unischedule.ui.dialog.RoomFormDialog;
@@ -187,26 +188,20 @@ public class RoomManagementPanel extends JPanel implements Refreshable {
 
     private void addRoom() {
         RoomFormDialog.showDialog(this, null).ifPresent(room -> {
-            try {
-                controllers.rooms().save(room);
+            UiTasks.run(this, "Đang lưu phòng học…", () -> controllers.rooms().save(room), () -> {
                 refresh();
                 Dialogs.success(this, "Đã thêm phòng học.");
-            } catch (ValidationException ex) {
-                Dialogs.error(this, ex.getMessage());
-            }
+            });
         });
     }
 
     private void editRoom() {
         try {
             RoomFormDialog.showDialog(this, selectedRoom()).ifPresent(room -> {
-                try {
-                    controllers.rooms().save(room);
+                UiTasks.run(this, "Đang cập nhật phòng học…", () -> controllers.rooms().save(room), () -> {
                     refresh();
                     Dialogs.success(this, "Đã cập nhật phòng học.");
-                } catch (ValidationException ex) {
-                    Dialogs.error(this, ex.getMessage());
-                }
+                });
             });
         } catch (ValidationException ex) {
             Dialogs.error(this, ex.getMessage());
@@ -226,9 +221,10 @@ public class RoomManagementPanel extends JPanel implements Refreshable {
         try {
             Classroom room = selectedRoom();
             if (Dialogs.confirm(this, "Đổi trạng thái bảo trì của phòng " + room.getCode() + "?")) {
-                controllers.rooms().toggleMaintenance(room);
-                refresh();
-                Dialogs.success(this, "Đã cập nhật trạng thái phòng.");
+                UiTasks.run(this, "Đang cập nhật trạng thái phòng…", () -> controllers.rooms().toggleMaintenance(room), () -> {
+                    refresh();
+                    Dialogs.success(this, "Đã cập nhật trạng thái phòng.");
+                });
             }
         } catch (ValidationException ex) {
             Dialogs.error(this, ex.getMessage());

@@ -4,6 +4,7 @@ import vn.edu.donga.unischedule.config.AppConfig;
 import vn.edu.donga.unischedule.controller.AuditController;
 import vn.edu.donga.unischedule.model.AuditEntry;
 import vn.edu.donga.unischedule.ui.component.PrimaryButton;
+import vn.edu.donga.unischedule.ui.component.UiTasks;
 import vn.edu.donga.unischedule.ui.model.GenericTableModel;
 import vn.edu.donga.unischedule.util.Dialogs;
 import vn.edu.donga.unischedule.util.TableUtils;
@@ -38,10 +39,9 @@ public class AuditLogPanel extends JPanel implements Refreshable {
         JPanel actions = new JPanel(new FlowLayout(FlowLayout.RIGHT));
         actions.setOpaque(false);
         PrimaryButton refresh = new PrimaryButton("Làm mới");
-        refresh.addActionListener(event -> {
-            refresh();
-            Dialogs.success(this, "Nhật ký hoạt động đã được tải lại.");
-        });
+        refresh.addActionListener(event -> UiTasks.run(this, "Đang tải nhật ký…", controller::findAll,
+                rows -> { tableModel.setRows(rows); Dialogs.success(this, "Nhật ký hoạt động đã được tải lại."); },
+                error -> Dialogs.error(this, UiTasks.message(error))));
         actions.add(refresh);
         add(actions, BorderLayout.NORTH);
         add(new JScrollPane(table), BorderLayout.CENTER);

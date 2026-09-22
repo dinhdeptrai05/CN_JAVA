@@ -12,7 +12,9 @@ import vn.edu.donga.unischedule.ui.component.PrimaryButton;
 import vn.edu.donga.unischedule.ui.component.RoundedPanel;
 import vn.edu.donga.unischedule.ui.component.SearchField;
 import vn.edu.donga.unischedule.ui.component.SecondaryButton;
+import vn.edu.donga.unischedule.ui.component.UiTasks;
 import vn.edu.donga.unischedule.ui.dialog.ScheduleFormDialog;
+import vn.edu.donga.unischedule.ui.dialog.MakeupClassDialog;
 import vn.edu.donga.unischedule.ui.model.GenericTableModel;
 import vn.edu.donga.unischedule.util.DateUtils;
 import vn.edu.donga.unischedule.util.Dialogs;
@@ -160,6 +162,16 @@ public class TimetablePanel extends JPanel implements Refreshable {
         SecondaryButton detail = new SecondaryButton("Xem chi tiết");
         detail.addActionListener(event -> showSelectedDetail());
         actions.add(detail);
+        if (user.getRole() == Role.LECTURER) {
+            PrimaryButton makeup = new PrimaryButton("Đăng ký học bù");
+            makeup.addActionListener(event -> {
+                int row = table.getSelectedRow();
+                ScheduleEntry selected = row < 0 ? null : tableModel.getRowAt(table.convertRowIndexToModel(row));
+                if (MakeupClassDialog.showDialog(this, controllers, user, selected, null, null, null))
+                    Dialogs.success(this, "Yêu cầu học bù đã gửi và đang chờ phòng đào tạo duyệt.");
+            });
+            actions.add(makeup);
+        }
         if (user.getRole() == Role.ACADEMIC) {
             PrimaryButton add = new PrimaryButton("Thêm lịch");
             SecondaryButton edit = new SecondaryButton("Sửa");
@@ -277,13 +289,10 @@ public class TimetablePanel extends JPanel implements Refreshable {
 
     private void addSchedule() {
         ScheduleFormDialog.showDialog(this, controllers, null).ifPresent(entry -> {
-            try {
-                controllers.schedules().save(entry);
+            UiTasks.run(this, "Đang lưu lịch học…", () -> controllers.schedules().save(entry), () -> {
                 refresh();
                 Dialogs.success(this, "Đã thêm lịch học vào cơ sở dữ liệu.");
-            } catch (ValidationException ex) {
-                Dialogs.error(this, ex.getMessage());
-            }
+            });
         });
     }
 
@@ -291,13 +300,10 @@ public class TimetablePanel extends JPanel implements Refreshable {
         try {
             ScheduleEntry entry = selectedEntry();
             ScheduleFormDialog.showDialog(this, controllers, entry).ifPresent(updated -> {
-                try {
-                    controllers.schedules().save(updated);
+                UiTasks.run(this, "Đang cập nhật lịch học…", () -> controllers.schedules().save(updated), () -> {
                     refresh();
                     Dialogs.success(this, "Đã cập nhật lịch học.");
-                } catch (ValidationException ex) {
-                    Dialogs.error(this, ex.getMessage());
-                }
+                });
             });
         } catch (ValidationException ex) {
             Dialogs.error(this, ex.getMessage());
@@ -308,9 +314,11 @@ public class TimetablePanel extends JPanel implements Refreshable {
         try {
             ScheduleEntry entry = selectedEntry();
             if (Dialogs.confirm(this, "Xóa lịch " + entry.getCourseSection().getCode() + " (hủy lịch)?")) {
-                controllers.schedules().delete(entry.getId());
-                refresh();
-                Dialogs.success(this, "Đã xóa lịch học.");
+                UiTasks.run(this, "Đang hủy lịch học…", () -> controllers.schedules().delete(entry.getId()), cancelled -> {
+                    refresh();
+                    if(cancelled) Dialogs.success(this, "Đã hủy lịch học.");
+                    else Dialogs.warning(this, "Lịch học đã được hủy trước đó.");
+                }, error -> Dialogs.error(this, UiTasks.message(error)));
             }
         } catch (ValidationException ex) {
             Dialogs.error(this, ex.getMessage());

@@ -50,7 +50,7 @@ public final class JdbcScheduleRepository implements ScheduleRepository {
         Long id=entry.getId();
         if(id==null) id=db.insert("INSERT INTO schedules(course_section_id,lecturer_assignment_id,classroom_id,start_slot_id,end_slot_id,day_of_week,start_date,end_date,status,note,created_by) VALUES (?,?,?,?,?,?,?,?,?,?,?)",section.getId(),assignment,room.getId(),start.getId(),end.getId(),entry.getDayOfWeek(),entry.getStartDate(),entry.getEndDate(),entry.getStatus(),entry.getNote(),db.actor().getId());
         else db.update("UPDATE schedules SET course_section_id=?,lecturer_assignment_id=?,classroom_id=?,start_slot_id=?,end_slot_id=?,day_of_week=?,start_date=?,end_date=?,status=?,note=? WHERE id=?",section.getId(),assignment,room.getId(),start.getId(),end.getId(),entry.getDayOfWeek(),entry.getStartDate(),entry.getEndDate(),entry.getStatus(),entry.getNote(),id);
-        db.audit("SAVE_SCHEDULE","schedules",id);return id;
+        db.audit(entry.getId()==null?"CREATE_SCHEDULE":"UPDATE_SCHEDULE","schedules",id);return id;
     }
     public boolean deleteById(Long id) { return db.transaction(c->{db.require(Role.ACADEMIC);db.lockScheduling();int count=db.update("UPDATE schedules SET status='CANCELLED' WHERE id=? AND status<>'CANCELLED'",id);if(count>0)db.audit("CANCEL_SCHEDULE","schedules",id);return count>0;}); }
 }

@@ -29,17 +29,26 @@ public final class JdbcRequestRepository implements RequestRepository {
                 if(r.getEquipmentQuantity()<=0) throw new ValidationException("Số lượng thiết bị phải lớn hơn 0.");
             }
             long key=db.insert("INSERT INTO change_requests(requester_id,schedule_id,requested_room_id,requested_equipment_id,requested_date,requested_day,requested_start_slot_id,equipment_name,quantity,request_type,reason,priority,status) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)",r.getRequester().getId(),r.getScheduleEntry()==null?null:r.getScheduleEntry().getId(),r.getDesiredRoom()==null?null:r.getDesiredRoom().getId(),equipment,r.getDesiredDate(),r.getDesiredDate()==null?null:r.getDesiredDate().getDayOfWeek().getValue()+1,r.getDesiredSlot()==null?null:r.getDesiredSlot().getId(),r.getEquipmentName(),r.getEquipmentQuantity(),r.getType(),r.getReason(),r.getPriority(),RequestStatus.PENDING);
+            if(r.getType()==RequestType.USE_ROOM)
+                db.update("INSERT INTO notifications(user_id,title,content,type,reference_type,reference_id,target_screen) SELECT ur.user_id,? ,?,'REQUEST','change_requests',?,'requests' FROM user_roles ur JOIN roles role ON role.id=ur.role_id JOIN users u ON u.id=ur.user_id WHERE role.code='ACADEMIC' AND u.status='ACTIVE'",
+                        "Yêu cầu học bù mới","Giảng viên "+r.getRequester().getFullName()+" đề nghị học bù cho lớp "+r.getScheduleEntry().getCourseSection().getCode()+".",key);
             db.audit("CREATE_REQUEST","change_requests",key);return key;
         });r.setId(id);return r;
     }
     private void validateTarget(ChangeRequest r) {
-        if(r.getType()==RequestType.CHANGE_ROOM || r.getType()==RequestType.CHANGE_SCHEDULE) {
-            if(r.getScheduleEntry()==null) throw new ValidationException("Chọn lịch cần thay đổi.");
+        if(r.getType()==RequestType.CHANGE_ROOM || r.getType()==RequestType.CHANGE_SCHEDULE || r.getType()==RequestType.USE_ROOM) {
+            if(r.getScheduleEntry()==null) throw new ValidationException("Chọn lớp học phần qua lịch đang dạy.");
             var schedule=new JdbcScheduleRepository(db).findById(r.getScheduleEntry().getId()).orElseThrow();
-            if(!schedule.getCourseSection().getLecturer().getId().equals(r.getRequester().getId()) || schedule.getStatus()==ScheduleStatus.CANCELLED) throw new ValidationException("Chỉ được yêu cầu thay đổi lịch đang dạy của mình.");
+            if(!schedule.getCourseSection().getLecturer().getId().equals(r.getRequester().getId()) || schedule.getStatus()==ScheduleStatus.CANCELLED) throw new ValidationException("Chỉ được gửi yêu cầu cho lớp mình đang dạy.");
+            if(r.getType()==RequestType.USE_ROOM && r.getDesiredDate()!=null
+                    && (r.getDesiredDate().isBefore(schedule.getCourseSection().getSemester().getStartDate())
+                    || r.getDesiredDate().isAfter(schedule.getCourseSection().getSemester().getEndDate())))
+                throw new ValidationException("Ngày học bù phải nằm trong học kỳ của lớp.");
         }
         if(r.getType()!=RequestType.CHANGE_SCHEDULE && r.getDesiredRoom()==null) throw new ValidationException("Vui lòng chọn phòng.");
         if((r.getType()==RequestType.CHANGE_SCHEDULE || r.getType()==RequestType.USE_ROOM || r.getType()==RequestType.BORROW_EQUIPMENT) && (r.getDesiredDate()==null || r.getDesiredSlot()==null)) throw new ValidationException("Vui lòng chọn ngày và ca.");
+        if(r.getType()==RequestType.USE_ROOM && r.getDesiredDate()!=null && r.getDesiredDate().isBefore(LocalDate.now()))
+            throw new ValidationException("Ngày học bù không được ở quá khứ.");
     }
     public boolean canProcess(ChangeRequest r,User actor) {
         return r.getStatus()==RequestStatus.PENDING && ((actor.getRole()==Role.ACADEMIC && (r.getType()==RequestType.CHANGE_ROOM || r.getType()==RequestType.CHANGE_SCHEDULE || r.getType()==RequestType.USE_ROOM)) || (actor.getRole()==Role.ADMIN && (r.getType()==RequestType.BORROW_EQUIPMENT || r.getType()==RequestType.REPORT_DAMAGE)));
@@ -62,10 +71,11 @@ public final class JdbcRequestRepository implements RequestRepository {
                     db.update("INSERT INTO notifications(user_id,title,content,type,target_screen) SELECT student_id,?,?, 'SCHEDULE','timetable' FROM student_enrollments WHERE course_section_id=? AND status='ACTIVE'","Thời khóa biểu đã cập nhật","Lịch lớp "+old.getCourseSection().getCode()+" đã thay đổi.",old.getCourseSection().getId());
                 } else if(r.getType()==RequestType.USE_ROOM) {
                     // A one-day reservation uses an existing assigned section so it participates in all conflict checks.
-                    if(r.getScheduleEntry()==null) throw new ValidationException("Yêu cầu mượn phòng cần chọn lịch của lớp để xác định lớp và giảng viên.");
                     var old=r.getScheduleEntry();
-                    if(!old.getCourseSection().getLecturer().getId().equals(r.getRequester().getId())) throw new ValidationException("Lịch không thuộc người gửi.");
-                    new JdbcScheduleRepository(db).persist(new ScheduleEntry(null,old.getCourseSection(),r.getDesiredRoom(),r.getDesiredDate().getDayOfWeek().getValue()+1,r.getDesiredSlot(),r.getDesiredSlot(),r.getDesiredDate(),r.getDesiredDate(),ScheduleStatus.PUBLISHED,"Mượn phòng theo yêu cầu "+r.getId()));
+                    new JdbcScheduleRepository(db).persist(new ScheduleEntry(null,old.getCourseSection(),r.getDesiredRoom(),r.getDesiredDate().getDayOfWeek().getValue()+1,r.getDesiredSlot(),r.getDesiredSlot(),r.getDesiredDate(),r.getDesiredDate(),ScheduleStatus.PUBLISHED,"Học bù theo yêu cầu "+r.getId()));
+                    String content="Lớp "+old.getCourseSection().getCode()+" học bù ngày "+r.getDesiredDate()+", "+r.getDesiredSlot().getName()+" tại phòng "+r.getDesiredRoom().getCode()+".";
+                    db.update("INSERT INTO notifications(user_id,title,content,type,reference_type,reference_id,target_screen) SELECT student_id,?,?,'SCHEDULE','change_requests',?,'timetable' FROM student_enrollments WHERE course_section_id=? AND status='ACTIVE'",
+                            "Lịch học bù đã được duyệt",content,r.getId(),old.getCourseSection().getId());
                 } else {
                     var items=new JdbcRoomRepository(db).findEquipmentByRoom(r.getDesiredRoom().getId());
                     var equipment=items.stream().filter(x->x.getName().equals(r.getEquipmentName())).findFirst().orElseThrow(()->new ValidationException("Không tìm thấy thiết bị trong phòng."));

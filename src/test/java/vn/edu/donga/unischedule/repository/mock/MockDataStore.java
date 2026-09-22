@@ -243,7 +243,7 @@ public class MockDataStore {
         requests.add(new ChangeRequest(nextRequestId(), lan, RequestType.CHANGE_SCHEDULE, schedules.get(5),
                 rooms.get(2), monday.plusDays(4), timeSlots.get(4), "", 0,
                 "Sinh viên tham gia khảo sát doanh nghiệp nên cần đổi ca học.", Priority.NORMAL, RequestStatus.REJECTED, LocalDateTime.now().minusDays(3)));
-        requests.add(new ChangeRequest(nextRequestId(), son, RequestType.USE_ROOM, null,
+        requests.add(new ChangeRequest(nextRequestId(), son, RequestType.USE_ROOM, schedules.get(4),
                 rooms.get(9), monday.plusDays(5), timeSlots.get(2), "", 0,
                 "Cần phòng lớn tổ chức seminar học thuật của khoa.", Priority.HIGH, RequestStatus.APPROVED, LocalDateTime.now().minusDays(4)));
         requests.add(new ChangeRequest(nextRequestId(), thao, RequestType.BORROW_EQUIPMENT, schedules.get(10),

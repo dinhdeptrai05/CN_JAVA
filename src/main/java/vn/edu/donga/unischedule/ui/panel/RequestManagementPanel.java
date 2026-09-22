@@ -10,7 +10,9 @@ import vn.edu.donga.unischedule.controller.AppControllers;
 import vn.edu.donga.unischedule.ui.component.PrimaryButton;
 import vn.edu.donga.unischedule.ui.component.SearchField;
 import vn.edu.donga.unischedule.ui.component.SecondaryButton;
+import vn.edu.donga.unischedule.ui.component.UiTasks;
 import vn.edu.donga.unischedule.ui.dialog.RequestDetailDialog;
+import vn.edu.donga.unischedule.ui.dialog.MakeupClassDialog;
 import vn.edu.donga.unischedule.ui.dialog.RequestFormDialog;
 import vn.edu.donga.unischedule.ui.model.GenericTableModel;
 import vn.edu.donga.unischedule.ui.renderer.BadgeRenderer;
@@ -113,6 +115,14 @@ public class RequestManagementPanel extends JPanel implements Refreshable {
         detail.addActionListener(event -> showDetail());
         actions.add(detail);
         if (user.getRole() == Role.LECTURER) {
+            SecondaryButton makeup = new SecondaryButton("Đăng ký học bù");
+            makeup.addActionListener(event -> {
+                if (MakeupClassDialog.showDialog(this, controllers, user, null, null, null, null)) {
+                    refresh();
+                    Dialogs.success(this, "Yêu cầu học bù đã gửi và đang chờ phòng đào tạo duyệt.");
+                }
+            });
+            actions.add(makeup);
             PrimaryButton create = new PrimaryButton("Gửi yêu cầu");
             create.addActionListener(event -> createRequest());
             actions.add(create);
@@ -174,22 +184,20 @@ public class RequestManagementPanel extends JPanel implements Refreshable {
 
     private void createRequest() {
         RequestFormDialog.showDialog(this, controllers, user).ifPresent(request -> {
-            try {
-                controllers.requests().create(request);
+            UiTasks.run(this, "Đang gửi yêu cầu…", () -> controllers.requests().create(request), () -> {
                 refresh();
                 Dialogs.success(this, "Yêu cầu đã được gửi và đang chờ duyệt.");
-            } catch (ValidationException ex) {
-                Dialogs.error(this, ex.getMessage());
-            }
+            });
         });
     }
 
     private void approveRequest() {
         try {
             ChangeRequest request = selectedRequest();
-            controllers.requests().approve(request, user);
-            refresh();
-            Dialogs.success(this, "Đã duyệt yêu cầu.");
+            UiTasks.run(this, "Đang duyệt yêu cầu…", () -> controllers.requests().approve(request, user), () -> {
+                refresh();
+                Dialogs.success(this, "Đã duyệt yêu cầu và cập nhật lịch nếu cần.");
+            });
         } catch (ValidationException ex) {
             Dialogs.error(this, ex.getMessage());
         }
@@ -202,9 +210,10 @@ public class RequestManagementPanel extends JPanel implements Refreshable {
             if (reason == null) {
                 return;
             }
-            controllers.requests().reject(request, user, reason);
-            refresh();
-            Dialogs.warning(this, "Đã từ chối yêu cầu.");
+            UiTasks.run(this, "Đang từ chối yêu cầu…", () -> controllers.requests().reject(request, user, reason), () -> {
+                refresh();
+                Dialogs.success(this, "Đã từ chối yêu cầu và thông báo cho người gửi.");
+            });
         } catch (ValidationException ex) {
             Dialogs.error(this, ex.getMessage());
         }

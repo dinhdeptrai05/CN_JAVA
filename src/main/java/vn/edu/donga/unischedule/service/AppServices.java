@@ -42,7 +42,7 @@ public class AppServices {
         var scheduleService=new ScheduleService(schedules,conflicts);
         var services=new AppServices(catalog,new JdbcAuthService(db),scheduleService,conflicts,
             new RoomService(new vn.edu.donga.unischedule.repository.jdbc.JdbcRoomRepository(db),scheduleService,conflicts),
-            new RequestService(new vn.edu.donga.unischedule.repository.jdbc.JdbcRequestRepository(db)),new UserService(users,catalog),
+            new RequestService(new vn.edu.donga.unischedule.repository.jdbc.JdbcRequestRepository(db),scheduleService),new UserService(users,catalog),
             new CourseSectionService(new vn.edu.donga.unischedule.repository.jdbc.JdbcCourseSectionRepository(db)),
             new NotificationService(new vn.edu.donga.unischedule.repository.jdbc.JdbcNotificationRepository(db)));
         services.auditService=new AuditService(db);

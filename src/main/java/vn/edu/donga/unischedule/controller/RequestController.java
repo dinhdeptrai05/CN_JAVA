@@ -32,8 +32,4 @@ public final class RequestController {
                         || TextUtils.containsIgnoreAccent(request.getType().getDisplayName(), keyword))
                 .toList();
     }
-    public void requestRoom(User user, Classroom room, String date, TimeSlot slot) {
-        create(FormController.request(user, RequestType.USE_ROOM, null, room, date, slot, "", "0",
-                "Yêu cầu sử dụng phòng trống theo kết quả tra cứu.", Priority.NORMAL));
-    }
 }

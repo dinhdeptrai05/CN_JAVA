@@ -16,7 +16,7 @@ public final class Dialogs {
     }
 
     public static void error(Component parent, String message) {
-        JOptionPane.showMessageDialog(parent, message, "Lỗi nhập liệu", JOptionPane.ERROR_MESSAGE);
+        JOptionPane.showMessageDialog(parent, message, "Không thành công", JOptionPane.ERROR_MESSAGE);
     }
 
     public static boolean confirm(Component parent, String message) {

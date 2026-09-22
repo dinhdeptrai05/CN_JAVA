@@ -77,13 +77,19 @@ class ControllerTest {
     @Test void requestControllerPreservesApprovalRules() {
         var controllers = controllers();
         User lecturer = controllers.auth().login("giangvien", "123456");
-        var draft = FormController.request(lecturer, RequestType.USE_ROOM, null, controllers.rooms().findAll().get(0),
-                LocalDate.now().plusDays(1).toString(), controllers.catalog().getTimeSlots().get(0), "", "0", "Mượn phòng cho buổi thảo luận", Priority.NORMAL);
+        var source = controllers.schedules().findByWeekForUser(DateUtils.currentWeekMonday(), lecturer).get(0);
+        var room = controllers.rooms().findAll().stream().filter(r -> r.getCode().equals("B101")).findFirst().orElseThrow();
+        LocalDate date = LocalDate.now().plusDays(1).with(java.time.temporal.TemporalAdjusters.nextOrSame(java.time.DayOfWeek.SUNDAY));
+        var draft = FormController.request(lecturer, RequestType.USE_ROOM, source, room,
+                date.toString(), controllers.catalog().getTimeSlots().get(0), "", "0", "Học bù cho lớp đang dạy", Priority.NORMAL);
         controllers.requests().create(draft);
         assertThrows(ValidationException.class, () -> controllers.requests().approve(draft, lecturer));
         assertEquals(RequestStatus.PENDING, draft.getStatus());
-        controllers.requests().approve(draft, controllers.auth().login("admin", "123456"));
+        assertThrows(ValidationException.class, () -> controllers.requests().approve(draft, controllers.auth().login("admin", "123456")));
+        int schedulesBefore = controllers.schedules().findAll().size();
+        controllers.requests().approve(draft, controllers.auth().login("daotao", "123456"));
         assertEquals(RequestStatus.APPROVED, draft.getStatus());
+        assertEquals(schedulesBefore + 1, controllers.schedules().findAll().size());
     }
 
     @Test void userDraftPreservesLecturerMetadataWithoutMutatingOriginal() {

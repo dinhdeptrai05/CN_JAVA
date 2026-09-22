@@ -8,6 +8,7 @@ import vn.edu.donga.unischedule.ui.component.SearchField;
 import vn.edu.donga.unischedule.ui.component.HeroIcons;
 import vn.edu.donga.unischedule.ui.component.Avatar;
 import vn.edu.donga.unischedule.ui.component.PrimaryButton;
+import vn.edu.donga.unischedule.ui.component.UiTasks;
 import vn.edu.donga.unischedule.ui.panel.*;
 
 import javax.swing.BorderFactory;
@@ -82,8 +83,10 @@ public class MainFrame extends JFrame implements ScreenNavigator {
         create.addActionListener(e -> {
             if (currentUser.getRole() == Role.ACADEMIC) {
                 vn.edu.donga.unischedule.ui.dialog.ScheduleFormDialog.showDialog(this, controllers, null).ifPresent(entry -> {
-                    try { controllers.schedules().save(entry); showScreen("timetable"); }
-                    catch (vn.edu.donga.unischedule.validation.ValidationException ex) { vn.edu.donga.unischedule.util.Dialogs.error(this, ex.getMessage()); }
+                    UiTasks.run(this, "Đang lưu lịch học…", () -> controllers.schedules().save(entry), () -> {
+                        showScreen("timetable");
+                        vn.edu.donga.unischedule.util.Dialogs.success(this, "Đã tạo lịch học mới.");
+                    });
                 });
             } else showScreen("roomSearch");
         });

@@ -8,6 +8,7 @@ import vn.edu.donga.unischedule.controller.AppControllers;
 import vn.edu.donga.unischedule.ui.component.PrimaryButton;
 import vn.edu.donga.unischedule.ui.component.SearchField;
 import vn.edu.donga.unischedule.ui.component.SecondaryButton;
+import vn.edu.donga.unischedule.ui.component.UiTasks;
 import vn.edu.donga.unischedule.ui.dialog.UserFormDialog;
 import vn.edu.donga.unischedule.ui.model.GenericTableModel;
 import vn.edu.donga.unischedule.ui.renderer.BadgeRenderer;
@@ -136,26 +137,20 @@ public class UserManagementPanel extends JPanel implements Refreshable {
 
     private void addUser() {
         UserFormDialog.showDialog(this, controllers, null).ifPresent(user -> {
-            try {
-                controllers.users().save(user);
+            UiTasks.run(this, "Đang tạo tài khoản…", () -> controllers.users().save(user), () -> {
                 refresh();
                 Dialogs.success(this, "Đã thêm tài khoản với mật khẩu 123456.");
-            } catch (ValidationException ex) {
-                Dialogs.error(this, ex.getMessage());
-            }
+            });
         });
     }
 
     private void editUser() {
         try {
             UserFormDialog.showDialog(this, controllers, selectedUser()).ifPresent(user -> {
-                try {
-                    controllers.users().save(user);
+                UiTasks.run(this, "Đang cập nhật tài khoản…", () -> controllers.users().save(user), () -> {
                     refresh();
                     Dialogs.success(this, "Đã cập nhật tài khoản.");
-                } catch (ValidationException ex) {
-                    Dialogs.error(this, ex.getMessage());
-                }
+                });
             });
         } catch (ValidationException ex) {
             Dialogs.error(this, ex.getMessage());
@@ -165,9 +160,10 @@ public class UserManagementPanel extends JPanel implements Refreshable {
     private void toggleLock() {
         try {
             User user = selectedUser();
-            controllers.users().toggleLock(user);
-            refresh();
-            Dialogs.success(this, "Đã cập nhật trạng thái tài khoản.");
+            UiTasks.run(this, "Đang cập nhật trạng thái tài khoản…", () -> controllers.users().toggleLock(user), () -> {
+                refresh();
+                Dialogs.success(this, "Đã cập nhật trạng thái tài khoản.");
+            });
         } catch (ValidationException ex) {
             Dialogs.error(this, ex.getMessage());
         }
@@ -176,8 +172,8 @@ public class UserManagementPanel extends JPanel implements Refreshable {
     private void resetPassword() {
         try {
             User user = selectedUser();
-            controllers.users().resetPassword(user);
-            Dialogs.success(this, "Mật khẩu đã được đặt lại thành 123456.");
+            UiTasks.run(this, "Đang đặt lại mật khẩu…", () -> controllers.users().resetPassword(user),
+                    () -> Dialogs.success(this, "Mật khẩu đã được đặt lại thành 123456."));
         } catch (ValidationException ex) {
             Dialogs.error(this, ex.getMessage());
         }

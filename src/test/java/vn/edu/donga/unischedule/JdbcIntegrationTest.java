@@ -68,7 +68,9 @@ class JdbcIntegrationTest {
         assertThrows(ValidationException.class,()->app.schedules().save(copy(base,base.getRoom(),base.getDayOfWeek(),base.getStartSlot(),base.getEndSlot())));
         assertThrows(ValidationException.class,()->app.schedules().save(copy(base,room,base.getDayOfWeek(),base.getStartSlot(),base.getEndSlot())));
         var candidate=copy(base,room,8,slots.get(4),slots.get(4));app.schedules().save(candidate);assertNotNull(candidate.getId());
+        assertEquals(1,db.scalar("SELECT COUNT(*) FROM audit_logs WHERE action='CREATE_SCHEDULE' AND entity_id=? AND user_id=?",candidate.getId(),db.actor().getId()));
         app.schedules().save(candidate); // Excludes itself when updating.
+        assertEquals(1,db.scalar("SELECT COUNT(*) FROM audit_logs WHERE action='UPDATE_SCHEDULE' AND entity_id=? AND user_id=?",candidate.getId(),db.actor().getId()));
         assertTrue(db.scalar("SELECT COUNT(*) FROM audit_logs")>before);
         assertTrue(app.schedules().delete(candidate.getId()));assertEquals("CANCELLED",db.query("SELECT status FROM schedules WHERE id=?",r->r.getString(1),candidate.getId()).get(0));
         login("sinhvien");assertThrows(ValidationException.class,()->app.schedules().save(copy(base,room,8,slots.get(4),slots.get(4))));
@@ -76,6 +78,7 @@ class JdbcIntegrationTest {
     @Test @Order(5) void requestTransactionNotifiesAndRollsBackOnConflict() {
         var lecturer=login("giangvien");var schedule=app.schedules().findAll().get(0);var slots=app.catalog().getTimeSlots();var room=app.rooms().findAll().stream().filter(r->r.getId()==4L).findFirst().orElseThrow();
         var req=new ChangeRequest(null,lecturer,RequestType.CHANGE_ROOM,schedule,room,LocalDate.now(),slots.get(0),"",0,"Đổi sang phòng phù hợp để giảng dạy.",Priority.NORMAL,RequestStatus.PENDING,LocalDateTime.now());app.requests().create(req);
+        assertEquals(1,db.scalar("SELECT COUNT(*) FROM audit_logs WHERE action='CREATE_REQUEST' AND entity_id=? AND user_id=?",req.getId(),lecturer.getId()));
         var admin=login("admin");assertFalse(app.requests().canProcess(req,admin));assertThrows(ValidationException.class,()->app.requests().approve(req,admin));
         var academic=login("daotao");long notifications=db.scalar("SELECT COUNT(*) FROM notifications");app.requests().approve(req,academic);
         assertEquals(RequestStatus.APPROVED,req.getStatus());assertTrue(db.scalar("SELECT COUNT(*) FROM notifications")>notifications);
@@ -130,6 +133,110 @@ class JdbcIntegrationTest {
             assertEquals(1,outcomes.stream().filter(Objects::nonNull).count());
             first.schedules().delete(outcomes.stream().filter(Objects::nonNull).findFirst().orElseThrow());
         }finally{pool.shutdownNow();}
+    }
+    @Test @Order(9) void adminSeesOtherThreeRolesAndNotificationChangesAreAtomic() {
+        var academic=login("daotao");
+        var sections=new JdbcCourseSectionRepository(db);
+        var base=sections.findAll().get(0);
+        var section=new CourseSection(null,"AUDIT-SECTION",base.getCourse(),base.getSemester(),base.getLecturer(),30,0,CourseSectionStatus.UNSCHEDULED);
+        sections.save(section);
+        sections.save(section);
+        assertTrue(sections.deleteById(section.getId()));
+        for(String action:List.of("CREATE_SECTION","UPDATE_SECTION","CANCEL_SECTION")) {
+            assertEquals(1,db.scalar("SELECT COUNT(*) FROM audit_logs WHERE action=? AND entity_type='course_sections' AND entity_id=? AND user_id=?",action,section.getId(),academic.getId()));
+        }
+        for(String account:List.of("daotao","giangvien","sinhvien")) {
+            var actor=login(account);
+            app.users().updateProfile(actor,actor.getFullName(),actor.getEmail(),actor.getPhone());
+            var repository=new JdbcNotificationRepository(db);
+            var note=app.notifications().findForUser(actor).get(0);
+            db.update("UPDATE notifications SET is_read=0,read_at=NULL WHERE id=?",note.getId());
+            long before=db.scalar("SELECT COUNT(*) FROM audit_logs");
+            assertThrows(IllegalStateException.class,()->db.transaction(c->{
+                note.setRead(true);
+                repository.save(note);
+                throw new IllegalStateException("Rollback audit together with the change");
+            }));
+            assertEquals(before,db.scalar("SELECT COUNT(*) FROM audit_logs"));
+            assertEquals(0,db.scalar("SELECT is_read FROM notifications WHERE id=?",note.getId()));
+            app.notifications().markRead(note);
+            assertEquals(before+1,db.scalar("SELECT COUNT(*) FROM audit_logs"));
+            app.notifications().markRead(note);
+            assertEquals(before+1,db.scalar("SELECT COUNT(*) FROM audit_logs"));
+            assertFalse(repository.deleteById(-1L));
+            assertEquals(before+1,db.scalar("SELECT COUNT(*) FROM audit_logs"));
+            assertTrue(repository.deleteById(note.getId()));
+            assertEquals(before+2,db.scalar("SELECT COUNT(*) FROM audit_logs"));
+        }
+        login("admin");
+        var history=app.audit().findAll();
+        for(String account:List.of("daotao","giangvien","sinhvien")) {
+            for(String action:List.of("UPDATE_PROFILE","READ_NOTIFICATION","DELETE_NOTIFICATION")) {
+                assertTrue(history.stream().anyMatch(e->account.equals(e.user()) && action.equals(e.action())),account+" / "+action);
+            }
+        }
+        for(String account:List.of("giangvien","sinhvien")) {
+            login(account);
+            assertThrows(ValidationException.class,()->app.audit().findAll());
+        }
+    }
+    @Test @Order(10) void lecturerMakeupRequestNeedsClassAndAcademicApprovalCreatesOneDaySchedule() {
+        var lecturer=login("giangvien");
+        var source=app.schedules().findAll().stream()
+                .filter(s->s.getStatus()==ScheduleStatus.PUBLISHED
+                        && s.getCourseSection().getLecturer().getId().equals(lecturer.getId()))
+                .findFirst().orElseThrow();
+        ScheduleEntry makeup=null;
+        LocalDate first=LocalDate.now().plusDays(1);
+        if(first.isBefore(source.getCourseSection().getSemester().getStartDate())) first=source.getCourseSection().getSemester().getStartDate();
+        for(int day=0;day<14 && makeup==null;day++) {
+            LocalDate date=first.plusDays(day);
+            if(date.isAfter(source.getCourseSection().getSemester().getEndDate())) break;
+            for(var slot:app.catalog().getTimeSlots()) {
+                for(var room:app.rooms().searchAvailableRooms(date,slot,null,null,source.getCourseSection().getStudentCount(),"")) {
+                    var candidate=new ScheduleEntry(null,source.getCourseSection(),room,date.getDayOfWeek().getValue()+1,
+                            slot,slot,date,date,ScheduleStatus.PUBLISHED,"Integration test makeup");
+                    try { app.schedules().validate(candidate);makeup=candidate;break; }
+                    catch(ValidationException ignored) { }
+                }
+                if(makeup!=null) break;
+            }
+        }
+        assertNotNull(makeup,"Test data should have an available makeup slot");
+        var invalid=new ChangeRequest(null,lecturer,RequestType.USE_ROOM,null,makeup.getRoom(),makeup.getStartDate(),
+                makeup.getStartSlot(),"",0,"Học bù do nghỉ lễ.",Priority.NORMAL,RequestStatus.PENDING,LocalDateTime.now());
+        long auditBefore=db.scalar("SELECT COUNT(*) FROM audit_logs");
+        assertThrows(ValidationException.class,()->app.requests().create(invalid));
+        assertEquals(auditBefore,db.scalar("SELECT COUNT(*) FROM audit_logs"));
+        var request=new ChangeRequest(null,lecturer,RequestType.USE_ROOM,source,makeup.getRoom(),makeup.getStartDate(),
+                makeup.getStartSlot(),"",0,"Học bù do nghỉ lễ.",Priority.NORMAL,RequestStatus.PENDING,LocalDateTime.now());
+        app.requests().create(request);
+        long academicId=db.scalar("SELECT id FROM users WHERE username='daotao'");
+        assertEquals(1,db.scalar("SELECT COUNT(*) FROM notifications WHERE user_id=? AND reference_type='change_requests' AND reference_id=?",academicId,request.getId()));
+        var admin=login("admin");
+        assertFalse(app.requests().canProcess(request,admin));
+        assertThrows(ValidationException.class,()->app.requests().approve(request,admin));
+        var academic=login("daotao");
+        long schedulesBefore=db.scalar("SELECT COUNT(*) FROM schedules");
+        app.requests().approve(request,academic);
+        assertEquals(schedulesBefore+1,db.scalar("SELECT COUNT(*) FROM schedules"));
+        assertEquals(1,db.scalar("SELECT COUNT(*) FROM schedules WHERE course_section_id=? AND classroom_id=? AND start_date=? AND end_date=? AND start_slot_id=? AND status='PUBLISHED'",
+                source.getCourseSection().getId(),makeup.getRoom().getId(),makeup.getStartDate(),makeup.getStartDate(),makeup.getStartSlot().getId()));
+        long students=db.scalar("SELECT COUNT(*) FROM student_enrollments WHERE course_section_id=? AND status='ACTIVE'",source.getCourseSection().getId());
+        assertEquals(students,db.scalar("SELECT COUNT(*) FROM notifications WHERE reference_type='change_requests' AND reference_id=? AND target_screen='timetable'",request.getId()));
+        assertEquals(1,db.scalar("SELECT COUNT(*) FROM audit_logs WHERE action='APPROVE_REQUEST' AND entity_id=? AND user_id=?",request.getId(),academic.getId()));
+        login("giangvien");
+        var duplicate=new ChangeRequest(null,lecturer,RequestType.USE_ROOM,source,makeup.getRoom(),makeup.getStartDate(),
+                makeup.getStartSlot(),"",0,"Thử đăng ký trùng ca.",Priority.NORMAL,RequestStatus.PENDING,LocalDateTime.now());
+        app.requests().create(duplicate);
+        academic=login("daotao");
+        long logs=db.scalar("SELECT COUNT(*) FROM audit_logs"),notes=db.scalar("SELECT COUNT(*) FROM notifications");
+        var reviewer=academic;
+        assertThrows(ValidationException.class,()->app.requests().approve(duplicate,reviewer));
+        assertEquals("PENDING",db.query("SELECT status FROM change_requests WHERE id=?",r->r.getString(1),duplicate.getId()).get(0));
+        assertEquals(schedulesBefore+1,db.scalar("SELECT COUNT(*) FROM schedules"));
+        assertEquals(logs,db.scalar("SELECT COUNT(*) FROM audit_logs"));
+        assertEquals(notes,db.scalar("SELECT COUNT(*) FROM notifications"));
     }
     private static Long bookAtGate(AppServices app,ScheduleEntry s,java.util.concurrent.CountDownLatch gate) throws InterruptedException {
         gate.await();try{return app.schedules().save(s).getId();}catch(ValidationException expected){return null;}

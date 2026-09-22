@@ -6,6 +6,7 @@ import vn.edu.donga.unischedule.controller.AppControllers;
 import vn.edu.donga.unischedule.ui.component.PrimaryButton;
 import vn.edu.donga.unischedule.ui.component.RoundedPanel;
 import vn.edu.donga.unischedule.ui.component.SecondaryButton;
+import vn.edu.donga.unischedule.ui.component.UiTasks;
 import vn.edu.donga.unischedule.util.Dialogs;
 import vn.edu.donga.unischedule.validation.ValidationException;
 import vn.edu.donga.unischedule.validation.Validator;
@@ -154,28 +155,21 @@ public class ProfilePanel extends JPanel implements Refreshable {
     }
 
     private void updateProfile() {
-        try {
-            controllers.users().updateProfile(user, fullNameField.getText(), emailField.getText(), phoneField.getText());
-            Dialogs.success(this, "Đã cập nhật hồ sơ cá nhân.");
-        } catch (ValidationException ex) {
-            Dialogs.error(this, ex.getMessage());
-        }
+        String name=fullNameField.getText(), email=emailField.getText(), phone=phoneField.getText();
+        UiTasks.run(this,"Đang cập nhật hồ sơ…",()->controllers.users().updateProfile(user,name,email,phone),
+                ()->{refresh();Dialogs.success(this,"Đã cập nhật hồ sơ cá nhân.");});
     }
 
     private void changePassword() {
         String oldPassword = new String(oldPasswordField.getPassword());
         String newPassword = new String(newPasswordField.getPassword());
         String confirm = new String(confirmPasswordField.getPassword());
-        try {
-            controllers.users().changePassword(user, oldPassword, newPassword, confirm);
-        } catch (ValidationException ex) {
-            Dialogs.error(this, ex.getMessage());
-            return;
-        }
-        oldPasswordField.setText("");
-        newPasswordField.setText("");
-        confirmPasswordField.setText("");
-        Dialogs.success(this, "Đã đổi mật khẩu.");
+        UiTasks.run(this,"Đang đổi mật khẩu…",()->controllers.users().changePassword(user,oldPassword,newPassword,confirm),()->{
+            oldPasswordField.setText("");
+            newPasswordField.setText("");
+            confirmPasswordField.setText("");
+            Dialogs.success(this,"Đã đổi mật khẩu.");
+        });
     }
 
     private String initials(String fullName) {
@@ -192,12 +186,10 @@ public class ProfilePanel extends JPanel implements Refreshable {
         if(chooser.showOpenDialog(this)==javax.swing.JFileChooser.APPROVE_OPTION) savePhoto(chooser.getSelectedFile().toPath());
     }
     private void savePhoto(java.nio.file.Path path) {
-        new javax.swing.SwingWorker<Void,Void>() {
-            protected Void doInBackground() { controllers.users().updateAvatar(user,path);return null; }
-            protected void done() {
-                try { get();javax.swing.SwingUtilities.getWindowAncestor(ProfilePanel.this).repaint();Dialogs.success(ProfilePanel.this,"Đã cập nhật ảnh hồ sơ."); }
-                catch(Exception ex) { Dialogs.error(ProfilePanel.this,ex.getCause()==null?ex.getMessage():ex.getCause().getMessage()); }
-            }
-        }.execute();
+        UiTasks.run(this,"Đang cập nhật ảnh hồ sơ…",()->controllers.users().updateAvatar(user,path),()->{
+            var window=javax.swing.SwingUtilities.getWindowAncestor(this);
+            if(window!=null)window.repaint();
+            Dialogs.success(this,"Đã cập nhật ảnh hồ sơ.");
+        });
     }
 }

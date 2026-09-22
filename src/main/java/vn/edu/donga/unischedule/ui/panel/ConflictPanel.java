@@ -8,6 +8,7 @@ import vn.edu.donga.unischedule.controller.AppControllers;
 import vn.edu.donga.unischedule.ui.component.PrimaryButton;
 import vn.edu.donga.unischedule.ui.component.SearchField;
 import vn.edu.donga.unischedule.ui.component.SecondaryButton;
+import vn.edu.donga.unischedule.ui.component.UiTasks;
 import vn.edu.donga.unischedule.ui.dialog.ConflictDetailDialog;
 import vn.edu.donga.unischedule.ui.model.GenericTableModel;
 import vn.edu.donga.unischedule.ui.renderer.BadgeRenderer;
@@ -154,9 +155,10 @@ public class ConflictPanel extends JPanel implements Refreshable {
     private void markResolved() {
         try {
             Conflict conflict = selectedConflict();
-            controllers.conflicts().markResolved(conflict.getId());
-            refresh();
-            Dialogs.success(this, "Đã đánh dấu xung đột là đã xử lý.");
+            UiTasks.run(this, "Đang kiểm tra xung đột…", () -> controllers.conflicts().markResolved(conflict.getId()), () -> {
+                refresh();
+                Dialogs.success(this, "Đã đánh dấu xung đột là đã xử lý.");
+            });
         } catch (ValidationException ex) {
             Dialogs.error(this, ex.getMessage());
         }

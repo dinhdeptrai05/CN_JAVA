@@ -11,6 +11,10 @@ import java.time.*;
 import java.nio.file.*;
 import java.util.*;
 import static org.junit.jupiter.api.Assertions.*;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.apache.poi.xwpf.usermodel.XWPFDocument;
+import org.apache.pdfbox.Loader;
+import org.apache.pdfbox.text.PDFTextStripper;
 
 class ReportServiceTest {
     @TempDir Path directory;
@@ -60,12 +64,13 @@ class ReportServiceTest {
         assertEquals(List.of("Đổi phòng",3,1L,1L,1L,66.67),row);
         assertEquals(2,service.generate(admin,new Report.Filter(filter.from(),filter.to(),1L,null)).requests());
     }
-    @Test void exportsUnicodeAndEscapesUntrustedCells() throws Exception {
+    @Test void exportsPdfWordAndExcel() throws Exception {
         var result=new ReportService(u->source()).generate(admin,filter);
-        Path csv=directory.resolve("report.csv"),html=directory.resolve("report.html");
-        ReportExport.csv(result,2,csv);ReportExport.html(result,html);
-        String text=Files.readString(csv);assertTrue(text.startsWith("\uFEFF"));assertTrue(text.contains("\"'=SUM(1,2)\""));assertTrue(text.contains("Môn học"));
-        String page=Files.readString(html);assertFalse(page.contains("<script>"));assertTrue(page.contains("&lt;script&gt;"));assertTrue(page.contains("window.print()"));
-        assertEquals("\"a,\"\"b\"\"\"",ReportExport.csvCell("a,\"b\""));
+        Path pdf=directory.resolve("report.pdf"),word=directory.resolve("report.docx"),excel=directory.resolve("report.xlsx");
+        ReportExport.pdf(result,pdf);ReportExport.word(result,word);ReportExport.excel(result,excel);
+        assertArrayEquals(new byte[]{'%','P','D','F'},Arrays.copyOf(Files.readAllBytes(pdf),4));
+        try(var document=Loader.loadPDF(pdf.toFile())){String text=new PDFTextStripper().getText(document);assertTrue(text.contains("Báo cáo thống kê UniSchedule"));assertTrue(text.contains("Lớp học phần"));}
+        try(XWPFDocument document=new XWPFDocument(Files.newInputStream(word))){assertTrue(document.getParagraphs().stream().anyMatch(p->p.getText().contains("Báo cáo thống kê")));assertEquals(4,document.getTables().size());}
+        try(XSSFWorkbook workbook=new XSSFWorkbook(Files.newInputStream(excel))){assertEquals(5,workbook.getNumberOfSheets());assertEquals("=SUM(1,2)",workbook.getSheet("Lớp học phần").getRow(2).getCell(0).getStringCellValue());}
     }
 }

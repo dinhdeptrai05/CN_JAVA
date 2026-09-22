@@ -16,7 +16,7 @@ public final class TestFixtures {
         ConflictService conflict = new ConflictService(scheduleRepository);
         ScheduleService schedule = new ScheduleService(scheduleRepository, conflict);
         RoomService room = new RoomService(roomRepository, schedule, conflict);
-        RequestService request = new RequestService(new MockRequestRepository(store));
+        RequestService request = new RequestService(new MockRequestRepository(store), schedule);
         UserService user = new UserService(userRepository, catalog);
         CourseSectionService section = new CourseSectionService(new MockCourseSectionRepository(store));
         NotificationService notification = new NotificationService(new MockNotificationRepository(store));
