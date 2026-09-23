@@ -28,6 +28,8 @@ import javax.swing.event.DocumentListener;
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
 import java.awt.GridLayout;
+import java.time.LocalDate;
+import java.util.TreeMap;
 import java.util.List;
 
 public class UserManagementPanel extends JPanel implements Refreshable {
@@ -35,6 +37,8 @@ public class UserManagementPanel extends JPanel implements Refreshable {
     private final SearchField searchField = new SearchField("Tìm username, họ tên hoặc email");
     private final JComboBox<String> roleBox = new JComboBox<>();
     private final JComboBox<String> statusBox = new JComboBox<>();
+    private final JComboBox<String> loginYearBox = new JComboBox<>();
+    private final javax.swing.JLabel loginSummary = new javax.swing.JLabel();
     private final GenericTableModel<User> tableModel;
     private final JTable table;
 
@@ -48,7 +52,7 @@ public class UserManagementPanel extends JPanel implements Refreshable {
                 User::getEmail,
                 user -> user.getRole().getDisplayName(),
                 user -> user.getLastLogin()==null ? "Chưa đăng nhập" : user.getLastLogin().toLocalDate().format(DateUtils.DATE_FORMAT),
-                User::getStatus);
+                user -> user.getStatus()==UserStatus.ACTIVE&&user.getLastLogin()==null ? "Chờ đăng nhập" : user.getStatus());
         table = new JTable(tableModel);
         TableUtils.style(table);
         table.getColumnModel().getColumn(6).setCellRenderer(new BadgeRenderer());
@@ -69,8 +73,13 @@ public class UserManagementPanel extends JPanel implements Refreshable {
         for (UserStatus status : UserStatus.values()) {
             statusBox.addItem(status.getDisplayName());
         }
+        loginYearBox.addItem("Tất cả năm đăng nhập");
+        for(int year=LocalDate.now().getYear();year>=LocalDate.now().minusYears(5).getYear();year--)loginYearBox.addItem(String.valueOf(year));
+        loginYearBox.addItem("Chưa đăng nhập");
+        statusBox.setToolTipText("Hoạt động nghĩa là tài khoản được phép đăng nhập, không phải vừa đăng nhập.");
         roleBox.addActionListener(event -> refresh());
         statusBox.addActionListener(event -> refresh());
+        loginYearBox.addActionListener(event -> refresh());
         searchField.getTextField().getDocument().addDocumentListener(new DocumentListener() {
             @Override
             public void insertUpdate(DocumentEvent e) {
@@ -92,12 +101,15 @@ public class UserManagementPanel extends JPanel implements Refreshable {
     private void buildUi() {
         JPanel top = new JPanel(new BorderLayout(12, 12));
         top.setOpaque(false);
-        JPanel filters = new JPanel(new GridLayout(1, 3, 10, 0));
+        JPanel filters = new JPanel(new GridLayout(1, 4, 10, 0));
         filters.setOpaque(false);
         filters.add(searchField);
         filters.add(roleBox);
         filters.add(statusBox);
-        top.add(filters, BorderLayout.CENTER);
+        filters.add(loginYearBox);
+        top.add(filters, BorderLayout.NORTH);
+        loginSummary.setForeground(AppConfig.MUTED);
+        top.add(loginSummary,BorderLayout.CENTER);
 
         JPanel actions = new JPanel(new FlowLayout(FlowLayout.RIGHT, 8, 0));
         actions.setOpaque(false);
@@ -123,8 +135,15 @@ public class UserManagementPanel extends JPanel implements Refreshable {
         String keyword = searchField.getText();
         String role = (String) roleBox.getSelectedItem();
         String status = (String) statusBox.getSelectedItem();
-        List<User> rows = controllers.users().search(keyword, role, status);
+        String selectedYear=(String)loginYearBox.getSelectedItem();
+        Integer year=selectedYear==null||selectedYear.startsWith("Tất cả")?null:selectedYear.equals("Chưa đăng nhập")?0:Integer.valueOf(selectedYear);
+        List<User> rows = controllers.users().search(keyword, role, status, year);
         tableModel.setRows(rows);
+        var byYear=new TreeMap<Integer,Long>();
+        for(User user:rows)byYear.merge(user.getLastLogin()==null?0:user.getLastLogin().getYear(),1L,Long::sum);
+        var parts=new java.util.ArrayList<String>();
+        byYear.forEach((key,count)->parts.add((key==0?"Chưa đăng nhập":key.toString())+": "+count));
+        loginSummary.setText("Đang xem "+rows.size()+" tài khoản · Lần đăng nhập cuối: "+String.join("  ·  ",parts));
     }
 
     private User selectedUser() {

@@ -38,6 +38,8 @@ public class StatusBadge extends JLabel {
     }
 
     private Color color(Object status) {
+        if (status == UserStatus.INACTIVE) return AppConfig.MUTED;
+        if ("Chờ đăng nhập".equals(status)) return AppConfig.WARNING;
         if (status == UserStatus.LOCKED || status == RoomStatus.MAINTENANCE || status == RoomStatus.INACTIVE
                 || status == ResourceStatus.BROKEN || status == CourseSectionStatus.CONFLICTED
                 || status == RequestStatus.REJECTED) {

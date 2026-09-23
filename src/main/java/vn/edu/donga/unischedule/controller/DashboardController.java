@@ -12,6 +12,11 @@ public final class DashboardController {
     public record Metric(String icon, String title, String value, String description, Tone tone) { }
     public record BuildingUsage(String building, long used, int total, int percent) { }
     private final AppServices services;
+    private volatile List<ScheduleEntry> cachedWeek;
+    private volatile LocalDate cachedWeekStart;
+    private volatile long cachedWeekAt;
+    private volatile List<Conflict> cachedConflicts;
+    private volatile long cachedConflictsAt;
 
     public DashboardController(AppServices services) { this.services = services; }
 
@@ -23,19 +28,21 @@ public final class DashboardController {
         long maintenance = services.rooms().findAll().stream().filter(room -> room.getRoomStatus() == RoomStatus.MAINTENANCE).count();
         long pending = services.requests().findForUser(user).stream().filter(request -> request.getStatus() == RequestStatus.PENDING).count();
         if (user.getRole() == Role.ADMIN) {
-            stats.add(new Metric("ND", "Tài khoản", String.valueOf(services.users().findAll().size()), "Người dùng hệ thống", Tone.PRIMARY));
-            stats.add(new Metric("TR", "Phòng trống", String.valueOf(available), "Sẵn sàng sử dụng", Tone.SUCCESS));
-            stats.add(new Metric("SD", "Đang dùng", String.valueOf(inUse), "Có lịch trong tuần", Tone.WARNING));
+            var users=services.users().findAll();
+            long activeUsers=users.stream().filter(account->account.getStatus()==UserStatus.ACTIVE).count();
+            stats.add(new Metric("ND", "Đang hoạt động", String.valueOf(activeUsers), "Trong "+users.size()+" tài khoản", Tone.PRIMARY));
+            stats.add(new Metric("TR", "Phòng sẵn sàng", String.valueOf(available), "Có thể xếp lịch", Tone.SUCCESS));
+            stats.add(new Metric("SD", "Có lịch tuần này", String.valueOf(inUse), "Phòng được xếp lịch", Tone.WARNING));
             stats.add(new Metric("BT", "Bảo trì", String.valueOf(maintenance), "Cần theo dõi", Tone.DANGER));
         } else if (user.getRole() == Role.ACADEMIC) {
             long totalRooms = services.rooms().findAll().size();
-            long weekClasses = services.schedules().findByWeekForUser(DateUtils.currentWeekMonday(), user).stream()
+            long weekClasses = weeklySchedules().stream()
                     .filter(entry -> department.equals("Tất cả khoa") || entry.getCourseSection().getCourse().getDepartment().getName().equals(department))
                     .map(entry -> entry.getCourseSection().getId()).distinct().count();
             stats.add(new Metric("LH", "Tổng số lớp tuần này", String.valueOf(weekClasses), "Lớp có lịch trong tuần", Tone.PRIMARY));
             stats.add(new Metric("PH", "Tỷ lệ sử dụng phòng", (totalRooms == 0 ? 0 : inUse * 100 / totalRooms) + "%", inUse + "/" + totalRooms + " phòng đang dùng", Tone.INFO));
             stats.add(new Metric("YC", "Đổi lịch chờ duyệt", String.valueOf(pending), "Yêu cầu đang chờ", Tone.WARNING));
-            stats.add(new Metric("XD", "Cảnh báo xung đột", String.valueOf(services.conflicts().findAllConflicts().stream().filter(c -> c.getStatus() != vn.edu.donga.unischedule.model.Enums.ConflictStatus.RESOLVED).count()), "Cần xử lý", Tone.DANGER));
+            stats.add(new Metric("XD", "Cảnh báo xung đột", String.valueOf(weeklyConflicts().stream().filter(c -> c.getStatus() != ConflictStatus.RESOLVED).count()), "Trong tuần này", Tone.DANGER));
         } else {
             List<ScheduleEntry> week = services.schedules().findByWeekForUser(DateUtils.currentWeekMonday(), user);
             int today = DateUtils.toSchoolDay(LocalDate.now());
@@ -54,9 +61,12 @@ public final class DashboardController {
 
     public List<ScheduleEntry> today(User user, String department) {
         int day = DateUtils.toSchoolDay(LocalDate.now());
-        return services.schedules().findByWeekForUser(DateUtils.currentWeekMonday(), user).stream()
+        List<ScheduleEntry> week = user.getRole() == Role.ADMIN || user.getRole() == Role.ACADEMIC
+                ? weeklySchedules() : services.schedules().findByWeekForUser(DateUtils.currentWeekMonday(), user);
+        return week.stream()
                 .filter(entry -> entry.getDayOfWeek() == day)
                 .filter(entry -> department.equals("Tất cả khoa") || entry.getCourseSection().getCourse().getDepartment().getName().equals(department))
+                .limit(12)
                 .toList();
     }
     public List<BuildingUsage> usage() {
@@ -69,11 +79,41 @@ public final class DashboardController {
         }).toList();
     }
     private java.util.Set<Long> usedRoomIds() {
-        var start=DateUtils.currentWeekMonday();var end=start.plusDays(6);
-        return services.schedules().findAll().stream().filter(s->s.getStatus()==ScheduleStatus.PUBLISHED && !s.getStartDate().isAfter(end) && !s.getEndDate().isBefore(start)).map(s->s.getRoom().getId()).collect(java.util.stream.Collectors.toSet());
+        return weeklySchedules().stream()
+                .filter(s -> s.getStatus() == ScheduleStatus.PUBLISHED)
+                .map(s -> s.getRoom().getId())
+                .collect(java.util.stream.Collectors.toSet());
+    }
+    private List<ScheduleEntry> weeklySchedules() {
+        LocalDate monday = DateUtils.currentWeekMonday();
+        long now = System.currentTimeMillis();
+        List<ScheduleEntry> current = cachedWeek;
+        if (current != null && monday.equals(cachedWeekStart) && now - cachedWeekAt < 15_000) return current;
+        synchronized (this) {
+            current = cachedWeek;
+            if (current != null && monday.equals(cachedWeekStart) && now - cachedWeekAt < 15_000) return current;
+            current = services.schedules().findByWeek(monday);
+            cachedWeekStart = monday;
+            cachedWeekAt = System.currentTimeMillis();
+            cachedWeek = current;
+            return current;
+        }
+    }
+    private List<Conflict> weeklyConflicts() {
+        long now = System.currentTimeMillis();
+        List<Conflict> current = cachedConflicts;
+        if (current != null && now - cachedConflictsAt < 15_000) return current;
+        synchronized (this) {
+            current = cachedConflicts;
+            if (current != null && now - cachedConflictsAt < 15_000) return current;
+            current = services.conflicts().findConflictsInWeek(DateUtils.currentWeekMonday());
+            cachedConflictsAt = System.currentTimeMillis();
+            cachedConflicts = current;
+            return current;
+        }
     }
     public List<Conflict> urgentConflicts() {
-        return services.conflicts().findAllConflicts().stream().filter(c -> c.getStatus() != ConflictStatus.RESOLVED).limit(2).toList();
+        return weeklyConflicts().stream().filter(c -> c.getStatus() != ConflictStatus.RESOLVED).limit(2).toList();
     }
     public List<ChangeRequest> recentRequests(User user) {
         return services.requests().findForUser(user).stream().sorted(Comparator.comparing(ChangeRequest::getCreatedAt).reversed()).limit(3).toList();

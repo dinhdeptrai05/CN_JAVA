@@ -23,9 +23,13 @@ public final class UserController {
     public User createUser(Role role, String username, String fullName, String email, String phone) { return service.createUser(role, username, fullName, email, phone); }
 
     public List<User> search(String keyword, String role, String status) {
+        return search(keyword,role,status,null);
+    }
+    public List<User> search(String keyword, String role, String status, Integer lastLoginYear) {
         return service.findAll().stream()
                 .filter(user -> role == null || role.startsWith("Tất cả") || user.getRole().getDisplayName().equals(role))
                 .filter(user -> status == null || status.startsWith("Tất cả") || user.getStatus().getDisplayName().equals(status))
+                .filter(user -> lastLoginYear == null || (lastLoginYear==0?user.getLastLogin()==null:user.getLastLogin()!=null&&user.getLastLogin().getYear()==lastLoginYear))
                 .filter(user -> keyword == null || keyword.isBlank()
                         || TextUtils.containsIgnoreAccent(user.getUsername(), keyword)
                         || TextUtils.containsIgnoreAccent(user.getFullName(), keyword)

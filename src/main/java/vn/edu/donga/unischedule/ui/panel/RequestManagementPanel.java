@@ -95,6 +95,7 @@ public class RequestManagementPanel extends JPanel implements Refreshable {
         tabs.addTab("Chờ duyệt", new JPanel());
         tabs.addTab("Đã duyệt", new JPanel());
         tabs.addTab("Từ chối", new JPanel());
+        tabs.setSelectedIndex(1);
         tabs.setPreferredSize(new Dimension(0, 42));
         tabs.addChangeListener(event -> refresh());
     }

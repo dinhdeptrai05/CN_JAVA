@@ -14,7 +14,11 @@ import vn.edu.donga.unischedule.validation.ValidationException;
 import vn.edu.donga.unischedule.validation.Validator;
 
 import java.time.LocalDate;
+import java.time.DayOfWeek;
+import java.time.temporal.TemporalAdjusters;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 public class RoomService {
@@ -30,6 +34,16 @@ public class RoomService {
 
     public List<Classroom> findAll() {
         return roomRepository.findAll();
+    }
+
+    public long countRoomsWithTimetable(LocalDate date) {
+        if (roomRepository instanceof vn.edu.donga.unischedule.repository.jdbc.JdbcRoomRepository jdbc)
+            return jdbc.countScheduledRooms(date);
+        return scheduleService.findAll().stream()
+                .filter(entry -> entry.getStatus() == ScheduleStatus.PUBLISHED)
+                .filter(entry -> !entry.getCourseSection().getSemester().getStartDate().isAfter(date)
+                        && !entry.getCourseSection().getSemester().getEndDate().isBefore(date))
+                .map(entry -> entry.getRoom().getId()).distinct().count();
     }
 
     public Classroom save(Classroom room) {
@@ -90,23 +104,32 @@ public class RoomService {
 
     public List<RoomAvailability> searchRoomAvailability(LocalDate date, TimeSlot slot, String building, RoomType type,
                                                          int minCapacity, String equipmentKeyword) {
-        List<ScheduleEntry> schedules = scheduleService.findAll();
+        LocalDate weekStart = date == null ? LocalDate.now() : date;
+        weekStart = weekStart.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY));
+        Map<Long, List<ScheduleEntry>> schedulesByRoom = scheduleService.findByWeek(weekStart).stream()
+                .collect(Collectors.groupingBy(entry -> entry.getRoom().getId()));
+        Set<Long> maintenanceRooms = roomRepository instanceof vn.edu.donga.unischedule.repository.jdbc.JdbcRoomRepository jdbc
+                ? jdbc.maintenanceRoomIds(date) : Set.of();
+        String equipmentSearch = equipmentKeyword == null ? "" : equipmentKeyword.trim().toLowerCase();
+        Map<Long, List<Equipment>> equipmentByRoom = equipmentSearch.isBlank() ? Map.of()
+                : roomRepository.findAllEquipment().stream()
+                        .collect(Collectors.groupingBy(item -> item.getClassroom().getId()));
         return roomRepository.findAll().stream()
                 .filter(room -> building == null || building.equals("Tất cả") || room.getBuilding().equals(building))
                 .filter(room -> type == null || room.getRoomType() == type)
                 .filter(room -> minCapacity <= 0 || room.getCapacity() >= minCapacity)
-                .filter(room -> equipmentKeyword == null || equipmentKeyword.isBlank()
-                        || roomRepository.findEquipmentByRoom(room.getId()).stream()
+                .filter(room -> equipmentSearch.isBlank()
+                        || equipmentByRoom.getOrDefault(room.getId(), List.of()).stream()
                         .anyMatch(item -> item.getStatus() == ResourceStatus.ACTIVE
-                                && item.getName().toLowerCase().contains(equipmentKeyword.toLowerCase())))
-                .map(room -> availability(room, date, slot, schedules))
+                                && item.getName().toLowerCase().contains(equipmentSearch)))
+                .map(room -> availability(room, date, slot, schedulesByRoom.getOrDefault(room.getId(), List.of()), maintenanceRooms))
                 .toList();
     }
 
-    private RoomAvailability availability(Classroom room, LocalDate date, TimeSlot slot, List<ScheduleEntry> schedules) {
+    private RoomAvailability availability(Classroom room, LocalDate date, TimeSlot slot, List<ScheduleEntry> schedules,
+                                          Set<Long> maintenanceRooms) {
         boolean maintenance = room.getRoomStatus() == RoomStatus.MAINTENANCE
-                || roomRepository instanceof vn.edu.donga.unischedule.repository.jdbc.JdbcRoomRepository jdbc
-                    && jdbc.hasMaintenance(room.getId(), date);
+                || maintenanceRooms.contains(room.getId());
         if (maintenance) return new RoomAvailability(room, RoomAvailability.Status.MAINTENANCE, null, "");
         if (room.getRoomStatus() == RoomStatus.INACTIVE)
             return new RoomAvailability(room, RoomAvailability.Status.UNAVAILABLE, null, "");
@@ -117,7 +140,6 @@ public class RoomService {
         ScheduleEntry probe = new ScheduleEntry(-1L, null, room, schoolDay, slot, slot, date, date, null, "");
         List<ScheduleEntry> matching = schedules.stream()
                 .filter(entry -> entry.getStatus() != ScheduleStatus.CANCELLED)
-                .filter(entry -> entry.getRoom().getId().equals(room.getId()))
                 .filter(entry -> conflictService.timeOverlaps(probe, entry))
                 .toList();
         if (matching.isEmpty()) return new RoomAvailability(room,

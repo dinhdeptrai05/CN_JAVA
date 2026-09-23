@@ -14,6 +14,8 @@ public class AppServices {
     private final CourseSectionService courseSectionService;
     private final NotificationService notificationService;
     private ReportService reportService;
+    private HistoryService historyService = new HistoryService(() -> new vn.edu.donga.unischedule.model.HistorySnapshot(java.time.LocalDate.now(),java.time.LocalDate.now(),0,java.util.List.of()));
+    public HistoryService history() { return historyService; }
     public ReportService reports() { return reportService; }
 
     public AppServices(CatalogService catalogService, AuthService authService, ScheduleService scheduleService,
@@ -46,7 +48,8 @@ public class AppServices {
             new CourseSectionService(new vn.edu.donga.unischedule.repository.jdbc.JdbcCourseSectionRepository(db)),
             new NotificationService(new vn.edu.donga.unischedule.repository.jdbc.JdbcNotificationRepository(db)));
         services.auditService=new AuditService(db);
-        services.reportService=new ReportService(new vn.edu.donga.unischedule.repository.jdbc.JdbcReportRepository(db));return services;
+        services.reportService=new ReportService(new vn.edu.donga.unischedule.repository.jdbc.JdbcReportRepository(db));
+        services.historyService=new HistoryService(new vn.edu.donga.unischedule.repository.jdbc.JdbcHistoryRepository(db));return services;
     }
 
     public CatalogService catalog() {

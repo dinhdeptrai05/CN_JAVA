@@ -23,6 +23,8 @@ import javax.swing.JComboBox;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
+import javax.swing.JLabel;
+import javax.swing.SwingWorker;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import java.awt.BorderLayout;
@@ -37,6 +39,9 @@ public class ConflictPanel extends JPanel implements Refreshable {
     private final JComboBox<String> statusBox = new JComboBox<>();
     private final GenericTableModel<Conflict> tableModel;
     private final JTable table;
+    private final JLabel loadStatus = new JLabel(" ");
+    private final javax.swing.Timer searchDelay = new javax.swing.Timer(250, event -> refresh());
+    private int refreshVersion;
 
     public ConflictPanel(AppControllers controllers) {
         this.controllers = controllers;
@@ -57,6 +62,7 @@ public class ConflictPanel extends JPanel implements Refreshable {
         setBackground(AppConfig.BACKGROUND);
         setBorder(BorderFactory.createEmptyBorder(22, 22, 22, 22));
         buildUi();
+        searchDelay.setRepeats(false);
         refresh();
     }
 
@@ -91,6 +97,7 @@ public class ConflictPanel extends JPanel implements Refreshable {
         top.add(actions, BorderLayout.SOUTH);
         add(top, BorderLayout.NORTH);
         add(new JScrollPane(table), BorderLayout.CENTER);
+        add(loadStatus, BorderLayout.SOUTH);
 
         table.addMouseListener(new java.awt.event.MouseAdapter() {
             @Override
@@ -105,17 +112,17 @@ public class ConflictPanel extends JPanel implements Refreshable {
         searchField.getTextField().getDocument().addDocumentListener(new DocumentListener() {
             @Override
             public void insertUpdate(DocumentEvent e) {
-                refresh();
+                searchDelay.restart();
             }
 
             @Override
             public void removeUpdate(DocumentEvent e) {
-                refresh();
+                searchDelay.restart();
             }
 
             @Override
             public void changedUpdate(DocumentEvent e) {
-                refresh();
+                searchDelay.restart();
             }
         });
     }
@@ -125,8 +132,23 @@ public class ConflictPanel extends JPanel implements Refreshable {
         String keyword = searchField.getText();
         String type = (String) typeBox.getSelectedItem();
         String status = (String) statusBox.getSelectedItem();
-        List<Conflict> rows = controllers.conflicts().search(keyword, type, status);
-        tableModel.setRows(rows);
+        int version = ++refreshVersion;
+        loadStatus.setText("Đang tải xung đột…");
+        new SwingWorker<List<Conflict>, Void>() {
+            @Override protected List<Conflict> doInBackground() {
+                return controllers.conflicts().search(keyword, type, status);
+            }
+            @Override protected void done() {
+                if (version != refreshVersion) return;
+                try {
+                    List<Conflict> rows = get();
+                    tableModel.setRows(rows);
+                    loadStatus.setText(rows.size() + " xung đột");
+                } catch (Exception error) {
+                    loadStatus.setText("Không thể tải xung đột: " + UiTasks.message(error));
+                }
+            }
+        }.execute();
     }
 
     private String scheduleName(vn.edu.donga.unischedule.model.ScheduleEntry entry) {

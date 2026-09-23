@@ -1,0 +1,245 @@
+Project UniSchedule {
+  database_type: 'MySQL'
+  Note: 'Lược đồ từ src/main/resources/db/01-05_create_*tables.sql. Các ID và FK kiểu BIGINT đều UNSIGNED trong SQL gốc.'
+}
+
+Table roles {
+  id bigint [pk, increment]
+  code varchar(30) [not null, unique]
+  name varchar(100) [not null]
+}
+
+Table departments {
+  id bigint [pk, increment]
+  code varchar(20) [not null, unique]
+  name varchar(120) [not null]
+}
+
+Table users {
+  id bigint [pk, increment]
+  department_id bigint
+  username varchar(50) [not null, unique]
+  password_hash varchar(255) [not null]
+  full_name varchar(120) [not null]
+  email varchar(150) [not null, unique]
+  phone varchar(20)
+  lecturer_code varchar(30)
+  student_code varchar(30)
+  class_code varchar(30)
+  avatar_data mediumblob
+  status varchar(20) [not null, default: 'ACTIVE']
+  last_login_at datetime
+  created_at datetime [not null]
+  updated_at datetime [not null]
+}
+
+Table user_roles {
+  user_id bigint [not null]
+  role_id bigint [not null]
+
+  indexes {
+    (user_id, role_id) [pk]
+  }
+}
+
+Table semesters {
+  id bigint [pk, increment]
+  code varchar(20) [not null, unique]
+  name varchar(100) [not null]
+  start_date date [not null]
+  end_date date [not null]
+  status varchar(20) [not null]
+}
+
+Table time_slots {
+  id bigint [pk, increment]
+  name varchar(50) [not null, unique]
+  start_time time [not null]
+  end_time time [not null]
+  sort_order int [not null, unique]
+}
+
+Table courses {
+  id bigint [pk, increment]
+  department_id bigint [not null]
+  code varchar(20) [not null, unique]
+  name varchar(160) [not null]
+  credits tinyint [not null]
+  required_room_type varchar(30) [not null]
+  status varchar(20) [not null, default: 'ACTIVE']
+}
+
+Table course_sections {
+  id bigint [pk, increment]
+  course_id bigint [not null]
+  semester_id bigint [not null]
+  code varchar(30) [not null, unique]
+  capacity int [not null]
+  student_count int [not null, default: 0]
+  status varchar(20) [not null]
+  created_at datetime [not null]
+}
+
+Table lecturer_assignments {
+  id bigint [pk, increment]
+  course_section_id bigint [not null]
+  lecturer_id bigint [not null]
+  assigned_at datetime [not null]
+
+  indexes {
+    (course_section_id, lecturer_id) [unique]
+    (id, course_section_id) [unique]
+  }
+}
+
+Table student_enrollments {
+  id bigint [pk, increment]
+  course_section_id bigint [not null]
+  student_id bigint [not null]
+  enrolled_at datetime [not null]
+  status varchar(20) [not null, default: 'ACTIVE']
+
+  indexes {
+    (course_section_id, student_id) [unique]
+  }
+}
+
+Table classrooms {
+  id bigint [pk, increment]
+  code varchar(20) [not null, unique]
+  name varchar(100) [not null]
+  building varchar(80) [not null]
+  floor int [not null]
+  capacity int [not null]
+  room_type varchar(30) [not null]
+  status varchar(20) [not null]
+  description varchar(500)
+}
+
+Table equipment {
+  id bigint [pk, increment]
+  code varchar(30) [not null, unique]
+  name varchar(120) [not null]
+  category varchar(50) [not null]
+  status varchar(20) [not null]
+}
+
+Table classroom_equipment {
+  id bigint [pk, increment]
+  classroom_id bigint [not null]
+  equipment_id bigint [not null]
+  quantity int [not null]
+  condition_status varchar(20) [not null]
+  condition_note varchar(255)
+  updated_at datetime [not null]
+
+  indexes {
+    (classroom_id, equipment_id) [unique]
+  }
+}
+
+Table schedules {
+  id bigint [pk, increment]
+  course_section_id bigint [not null]
+  lecturer_assignment_id bigint [not null]
+  classroom_id bigint [not null]
+  start_slot_id bigint [not null]
+  end_slot_id bigint [not null]
+  day_of_week tinyint [not null]
+  start_date date [not null]
+  end_date date [not null]
+  status varchar(20) [not null]
+  note varchar(500)
+  created_by bigint [not null]
+  created_at datetime [not null]
+  updated_at datetime [not null]
+}
+
+Table change_requests {
+  id bigint [pk, increment]
+  requester_id bigint [not null]
+  schedule_id bigint
+  requested_room_id bigint
+  requested_equipment_id bigint
+  requested_date date
+  requested_day tinyint
+  requested_start_slot_id bigint
+  requested_end_slot_id bigint
+  equipment_name varchar(120)
+  quantity int
+  request_type varchar(30) [not null]
+  reason text [not null]
+  priority varchar(20) [not null]
+  status varchar(20) [not null]
+  reviewed_by bigint
+  review_reason text
+  reviewed_at datetime
+  created_at datetime [not null]
+}
+
+Table notifications {
+  id bigint [pk, increment]
+  user_id bigint [not null]
+  title varchar(180) [not null]
+  content text [not null]
+  type varchar(30) [not null]
+  reference_type varchar(50)
+  reference_id bigint
+  target_screen varchar(50)
+  is_read boolean [not null, default: false]
+  created_at datetime [not null]
+  read_at datetime
+}
+
+Table audit_logs {
+  id bigint [pk, increment]
+  user_id bigint
+  action varchar(80) [not null]
+  entity_type varchar(60) [not null]
+  entity_id bigint
+  details json
+  created_at datetime [not null]
+}
+
+Table maintenance_records {
+  id bigint [pk, increment]
+  classroom_id bigint
+  classroom_equipment_id bigint
+  reported_by bigint [not null]
+  description text [not null]
+  start_date date [not null]
+  end_date date
+  status varchar(20) [not null]
+  created_at datetime [not null]
+}
+
+Ref: users.department_id > departments.id [delete: set null]
+Ref: user_roles.user_id > users.id [delete: cascade]
+Ref: user_roles.role_id > roles.id [delete: cascade]
+Ref: courses.department_id > departments.id
+Ref: course_sections.course_id > courses.id
+Ref: course_sections.semester_id > semesters.id
+Ref: lecturer_assignments.course_section_id > course_sections.id
+Ref: lecturer_assignments.lecturer_id > users.id
+Ref: student_enrollments.course_section_id > course_sections.id
+Ref: student_enrollments.student_id > users.id
+Ref: classroom_equipment.classroom_id > classrooms.id
+Ref: classroom_equipment.equipment_id > equipment.id
+Ref: schedules.course_section_id > course_sections.id
+Ref: schedules.(lecturer_assignment_id, course_section_id) > lecturer_assignments.(id, course_section_id)
+Ref: schedules.classroom_id > classrooms.id
+Ref: schedules.start_slot_id > time_slots.id
+Ref: schedules.end_slot_id > time_slots.id
+Ref: schedules.created_by > users.id
+Ref: change_requests.requester_id > users.id
+Ref: change_requests.schedule_id > schedules.id
+Ref: change_requests.requested_room_id > classrooms.id
+Ref: change_requests.requested_equipment_id > equipment.id
+Ref: change_requests.requested_start_slot_id > time_slots.id
+Ref: change_requests.requested_end_slot_id > time_slots.id
+Ref: change_requests.reviewed_by > users.id
+Ref: notifications.user_id > users.id
+Ref: audit_logs.user_id > users.id [delete: set null]
+Ref: maintenance_records.classroom_id > classrooms.id
+Ref: maintenance_records.classroom_equipment_id > classroom_equipment.id
+Ref: maintenance_records.reported_by > users.id

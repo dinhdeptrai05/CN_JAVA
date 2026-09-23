@@ -5,7 +5,9 @@ import vn.edu.donga.unischedule.model.Enums.*;
 import vn.edu.donga.unischedule.service.RoomService;
 import vn.edu.donga.unischedule.util.TextUtils;
 import java.time.LocalDate;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public final class RoomController {
     private final RoomService service;
@@ -13,6 +15,7 @@ public final class RoomController {
     public RoomController(RoomService service) { this.service = service; }
 
     public List<Classroom> findAll() { return service.findAll(); }
+    public long countRoomsWithTimetable(LocalDate date) { return service.countRoomsWithTimetable(date); }
 
     public Classroom save(Classroom room) { return service.save(room); }
 
@@ -28,6 +31,13 @@ public final class RoomController {
     public List<RoomAvailability> searchRoomAvailability(LocalDate date, TimeSlot slot, String building, RoomType type, int minCapacity, String equipmentKeyword) { return service.searchRoomAvailability(date, slot, building, type, minCapacity, equipmentKeyword); }
 
     public List<Classroom> search(String keyword, String building, String type, int minCapacity, String status) {
+        Map<Long, String> equipmentByRoom = new HashMap<>();
+        if(keyword != null && !keyword.isBlank()) {
+            Map<Long, List<String>> names = new HashMap<>();
+            for(Equipment item : service.findAllEquipment()) names.computeIfAbsent(item.getClassroom().getId(), ignored -> new java.util.ArrayList<>())
+                    .add(item.getName() + " x" + item.getQuantity());
+            names.forEach((roomId, items) -> equipmentByRoom.put(roomId, String.join(", ", items)));
+        }
         return service.findAll().stream()
                 .filter(room -> building == null || building.startsWith("Tất cả") || room.getBuilding().equals(building))
                 .filter(room -> type == null || type.startsWith("Tất cả") || room.getRoomType().getDisplayName().equals(type))
@@ -36,7 +46,7 @@ public final class RoomController {
                 .filter(room -> keyword == null || keyword.isBlank()
                         || TextUtils.containsIgnoreAccent(room.getCode(), keyword)
                         || TextUtils.containsIgnoreAccent(room.getName(), keyword)
-                        || TextUtils.containsIgnoreAccent(equipmentSummary(room), keyword))
+                        || TextUtils.containsIgnoreAccent(equipmentByRoom.getOrDefault(room.getId(), ""), keyword))
                 .toList();
     }
 

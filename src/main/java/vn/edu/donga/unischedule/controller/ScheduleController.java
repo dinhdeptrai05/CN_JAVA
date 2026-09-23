@@ -15,12 +15,16 @@ public final class ScheduleController {
     public List<ScheduleEntry> findAll() { return service.findAll(); }
 
     public List<ScheduleEntry> findByWeekForUser(LocalDate weekStart, User user) { return service.findByWeekForUser(weekStart, user); }
+    public List<ScheduleEntry> findPublishedByWeekForUser(LocalDate weekStart, User user) { return service.findPublishedByWeekForUser(weekStart, user); }
 
     public ScheduleEntry save(ScheduleEntry entry) { return service.save(entry); }
 
     public boolean delete(Long id) { return service.delete(id); }
     public List<ScheduleEntry> search(LocalDate weekStart, User user, String keyword, String semester, String department, String lecturer, String room) {
-        return service.findByWeekForUser(weekStart, user).stream()
+        return search(weekStart, user, keyword, semester, department, lecturer, room, false);
+    }
+    public List<ScheduleEntry> search(LocalDate weekStart, User user, String keyword, String semester, String department, String lecturer, String room, boolean publishedCalendar) {
+        return (publishedCalendar ? service.findPublishedByWeekForUser(weekStart, user) : service.findByWeekForUser(weekStart, user)).stream()
                 .filter(entry -> semester == null || semester.startsWith("Tất cả") || entry.getCourseSection().getSemester().getName().equals(semester))
                 .filter(entry -> department == null || department.startsWith("Tất cả") || entry.getCourseSection().getCourse().getDepartment().getName().equals(department))
                 .filter(entry -> lecturer == null || lecturer.startsWith("Tất cả") || entry.getCourseSection().getLecturer().getFullName().equals(lecturer))

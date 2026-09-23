@@ -9,9 +9,12 @@ public final class JdbcCourseSectionRepository implements CourseSectionRepositor
     public JdbcCourseSectionRepository(JdbcDatabase db) { this.db=db; }
     public List<CourseSection> findAll() {
         var catalog=new JdbcCatalogRepository(db); var courses=catalog.getCourses(); var semesters=catalog.getSemesters(); var users=new JdbcUserRepository(db).findAll();
+        var courseById=new HashMap<Long,Course>();for(var course:courses)courseById.put(course.getId(),course);
+        var semesterById=new HashMap<Long,Semester>();for(var semester:semesters)semesterById.put(semester.getId(),semester);
+        var lecturerById=new HashMap<Long,Lecturer>();for(var user:users)if(user instanceof Lecturer lecturer)lecturerById.put(user.getId(),lecturer);
         return db.query("SELECT cs.*, (SELECT lecturer_id FROM lecturer_assignments WHERE course_section_id=cs.id ORDER BY id LIMIT 1) lecturer_id FROM course_sections cs ORDER BY cs.code",r->{
             long courseId=r.getLong("course_id"),semesterId=r.getLong("semester_id"),lecturerId=r.getLong("lecturer_id");
-            return new CourseSection(r.getLong("id"),r.getString("code"),courses.stream().filter(x->x.getId()==courseId).findFirst().orElseThrow(),semesters.stream().filter(x->x.getId()==semesterId).findFirst().orElseThrow(),(Lecturer)users.stream().filter(x->x.getId()==lecturerId).findFirst().orElse(null),r.getInt("capacity"),r.getInt("student_count"),CourseSectionStatus.valueOf(r.getString("status")));
+            return new CourseSection(r.getLong("id"),r.getString("code"),Objects.requireNonNull(courseById.get(courseId)),Objects.requireNonNull(semesterById.get(semesterId)),lecturerById.get(lecturerId),r.getInt("capacity"),r.getInt("student_count"),CourseSectionStatus.valueOf(r.getString("status")));
         });
     }
     public Optional<CourseSection> findById(Long id) { return findAll().stream().filter(x->x.getId().equals(id)).findFirst(); }

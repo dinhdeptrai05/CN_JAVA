@@ -27,9 +27,10 @@ public final class JdbcRoomRepository implements RoomRepository {
     public boolean deleteById(Long id) { var room=findById(id); if(room.isEmpty()) return false; room.get().setRoomStatus(RoomStatus.INACTIVE); save(room.get()); return true; }
     public List<Equipment> findAllEquipment() {
         var rooms=findAll();
+        var roomById=new HashMap<Long,Classroom>();for(var room:rooms)roomById.put(room.getId(),room);
         return db.query("SELECT e.*,ce.id placement_id,ce.classroom_id,ce.quantity,ce.condition_note,ce.condition_status FROM equipment e JOIN classroom_equipment ce ON ce.equipment_id=e.id ORDER BY e.code,ce.id",r->{
             ResourceStatus status=switch(r.getString("condition_status")) { case "DAMAGED"->ResourceStatus.BROKEN; case "MAINTENANCE"->ResourceStatus.MAINTENANCE; case "UNAVAILABLE"->ResourceStatus.INACTIVE; default->ResourceStatus.ACTIVE; };
-            var item=new Equipment(r.getLong("id"),r.getString("code"),r.getString("name"),r.getString("category"),r.getInt("quantity"),r.getString("condition_note"),rooms.stream().filter(x->{try{return x.getId()==r.getLong("classroom_id");}catch(java.sql.SQLException ex){throw new IllegalStateException(ex);}}).findFirst().orElseThrow(),status);
+            var item=new Equipment(r.getLong("id"),r.getString("code"),r.getString("name"),r.getString("category"),r.getInt("quantity"),r.getString("condition_note"),Objects.requireNonNull(roomById.get(r.getLong("classroom_id"))),status);
             item.setPlacementId(r.getLong("placement_id")); return item;
         });
     }
@@ -51,4 +52,11 @@ public final class JdbcRoomRepository implements RoomRepository {
         }); e.setId(ids[0]); e.setPlacementId(ids[1]); return e;
     }
     public boolean hasMaintenance(Long roomId,LocalDate date) { return date!=null && db.scalar("SELECT COUNT(*) FROM maintenance_records WHERE classroom_id=? AND status IN ('REPORTED','IN_PROGRESS') AND start_date<=? AND (end_date IS NULL OR end_date>=?)",roomId,date,date)>0; }
+    public Set<Long> maintenanceRoomIds(LocalDate date) {
+        if(date==null)return Set.of();
+        return new HashSet<>(db.query("SELECT DISTINCT classroom_id FROM maintenance_records WHERE classroom_id IS NOT NULL AND status IN ('REPORTED','IN_PROGRESS') AND start_date<=? AND (end_date IS NULL OR end_date>=?)",r->r.getLong(1),date,date));
+    }
+    public long countScheduledRooms(LocalDate date) {
+        return db.scalar("SELECT COUNT(DISTINCT s.classroom_id) FROM schedules s JOIN course_sections cs ON cs.id=s.course_section_id JOIN semesters sm ON sm.id=cs.semester_id WHERE s.status='PUBLISHED' AND sm.start_date<=? AND sm.end_date>=?",date,date);
+    }
 }

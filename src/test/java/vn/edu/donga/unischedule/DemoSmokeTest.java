@@ -13,6 +13,7 @@ import vn.edu.donga.unischedule.config.ThemeConfig;
 import vn.edu.donga.unischedule.service.AppServices;
 import vn.edu.donga.unischedule.ui.frame.LoginFrame;
 import vn.edu.donga.unischedule.ui.frame.MainFrame;
+import vn.edu.donga.unischedule.ui.panel.HistoryPanel;
 
 import javax.swing.SwingUtilities;
 import java.time.LocalDate;
@@ -113,8 +114,25 @@ class DemoSmokeTest {
             loginFrame.dispose();
             for (String username : new String[]{"admin", "daotao", "giangvien", "sinhvien"}) {
                 MainFrame frame = new MainFrame(new vn.edu.donga.unischedule.controller.AppControllers(services), services.auth().login(username, "123456"));
+                frame.showScreen("history");
+                assertTrue(contains(frame,HistoryPanel.class),"History screen must be available for "+username);
+                assertEquals(username.equals("admin")||username.equals("daotao"),hasReportButton(frame),username);
                 frame.dispose();
             }
         });
+    }
+    private static boolean contains(java.awt.Container root,Class<?> type) {
+        for(var child:root.getComponents()) {
+            if(type.isInstance(child))return true;
+            if(child instanceof java.awt.Container nested&&contains(nested,type))return true;
+        }
+        return false;
+    }
+    private static boolean hasReportButton(java.awt.Container root) {
+        for(var child:root.getComponents()) {
+            if(child instanceof javax.swing.JButton button&&"Xem báo cáo năm đã chọn".equals(button.getText()))return true;
+            if(child instanceof java.awt.Container nested&&hasReportButton(nested))return true;
+        }
+        return false;
     }
 }

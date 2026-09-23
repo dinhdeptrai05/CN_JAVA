@@ -19,8 +19,12 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 public class AuditLogPanel extends JPanel implements Refreshable {
+    private static final int PAGE_SIZE=100;
     private final GenericTableModel<AuditEntry> tableModel;
     private final AuditController controller;
+    private final javax.swing.JLabel pageLabel=new javax.swing.JLabel();
+    private final javax.swing.JButton previous=new javax.swing.JButton("Trước"),next=new javax.swing.JButton("Sau");
+    private int page;
 
     public AuditLogPanel(AuditController controller) {
         this.controller = controller;
@@ -39,10 +43,11 @@ public class AuditLogPanel extends JPanel implements Refreshable {
         JPanel actions = new JPanel(new FlowLayout(FlowLayout.RIGHT));
         actions.setOpaque(false);
         PrimaryButton refresh = new PrimaryButton("Làm mới");
-        refresh.addActionListener(event -> UiTasks.run(this, "Đang tải nhật ký…", controller::findAll,
-                rows -> { tableModel.setRows(rows); Dialogs.success(this, "Nhật ký hoạt động đã được tải lại."); },
-                error -> Dialogs.error(this, UiTasks.message(error))));
+        refresh.addActionListener(event -> {page=0;refresh();});
         actions.add(refresh);
+        previous.addActionListener(e->{if(page>0){page--;refresh();}});
+        next.addActionListener(e->{page++;refresh();});
+        actions.add(previous);actions.add(pageLabel);actions.add(next);
         add(actions, BorderLayout.NORTH);
         add(new JScrollPane(table), BorderLayout.CENTER);
         refresh();
@@ -50,6 +55,9 @@ public class AuditLogPanel extends JPanel implements Refreshable {
 
     @Override
     public void refresh() {
-        tableModel.setRows(controller.findAll());
+        long count=controller.count();int maxPage=(int)Math.max(0,(count-1)/PAGE_SIZE);page=Math.min(page,maxPage);
+        tableModel.setRows(controller.findPage(page,PAGE_SIZE));
+        pageLabel.setText("Trang "+(page+1)+" / "+(maxPage+1)+"  ·  "+count+" sự kiện");
+        previous.setEnabled(page>0);next.setEnabled(page<maxPage);
     }
 }

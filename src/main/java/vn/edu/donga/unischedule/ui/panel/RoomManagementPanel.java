@@ -31,7 +31,11 @@ import javax.swing.event.DocumentListener;
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
 import java.awt.GridLayout;
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 public class RoomManagementPanel extends JPanel implements Refreshable {
@@ -45,6 +49,7 @@ public class RoomManagementPanel extends JPanel implements Refreshable {
     private final JComboBox<String> statusBox = new JComboBox<>();
     private final GenericTableModel<Classroom> tableModel;
     private final JTable table;
+    private final Map<Long, String> equipmentSummaryByRoom = new HashMap<>();
 
     public RoomManagementPanel(AppControllers controllers, User user) {
         this.controllers = controllers;
@@ -149,6 +154,13 @@ public class RoomManagementPanel extends JPanel implements Refreshable {
     @Override
     public void refresh() {
         rebuildStats();
+        equipmentSummaryByRoom.clear();
+        Map<Long, List<String>> equipmentNames = new HashMap<>();
+        controllers.rooms().findAllEquipment().forEach(item -> equipmentNames
+                .computeIfAbsent(item.getClassroom().getId(), ignored -> new ArrayList<>())
+                .add(item.getName() + " x" + item.getQuantity()));
+        equipmentNames.forEach((roomId, names) -> equipmentSummaryByRoom.put(roomId,
+                names.stream().limit(3).collect(Collectors.joining(", "))));
         String keyword = searchField.getText();
         String building = (String) buildingBox.getSelectedItem();
         String type = (String) typeBox.getSelectedItem();
@@ -162,9 +174,10 @@ public class RoomManagementPanel extends JPanel implements Refreshable {
     private void rebuildStats() {
         statsPanel.removeAll();
         List<Classroom> rooms = controllers.rooms().findAll();
+        long scheduled = controllers.rooms().countRoomsWithTimetable(LocalDate.now());
         statsPanel.add(new StatCard("PH", "Tổng số phòng", String.valueOf(rooms.size()), "Trong hệ thống", AppConfig.PRIMARY));
-        statsPanel.add(new StatCard("TR", "Phòng trống", String.valueOf(count(RoomStatus.AVAILABLE)), "Sẵn sàng", AppConfig.SUCCESS));
-        statsPanel.add(new StatCard("SD", "Đang sử dụng", String.valueOf(count(RoomStatus.IN_USE)), "Có lịch học", AppConfig.WARNING));
+        statsPanel.add(new StatCard("SD", "Có lịch kỳ này", String.valueOf(scheduled), "Có lịch đã công bố", AppConfig.WARNING));
+        statsPanel.add(new StatCard("TR", "Chưa có lịch", String.valueOf(rooms.size() - scheduled), "Trong học kỳ hiện tại", AppConfig.SUCCESS));
         statsPanel.add(new StatCard("BT", "Bảo trì", String.valueOf(count(RoomStatus.MAINTENANCE)), "Cần xử lý", AppConfig.DANGER));
         statsPanel.revalidate();
         statsPanel.repaint();
@@ -175,7 +188,7 @@ public class RoomManagementPanel extends JPanel implements Refreshable {
     }
 
     private String equipmentSummary(Classroom room) {
-        return controllers.rooms().equipmentSummary(room);
+        return equipmentSummaryByRoom.getOrDefault(room.getId(), "");
     }
 
     private Classroom selectedRoom() {

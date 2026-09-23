@@ -980,7 +980,7 @@ Chuẩn bị MySQL và ứng dụng bằng hướng dẫn ở mục 11; dùng t�
 | 7 | Giảng viên gửi yêu cầu đổi phòng, học vụ duyệt | Kiểm tra chủ thể, trạng thái PENDING, cập nhật lịch và thông báo cùng transaction. |
 | 8 | Mở hồ sơ, thay ảnh, đăng nhập lại | Ảnh đã được chuẩn hóa và lưu BLOB trong MySQL, không chỉ thay hình tạm trên UI. |
 | 9 | Mở báo cáo, chọn khoảng ngày và bộ lọc | Số liệu lấy từ JDBC; giải thích ngày học thực tế, deduplicate và mẫu số công suất. |
-| 10 | Xuất CSV/HTML, mở file và kiểm tra | CSV là bảng được chọn, HTML chứa các bảng báo cáo; in HTML để lưu PDF. |
+| 10 | Xuất PDF/Word/Excel, mở file và kiểm tra | Mỗi định dạng chứa số liệu tổng quan và đầy đủ bốn bảng báo cáo. |
 | 11 | Mở mã thuật toán và test liên quan | Chỉ ra điều kiện trùng, giao dịch và một test kiểm chứng; nêu giới hạn hiện tại. |
 
 Không tạo lỗi bằng cách phá dữ liệu chính. Tình huống cạnh tranh hai phiên và rollback nhiều bước nên minh họa bằng integration test trên schema test.
@@ -1053,7 +1053,7 @@ Các liên kết bên dưới tính từ thư mục gốc dự án. Khi bảo v�
 | Snapshot dữ liệu báo cáo | [JdbcReportRepository.java](src/main/java/vn/edu/donga/unischedule/repository/jdbc/JdbcReportRepository.java) |
 | Điều phối báo cáo | [ReportController.java](src/main/java/vn/edu/donga/unischedule/controller/ReportController.java) |
 | SwingWorker và bảng báo cáo | [ReportPanel.java](src/main/java/vn/edu/donga/unischedule/ui/panel/ReportPanel.java) |
-| Xuất CSV/HTML và escape | [ReportExport.java](src/main/java/vn/edu/donga/unischedule/util/ReportExport.java) |
+| Xuất PDF/Word/Excel | [ReportExport.java](src/main/java/vn/edu/donga/unischedule/util/ReportExport.java) |
 | Test công thức báo cáo | [ReportServiceTest.java](src/test/java/vn/edu/donga/unischedule/ReportServiceTest.java) |
 | Test báo cáo với MySQL | [ReportIntegrationTest.java](src/test/java/vn/edu/donga/unischedule/ReportIntegrationTest.java) |
 | Hướng dẫn dự án | [README.md](README.md) |

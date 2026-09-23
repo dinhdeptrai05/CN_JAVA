@@ -30,6 +30,7 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextField;
+import javax.swing.SwingWorker;
 import java.awt.BorderLayout;
 import java.awt.CardLayout;
 import java.awt.Color;
@@ -40,6 +41,10 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.HashMap;
+import java.util.ArrayList;
+import java.util.concurrent.CancellationException;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 public class RoomSearchPanel extends JPanel implements Refreshable {
@@ -60,6 +65,14 @@ public class RoomSearchPanel extends JPanel implements Refreshable {
     private List<RoomAvailability> latestRows = List.of();
     private Map<Long, String> equipmentByRoom = Map.of();
     private final JLabel resultStatus = new JLabel(" ");
+    private static final int CARD_PAGE_SIZE = 48;
+    private final SecondaryButton previousCards = new SecondaryButton("Trang trước");
+    private final SecondaryButton nextCards = new SecondaryButton("Trang sau");
+    private int cardPage;
+    private long searchVersion;
+    private long lastLoadedAt;
+    private boolean hasLoaded;
+    private SwingWorker<SearchResult, Void> searchWorker;
 
     private record SearchResult(List<RoomAvailability> rooms, Map<Long, String> equipment) { }
 
@@ -84,7 +97,7 @@ public class RoomSearchPanel extends JPanel implements Refreshable {
         setBorder(BorderFactory.createEmptyBorder(22, 22, 22, 22));
         buildFilters();
         buildUi();
-        refresh();
+        searchAsync();
     }
 
     private void buildFilters() {
@@ -120,6 +133,10 @@ public class RoomSearchPanel extends JPanel implements Refreshable {
         actions.setOpaque(false);
         resultStatus.setForeground(AppConfig.MUTED);
         actions.add(resultStatus);
+        previousCards.addActionListener(event -> { cardPage--; rebuildCards(); updatePageControls(); });
+        nextCards.addActionListener(event -> { cardPage++; rebuildCards(); updatePageControls(); });
+        actions.add(previousCards);
+        actions.add(nextCards);
         JLabel countNote = new JLabel("Sĩ số theo lịch, không phải số người có mặt thực tế.");
         countNote.setForeground(AppConfig.MUTED);
         actions.add(countNote);
@@ -140,20 +157,9 @@ public class RoomSearchPanel extends JPanel implements Refreshable {
 
     @Override
     public void refresh() {
-        try {
-            LocalDate date = LocalDate.parse(dateField.getText().trim(), DateUtils.INPUT_FORMAT);
-            int minCapacity = capacityField.getText().isBlank() ? 0 : Integer.parseInt(capacityField.getText().trim());
-            showRows(searchRooms(date, (TimeSlot) slotBox.getSelectedItem(),
-                    buildingBox.getSelectedIndex() == 0 ? null : (String) buildingBox.getSelectedItem(),
-                    selectedRoomType(), minCapacity, equipmentField.getText(),
-                    statusBox.getSelectedIndex() == 0 ? null : (String) statusBox.getSelectedItem()));
-        } catch (NumberFormatException ex) {
-            Dialogs.error(this, "Sức chứa tối thiểu phải là số nguyên.");
-        } catch (java.time.format.DateTimeParseException ex) {
-            Dialogs.error(this, "Ngày tra cứu phải nhập theo định dạng yyyy-MM-dd.");
-        } catch (Exception ex) {
-            Dialogs.error(this, UiTasks.message(ex));
-        }
+        if (searchWorker != null && !searchWorker.isDone()) return;
+        if (hasLoaded && System.nanoTime() - lastLoadedAt < TimeUnit.SECONDS.toNanos(15)) return;
+        searchAsync();
     }
 
     private void searchAsync() {
@@ -165,9 +171,25 @@ public class RoomSearchPanel extends JPanel implements Refreshable {
             RoomType type = selectedRoomType();
             String equipment = equipmentField.getText();
             String status = statusBox.getSelectedIndex() == 0 ? null : (String) statusBox.getSelectedItem();
-            UiTasks.run(this, "Đang tra cứu phòng…", () -> searchRooms(
-                    date, slot, building, type, minCapacity, equipment, status),
-                    this::showRows, error -> Dialogs.error(this, UiTasks.message(error)));
+            long version = ++searchVersion;
+            if (searchWorker != null) searchWorker.cancel(true);
+            resultStatus.setText("Đang tra cứu phòng…");
+            searchWorker = new SwingWorker<>() {
+                @Override protected SearchResult doInBackground() {
+                    return searchRooms(date, slot, building, type, minCapacity, equipment, status);
+                }
+                @Override protected void done() {
+                    if (version != searchVersion) return;
+                    try { showRows(get()); }
+                    catch (CancellationException ignored) { }
+                    catch (InterruptedException ex) { Thread.currentThread().interrupt(); }
+                    catch (ExecutionException ex) {
+                        resultStatus.setText("Không thể tải phòng.");
+                        Dialogs.error(RoomSearchPanel.this, UiTasks.message(ex.getCause() == null ? ex : ex.getCause()));
+                    }
+                }
+            };
+            searchWorker.execute();
         } catch (NumberFormatException ex) {
             Dialogs.error(this, "Sức chứa tối thiểu phải là số nguyên.");
         } catch (java.time.format.DateTimeParseException ex) {
@@ -180,29 +202,49 @@ public class RoomSearchPanel extends JPanel implements Refreshable {
         List<RoomAvailability> rows = controllers.rooms().searchRoomAvailability(date, slot, building, type,
                         minCapacity, equipment).stream()
                 .filter(result -> status == null || result.status().label().equals(status)).toList();
+        Map<Long, List<String>> names = new HashMap<>();
+        controllers.rooms().findAllEquipment().forEach(item -> names
+                .computeIfAbsent(item.getClassroom().getId(), ignored -> new ArrayList<>())
+                .add(item.getName() + " x" + item.getQuantity()));
         Map<Long, String> details = new HashMap<>();
         for (RoomAvailability result : rows)
-            details.put(result.room().getId(), controllers.rooms().equipmentDetails(result.room()));
+            details.put(result.room().getId(), String.join(", ", names.getOrDefault(result.room().getId(), List.of())));
         return new SearchResult(rows, details);
     }
 
     private void showRows(SearchResult result) {
         latestRows = result.rooms();
         equipmentByRoom = result.equipment();
+        hasLoaded = true;
+        lastLoadedAt = System.nanoTime();
+        cardPage = 0;
         tableModel.setRows(latestRows);
-        rebuildCards();
         switchView();
-        resultStatus.setText("Đã tìm thấy " + latestRows.size() + " phòng.");
     }
 
     private void switchView() {
-        ((CardLayout) resultsPanel.getLayout()).show(resultsPanel, viewBox.getSelectedIndex() == 0 ? "cards" : "table");
+        boolean cards = viewBox.getSelectedIndex() == 0;
+        ((CardLayout) resultsPanel.getLayout()).show(resultsPanel, cards ? "cards" : "table");
+        if (cards) rebuildCards();
+        updatePageControls();
+    }
+
+    private void updatePageControls() {
+        boolean cards = viewBox.getSelectedIndex() == 0;
+        previousCards.setVisible(cards && cardPage > 0);
+        nextCards.setVisible(cards && (cardPage + 1) * CARD_PAGE_SIZE < latestRows.size());
+        if (cards && !latestRows.isEmpty())
+            resultStatus.setText("Đã tìm thấy " + latestRows.size() + " phòng · Hiển thị "
+                    + (cardPage * CARD_PAGE_SIZE + 1) + "–" + Math.min(latestRows.size(), (cardPage + 1) * CARD_PAGE_SIZE));
+        else resultStatus.setText("Đã tìm thấy " + latestRows.size() + " phòng.");
     }
 
     private void rebuildCards() {
         cardsPanel.removeAll();
         cardsPanel.setBackground(AppConfig.BACKGROUND);
-        for (RoomAvailability result : latestRows) {
+        int from = Math.min(cardPage * CARD_PAGE_SIZE, latestRows.size());
+        int to = Math.min(from + CARD_PAGE_SIZE, latestRows.size());
+        for (RoomAvailability result : latestRows.subList(from, to)) {
             Classroom room = result.room();
             RoundedPanel card = new RoundedPanel(8, Color.WHITE);
             card.setLayout(new BorderLayout(0, 10));

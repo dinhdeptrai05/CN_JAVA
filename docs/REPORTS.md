@@ -13,8 +13,9 @@ Chỉ lịch **PUBLISHED** được tính vào số buổi, ca và giờ. Lịch
 
 ## Xuất và in
 
-- **Xuất CSV (tab này)**: xuất toàn bộ dữ liệu của tab đang chọn, kèm phạm vi lọc và chú thích, UTF-8 có BOM để giữ tiếng Việt. Có xử lý dấu phẩy, dấu ngoặc kép và ngăn ô dữ liệu bị diễn giải thành công thức khi mở bằng phần mềm bảng tính.
-- **Xuất bản in HTML**: xuất cả bốn báo cáo cùng số liệu tổng quan vào một file HTML độc lập. Mở bằng trình duyệt, nhấn **In / Lưu PDF** và chọn máy in hoặc Save as PDF. Không cần mạng để xem/in file.
+- **Xuất PDF**: tạo tài liệu PDF hoàn chỉnh, dùng font Unicode để hiển thị đúng tiếng Việt và tự ngắt trang khi bảng dài.
+- **Xuất Word**: tạo tệp `.docx` gồm số liệu tổng quan và cả bốn bảng báo cáo.
+- **Xuất Excel**: tạo tệp `.xlsx` với một sheet tổng quan và một sheet riêng cho mỗi bảng báo cáo.
 - Sau khi thay đổi bộ lọc, phải tạo lại báo cáo trước khi xuất. Bản xuất lấy đúng snapshot đã tải trên màn hình.
 - File có sẵn chỉ được ghi đè sau khi xác nhận trong hộp thoại.
 
@@ -22,4 +23,4 @@ Chỉ lịch **PUBLISHED** được tính vào số buổi, ca và giờ. Lịch
 
 `ReportServiceTest` kiểm tra số buổi theo ngày, loại lịch hủy, chống đếm lặp ca phòng, thời lượng ca, ngày biên, phạm vi rỗng, phân quyền và nội dung xuất an toàn. `ReportIntegrationTest` đối chiếu kết quả với truy vấn lịch ngày độc lập trên MySQL, kiểm tra quyền thực tế trong database và render màn hình.
 
-Kiểm thử tích hợp dùng cấu hình `UNISCHEDULE_DB_URL` trỏ tới `unischedule_test`; không cần xóa hoặc seed lại database chỉ để chạy hai test báo cáo. Ảnh và HTML kiểm chứng nằm trong `target/jdbc-previews/reports.png` và `target/jdbc-previews/report.html`.
+Kiểm thử tích hợp dùng cấu hình `UNISCHEDULE_DB_URL` trỏ tới `unischedule_test`; không cần xóa hoặc seed lại database chỉ để chạy hai test báo cáo. Ảnh và PDF kiểm chứng nằm trong `target/jdbc-previews/reports.png` và `target/jdbc-previews/report.pdf`.

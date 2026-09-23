@@ -1,0 +1,697 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="3020" height="1800" viewBox="0 0 3020 1800" role="img" aria-label="UniSchedule database diagram in the style of the supplied reference, with 18 compact tables and 30 foreign keys">
+<defs><pattern id="fineGrid" width="10" height="10" patternUnits="userSpaceOnUse"><path d="M 10 0 L 0 0 0 10" fill="none" stroke="#e8edf2" stroke-width=".65"/></pattern><pattern id="largeGrid" width="50" height="50" patternUnits="userSpaceOnUse"><path d="M 50 0 L 0 0 0 50" fill="none" stroke="#d6dee7" stroke-width=".8"/></pattern><filter id="shadow" x="-20%" y="-20%" width="140%" height="150%"><feDropShadow dx="0" dy="2" stdDeviation="2" flood-color="#8aa0b2" flood-opacity=".25"/></filter></defs>
+<style>text{font-family:Arial,'DejaVu Sans',sans-serif;fill:#243342} .title{font-size:25px;font-weight:700} .sub{font-size:14px;fill:#5c6b78} .table{font-size:16px;font-weight:700;fill:#183951} .field{font-size:12.5px} .type{font-size:11.5px;fill:#647583} .badge{font-size:9px;font-weight:700;fill:#fff} .footer{font-size:10px;fill:#6b7b86} .conn{fill:none;stroke:#58646e;stroke-width:1.6;stroke-dasharray:9 6;stroke-linecap:square;stroke-linejoin:miter;opacity:.82}</style>
+<rect width="3020" height="1800" fill="#fff"/><rect width="3020" height="1800" fill="url(#fineGrid)"/><rect width="3020" height="1800" fill="url(#largeGrid)"/>
+<text x="70" y="55" class="title">UniSchedule — Database Diagram</text>
+<text x="70" y="80" class="sub">Lược đồ vật lý theo ảnh mẫu · MySQL · 18 bảng · 30 khóa ngoại · PK / FK / UQ</text>
+<line x1="70" y1="105" x2="2940" y2="105" stroke="#aabac7" stroke-width="1"/>
+<path class="conn" d="M 690 247 H 555 V 475 H 460"/>
+<path class="conn" d="M 1080 745 H 1120 V 225 H 1080"/>
+<path class="conn" d="M 690 767 H 575 V 225 H 460"/>
+<path class="conn" d="M 690 1027 H 585 V 475 H 460"/>
+<path class="conn" d="M 1310 1077 H 1215 V 1005 H 1080"/>
+<path class="conn" d="M 1310 1099 H 865 V 775 H 460"/>
+<path class="conn" d="M 1930 257 H 1805 V 1055 H 1700"/>
+<path class="conn" d="M 1930 279 H 1505 V 225 H 1080"/>
+<path class="conn" d="M 1930 577 H 1825 V 1055 H 1700"/>
+<path class="conn" d="M 1930 599 H 1525 V 225 H 1080"/>
+<path class="conn" d="M 1930 917 H 1485 V 1365 H 1080"/>
+<path class="conn" d="M 1930 939 H 1805 V 1495 H 1700"/>
+<path class="conn" d="M 2550 377 H 2125 V 1055 H 1700"/>
+<path class="conn" d="M 2550 399 H 2445 V 235 H 2320"/>
+<path class="conn" d="M 2550 421 H 1835 V 1365 H 1080"/>
+<path class="conn" d="M 2550 443 H 1485 V 1145 H 460"/>
+<path class="conn" d="M 2550 465 H 1495 V 1145 H 460"/>
+<path class="conn" d="M 2550 597 H 1815 V 225 H 1080"/>
+<path class="conn" d="M 2550 1057 H 1825 V 225 H 1080"/>
+<path class="conn" d="M 2940 1079 H 2980 V 355 H 2940"/>
+<path class="conn" d="M 2550 1101 H 1795 V 1365 H 1080"/>
+<path class="conn" d="M 2550 1123 H 2115 V 1495 H 1700"/>
+<path class="conn" d="M 2550 1189 H 1505 V 1145 H 460"/>
+<path class="conn" d="M 2550 1211 H 1515 V 1145 H 460"/>
+<path class="conn" d="M 2550 1365 H 1835 V 225 H 1080"/>
+<path class="conn" d="M 1310 247 H 1175 V 225 H 1080"/>
+<path class="conn" d="M 1310 707 H 1185 V 225 H 1080"/>
+<path class="conn" d="M 1930 1327 H 1505 V 1365 H 1080"/>
+<path class="conn" d="M 2320 1349 H 2396 V 895 H 2320"/>
+<path class="conn" d="M 1930 1371 H 1525 V 225 H 1080"/>
+<g filter="url(#shadow)"><rect x="70" y="180" width="390" height="120" rx="5" fill="#fff" stroke="#8ca6b9" stroke-width="1.2"/>
+<path d="M 75 180 H 455 Q 460 180 460 185 V 214 H 70 V 185 Q 70 180 75 180" fill="#a9cbe0" stroke="#7ba3be" stroke-width="1"/>
+<rect x="78" y="188" width="14" height="14" rx="2" fill="#e6f4fc" stroke="#6c91a9"/><path d="M 80 193 H 90 M 80 197 H 90" stroke="#6c91a9" stroke-width="1"/>
+<text x="99" y="203" class="table">roles</text><path d="M 443 193 l 5 0 -2.5 4 z" fill="#54748a"/>
+<rect x="75" y="218" width="16" height="14" rx="3" fill="#d7a439"/><text x="83" y="228" class="badge" text-anchor="middle">P</text>
+<text x="106" y="229" class="field">id</text>
+<text x="327" y="229" class="type">bigint</text>
+<line x1="71" y1="236" x2="459" y2="236" stroke="#eff2f5" stroke-width=".8"/>
+<rect x="75" y="240" width="16" height="14" rx="3" fill="#78a790"/><text x="83" y="250" class="badge" text-anchor="middle">U</text>
+<text x="106" y="251" class="field">code</text>
+<text x="327" y="251" class="type">varchar(30)</text>
+<line x1="71" y1="258" x2="459" y2="258" stroke="#eff2f5" stroke-width=".8"/>
+<circle cx="83" cy="269" r="2.6" fill="#b5c2cc"/>
+<text x="106" y="273" class="field">name</text>
+<text x="327" y="273" class="type">varchar(100)</text>
+<rect x="71" y="280" width="388" height="19" fill="#e7ecef"/><text x="81" y="294" class="footer">Indexes</text><path d="M 442 286 l 5 4 -5 4 z" fill="#7f919e"/></g>
+<g filter="url(#shadow)"><rect x="70" y="430" width="390" height="120" rx="5" fill="#fff" stroke="#8ca6b9" stroke-width="1.2"/>
+<path d="M 75 430 H 455 Q 460 430 460 435 V 464 H 70 V 435 Q 70 430 75 430" fill="#a9cbe0" stroke="#7ba3be" stroke-width="1"/>
+<rect x="78" y="438" width="14" height="14" rx="2" fill="#e6f4fc" stroke="#6c91a9"/><path d="M 80 443 H 90 M 80 447 H 90" stroke="#6c91a9" stroke-width="1"/>
+<text x="99" y="453" class="table">departments</text><path d="M 443 443 l 5 0 -2.5 4 z" fill="#54748a"/>
+<rect x="75" y="468" width="16" height="14" rx="3" fill="#d7a439"/><text x="83" y="478" class="badge" text-anchor="middle">P</text>
+<text x="106" y="479" class="field">id</text>
+<text x="327" y="479" class="type">bigint</text>
+<line x1="71" y1="486" x2="459" y2="486" stroke="#eff2f5" stroke-width=".8"/>
+<rect x="75" y="490" width="16" height="14" rx="3" fill="#78a790"/><text x="83" y="500" class="badge" text-anchor="middle">U</text>
+<text x="106" y="501" class="field">code</text>
+<text x="327" y="501" class="type">varchar(20)</text>
+<line x1="71" y1="508" x2="459" y2="508" stroke="#eff2f5" stroke-width=".8"/>
+<circle cx="83" cy="519" r="2.6" fill="#b5c2cc"/>
+<text x="106" y="523" class="field">name</text>
+<text x="327" y="523" class="type">varchar(120)</text>
+<rect x="71" y="530" width="388" height="19" fill="#e7ecef"/><text x="81" y="544" class="footer">Indexes</text><path d="M 442 536 l 5 4 -5 4 z" fill="#7f919e"/></g>
+<g filter="url(#shadow)"><rect x="690" y="180" width="390" height="384" rx="5" fill="#fff" stroke="#8ca6b9" stroke-width="1.2"/>
+<path d="M 695 180 H 1075 Q 1080 180 1080 185 V 214 H 690 V 185 Q 690 180 695 180" fill="#a9cbe0" stroke="#7ba3be" stroke-width="1"/>
+<rect x="698" y="188" width="14" height="14" rx="2" fill="#e6f4fc" stroke="#6c91a9"/><path d="M 700 193 H 710 M 700 197 H 710" stroke="#6c91a9" stroke-width="1"/>
+<text x="719" y="203" class="table">users</text><path d="M 1063 193 l 5 0 -2.5 4 z" fill="#54748a"/>
+<rect x="695" y="218" width="16" height="14" rx="3" fill="#d7a439"/><text x="703" y="228" class="badge" text-anchor="middle">P</text>
+<text x="726" y="229" class="field">id</text>
+<text x="947" y="229" class="type">bigint</text>
+<line x1="691" y1="236" x2="1079" y2="236" stroke="#eff2f5" stroke-width=".8"/>
+<rect x="695" y="240" width="16" height="14" rx="3" fill="#67a9c7"/><text x="703" y="250" class="badge" text-anchor="middle">F</text>
+<text x="726" y="251" class="field">department_id</text>
+<text x="947" y="251" class="type">bigint</text>
+<line x1="691" y1="258" x2="1079" y2="258" stroke="#eff2f5" stroke-width=".8"/>
+<rect x="695" y="262" width="16" height="14" rx="3" fill="#78a790"/><text x="703" y="272" class="badge" text-anchor="middle">U</text>
+<text x="726" y="273" class="field">username</text>
+<text x="947" y="273" class="type">varchar(50)</text>
+<line x1="691" y1="280" x2="1079" y2="280" stroke="#eff2f5" stroke-width=".8"/>
+<circle cx="703" cy="291" r="2.6" fill="#b5c2cc"/>
+<text x="726" y="295" class="field">password_hash</text>
+<text x="947" y="295" class="type">varchar(255)</text>
+<line x1="691" y1="302" x2="1079" y2="302" stroke="#eff2f5" stroke-width=".8"/>
+<circle cx="703" cy="313" r="2.6" fill="#b5c2cc"/>
+<text x="726" y="317" class="field">full_name</text>
+<text x="947" y="317" class="type">varchar(120)</text>
+<line x1="691" y1="324" x2="1079" y2="324" stroke="#eff2f5" stroke-width=".8"/>
+<rect x="695" y="328" width="16" height="14" rx="3" fill="#78a790"/><text x="703" y="338" class="badge" text-anchor="middle">U</text>
+<text x="726" y="339" class="field">email</text>
+<text x="947" y="339" class="type">varchar(150)</text>
+<line x1="691" y1="346" x2="1079" y2="346" stroke="#eff2f5" stroke-width=".8"/>
+<circle cx="703" cy="357" r="2.6" fill="#b5c2cc"/>
+<text x="726" y="361" class="field">phone</text>
+<text x="947" y="361" class="type">varchar(20)</text>
+<line x1="691" y1="368" x2="1079" y2="368" stroke="#eff2f5" stroke-width=".8"/>
+<circle cx="703" cy="379" r="2.6" fill="#b5c2cc"/>
+<text x="726" y="383" class="field">lecturer_code</text>
+<text x="947" y="383" class="type">varchar(30)</text>
+<line x1="691" y1="390" x2="1079" y2="390" stroke="#eff2f5" stroke-width=".8"/>
+<circle cx="703" cy="401" r="2.6" fill="#b5c2cc"/>
+<text x="726" y="405" class="field">student_code</text>
+<text x="947" y="405" class="type">varchar(30)</text>
+<line x1="691" y1="412" x2="1079" y2="412" stroke="#eff2f5" stroke-width=".8"/>
+<circle cx="703" cy="423" r="2.6" fill="#b5c2cc"/>
+<text x="726" y="427" class="field">class_code</text>
+<text x="947" y="427" class="type">varchar(30)</text>
+<line x1="691" y1="434" x2="1079" y2="434" stroke="#eff2f5" stroke-width=".8"/>
+<circle cx="703" cy="445" r="2.6" fill="#b5c2cc"/>
+<text x="726" y="449" class="field">avatar_data</text>
+<text x="947" y="449" class="type">mediumblob</text>
+<line x1="691" y1="456" x2="1079" y2="456" stroke="#eff2f5" stroke-width=".8"/>
+<circle cx="703" cy="467" r="2.6" fill="#b5c2cc"/>
+<text x="726" y="471" class="field">status</text>
+<text x="947" y="471" class="type">varchar(20)</text>
+<line x1="691" y1="478" x2="1079" y2="478" stroke="#eff2f5" stroke-width=".8"/>
+<circle cx="703" cy="489" r="2.6" fill="#b5c2cc"/>
+<text x="726" y="493" class="field">last_login_at</text>
+<text x="947" y="493" class="type">datetime</text>
+<line x1="691" y1="500" x2="1079" y2="500" stroke="#eff2f5" stroke-width=".8"/>
+<circle cx="703" cy="511" r="2.6" fill="#b5c2cc"/>
+<text x="726" y="515" class="field">created_at</text>
+<text x="947" y="515" class="type">datetime</text>
+<line x1="691" y1="522" x2="1079" y2="522" stroke="#eff2f5" stroke-width=".8"/>
+<circle cx="703" cy="533" r="2.6" fill="#b5c2cc"/>
+<text x="726" y="537" class="field">updated_at</text>
+<text x="947" y="537" class="type">datetime</text>
+<rect x="691" y="544" width="388" height="19" fill="#e7ecef"/><text x="701" y="558" class="footer">Indexes</text><path d="M 1062 550 l 5 4 -5 4 z" fill="#7f919e"/></g>
+<g filter="url(#shadow)"><rect x="690" y="700" width="390" height="98" rx="5" fill="#fff" stroke="#8ca6b9" stroke-width="1.2"/>
+<path d="M 695 700 H 1075 Q 1080 700 1080 705 V 734 H 690 V 705 Q 690 700 695 700" fill="#a9cbe0" stroke="#7ba3be" stroke-width="1"/>
+<rect x="698" y="708" width="14" height="14" rx="2" fill="#e6f4fc" stroke="#6c91a9"/><path d="M 700 713 H 710 M 700 717 H 710" stroke="#6c91a9" stroke-width="1"/>
+<text x="719" y="723" class="table">user_roles</text><path d="M 1063 713 l 5 0 -2.5 4 z" fill="#54748a"/>
+<rect x="695" y="738" width="23" height="14" rx="3" fill="#d7a439"/><text x="706.5" y="748" class="badge" text-anchor="middle">PF</text>
+<text x="726" y="749" class="field">user_id</text>
+<text x="947" y="749" class="type">bigint</text>
+<line x1="691" y1="756" x2="1079" y2="756" stroke="#eff2f5" stroke-width=".8"/>
+<rect x="695" y="760" width="23" height="14" rx="3" fill="#d7a439"/><text x="706.5" y="770" class="badge" text-anchor="middle">PF</text>
+<text x="726" y="771" class="field">role_id</text>
+<text x="947" y="771" class="type">bigint</text>
+<rect x="691" y="778" width="388" height="19" fill="#e7ecef"/><text x="701" y="792" class="footer">Indexes</text><path d="M 1062 784 l 5 4 -5 4 z" fill="#7f919e"/></g>
+<g filter="url(#shadow)"><rect x="70" y="730" width="390" height="186" rx="5" fill="#fff" stroke="#8ca6b9" stroke-width="1.2"/>
+<path d="M 75 730 H 455 Q 460 730 460 735 V 764 H 70 V 735 Q 70 730 75 730" fill="#a9cbe0" stroke="#7ba3be" stroke-width="1"/>
+<rect x="78" y="738" width="14" height="14" rx="2" fill="#e6f4fc" stroke="#6c91a9"/><path d="M 80 743 H 90 M 80 747 H 90" stroke="#6c91a9" stroke-width="1"/>
+<text x="99" y="753" class="table">semesters</text><path d="M 443 743 l 5 0 -2.5 4 z" fill="#54748a"/>
+<rect x="75" y="768" width="16" height="14" rx="3" fill="#d7a439"/><text x="83" y="778" class="badge" text-anchor="middle">P</text>
+<text x="106" y="779" class="field">id</text>
+<text x="327" y="779" class="type">bigint</text>
+<line x1="71" y1="786" x2="459" y2="786" stroke="#eff2f5" stroke-width=".8"/>
+<rect x="75" y="790" width="16" height="14" rx="3" fill="#78a790"/><text x="83" y="800" class="badge" text-anchor="middle">U</text>
+<text x="106" y="801" class="field">code</text>
+<text x="327" y="801" class="type">varchar(20)</text>
+<line x1="71" y1="808" x2="459" y2="808" stroke="#eff2f5" stroke-width=".8"/>
+<circle cx="83" cy="819" r="2.6" fill="#b5c2cc"/>
+<text x="106" y="823" class="field">name</text>
+<text x="327" y="823" class="type">varchar(100)</text>
+<line x1="71" y1="830" x2="459" y2="830" stroke="#eff2f5" stroke-width=".8"/>
+<circle cx="83" cy="841" r="2.6" fill="#b5c2cc"/>
+<text x="106" y="845" class="field">start_date</text>
+<text x="327" y="845" class="type">date</text>
+<line x1="71" y1="852" x2="459" y2="852" stroke="#eff2f5" stroke-width=".8"/>
+<circle cx="83" cy="863" r="2.6" fill="#b5c2cc"/>
+<text x="106" y="867" class="field">end_date</text>
+<text x="327" y="867" class="type">date</text>
+<line x1="71" y1="874" x2="459" y2="874" stroke="#eff2f5" stroke-width=".8"/>
+<circle cx="83" cy="885" r="2.6" fill="#b5c2cc"/>
+<text x="106" y="889" class="field">status</text>
+<text x="327" y="889" class="type">varchar(20)</text>
+<rect x="71" y="896" width="388" height="19" fill="#e7ecef"/><text x="81" y="910" class="footer">Indexes</text><path d="M 442 902 l 5 4 -5 4 z" fill="#7f919e"/></g>
+<g filter="url(#shadow)"><rect x="70" y="1100" width="390" height="164" rx="5" fill="#fff" stroke="#8ca6b9" stroke-width="1.2"/>
+<path d="M 75 1100 H 455 Q 460 1100 460 1105 V 1134 H 70 V 1105 Q 70 1100 75 1100" fill="#a9cbe0" stroke="#7ba3be" stroke-width="1"/>
+<rect x="78" y="1108" width="14" height="14" rx="2" fill="#e6f4fc" stroke="#6c91a9"/><path d="M 80 1113 H 90 M 80 1117 H 90" stroke="#6c91a9" stroke-width="1"/>
+<text x="99" y="1123" class="table">time_slots</text><path d="M 443 1113 l 5 0 -2.5 4 z" fill="#54748a"/>
+<rect x="75" y="1138" width="16" height="14" rx="3" fill="#d7a439"/><text x="83" y="1148" class="badge" text-anchor="middle">P</text>
+<text x="106" y="1149" class="field">id</text>
+<text x="327" y="1149" class="type">bigint</text>
+<line x1="71" y1="1156" x2="459" y2="1156" stroke="#eff2f5" stroke-width=".8"/>
+<rect x="75" y="1160" width="16" height="14" rx="3" fill="#78a790"/><text x="83" y="1170" class="badge" text-anchor="middle">U</text>
+<text x="106" y="1171" class="field">name</text>
+<text x="327" y="1171" class="type">varchar(50)</text>
+<line x1="71" y1="1178" x2="459" y2="1178" stroke="#eff2f5" stroke-width=".8"/>
+<circle cx="83" cy="1189" r="2.6" fill="#b5c2cc"/>
+<text x="106" y="1193" class="field">start_time</text>
+<text x="327" y="1193" class="type">time</text>
+<line x1="71" y1="1200" x2="459" y2="1200" stroke="#eff2f5" stroke-width=".8"/>
+<circle cx="83" cy="1211" r="2.6" fill="#b5c2cc"/>
+<text x="106" y="1215" class="field">end_time</text>
+<text x="327" y="1215" class="type">time</text>
+<line x1="71" y1="1222" x2="459" y2="1222" stroke="#eff2f5" stroke-width=".8"/>
+<rect x="75" y="1226" width="16" height="14" rx="3" fill="#78a790"/><text x="83" y="1236" class="badge" text-anchor="middle">U</text>
+<text x="106" y="1237" class="field">sort_order</text>
+<text x="327" y="1237" class="type">int</text>
+<rect x="71" y="1244" width="388" height="19" fill="#e7ecef"/><text x="81" y="1258" class="footer">Indexes</text><path d="M 442 1250 l 5 4 -5 4 z" fill="#7f919e"/></g>
+<g filter="url(#shadow)"><rect x="690" y="960" width="390" height="208" rx="5" fill="#fff" stroke="#8ca6b9" stroke-width="1.2"/>
+<path d="M 695 960 H 1075 Q 1080 960 1080 965 V 994 H 690 V 965 Q 690 960 695 960" fill="#a9cbe0" stroke="#7ba3be" stroke-width="1"/>
+<rect x="698" y="968" width="14" height="14" rx="2" fill="#e6f4fc" stroke="#6c91a9"/><path d="M 700 973 H 710 M 700 977 H 710" stroke="#6c91a9" stroke-width="1"/>
+<text x="719" y="983" class="table">courses</text><path d="M 1063 973 l 5 0 -2.5 4 z" fill="#54748a"/>
+<rect x="695" y="998" width="16" height="14" rx="3" fill="#d7a439"/><text x="703" y="1008" class="badge" text-anchor="middle">P</text>
+<text x="726" y="1009" class="field">id</text>
+<text x="947" y="1009" class="type">bigint</text>
+<line x1="691" y1="1016" x2="1079" y2="1016" stroke="#eff2f5" stroke-width=".8"/>
+<rect x="695" y="1020" width="16" height="14" rx="3" fill="#67a9c7"/><text x="703" y="1030" class="badge" text-anchor="middle">F</text>
+<text x="726" y="1031" class="field">department_id</text>
+<text x="947" y="1031" class="type">bigint</text>
+<line x1="691" y1="1038" x2="1079" y2="1038" stroke="#eff2f5" stroke-width=".8"/>
+<rect x="695" y="1042" width="16" height="14" rx="3" fill="#78a790"/><text x="703" y="1052" class="badge" text-anchor="middle">U</text>
+<text x="726" y="1053" class="field">code</text>
+<text x="947" y="1053" class="type">varchar(20)</text>
+<line x1="691" y1="1060" x2="1079" y2="1060" stroke="#eff2f5" stroke-width=".8"/>
+<circle cx="703" cy="1071" r="2.6" fill="#b5c2cc"/>
+<text x="726" y="1075" class="field">name</text>
+<text x="947" y="1075" class="type">varchar(160)</text>
+<line x1="691" y1="1082" x2="1079" y2="1082" stroke="#eff2f5" stroke-width=".8"/>
+<circle cx="703" cy="1093" r="2.6" fill="#b5c2cc"/>
+<text x="726" y="1097" class="field">credits</text>
+<text x="947" y="1097" class="type">tinyint</text>
+<line x1="691" y1="1104" x2="1079" y2="1104" stroke="#eff2f5" stroke-width=".8"/>
+<circle cx="703" cy="1115" r="2.6" fill="#b5c2cc"/>
+<text x="726" y="1119" class="field">required_room_type</text>
+<text x="947" y="1119" class="type">varchar(30)</text>
+<line x1="691" y1="1126" x2="1079" y2="1126" stroke="#eff2f5" stroke-width=".8"/>
+<circle cx="703" cy="1137" r="2.6" fill="#b5c2cc"/>
+<text x="726" y="1141" class="field">status</text>
+<text x="947" y="1141" class="type">varchar(20)</text>
+<rect x="691" y="1148" width="388" height="19" fill="#e7ecef"/><text x="701" y="1162" class="footer">Indexes</text><path d="M 1062 1154 l 5 4 -5 4 z" fill="#7f919e"/></g>
+<g filter="url(#shadow)"><rect x="1310" y="1010" width="390" height="230" rx="5" fill="#fff" stroke="#8ca6b9" stroke-width="1.2"/>
+<path d="M 1315 1010 H 1695 Q 1700 1010 1700 1015 V 1044 H 1310 V 1015 Q 1310 1010 1315 1010" fill="#a9cbe0" stroke="#7ba3be" stroke-width="1"/>
+<rect x="1318" y="1018" width="14" height="14" rx="2" fill="#e6f4fc" stroke="#6c91a9"/><path d="M 1320 1023 H 1330 M 1320 1027 H 1330" stroke="#6c91a9" stroke-width="1"/>
+<text x="1339" y="1033" class="table">course_sections</text><path d="M 1683 1023 l 5 0 -2.5 4 z" fill="#54748a"/>
+<rect x="1315" y="1048" width="16" height="14" rx="3" fill="#d7a439"/><text x="1323" y="1058" class="badge" text-anchor="middle">P</text>
+<text x="1346" y="1059" class="field">id</text>
+<text x="1567" y="1059" class="type">bigint</text>
+<line x1="1311" y1="1066" x2="1699" y2="1066" stroke="#eff2f5" stroke-width=".8"/>
+<rect x="1315" y="1070" width="16" height="14" rx="3" fill="#67a9c7"/><text x="1323" y="1080" class="badge" text-anchor="middle">F</text>
+<text x="1346" y="1081" class="field">course_id</text>
+<text x="1567" y="1081" class="type">bigint</text>
+<line x1="1311" y1="1088" x2="1699" y2="1088" stroke="#eff2f5" stroke-width=".8"/>
+<rect x="1315" y="1092" width="16" height="14" rx="3" fill="#67a9c7"/><text x="1323" y="1102" class="badge" text-anchor="middle">F</text>
+<text x="1346" y="1103" class="field">semester_id</text>
+<text x="1567" y="1103" class="type">bigint</text>
+<line x1="1311" y1="1110" x2="1699" y2="1110" stroke="#eff2f5" stroke-width=".8"/>
+<rect x="1315" y="1114" width="16" height="14" rx="3" fill="#78a790"/><text x="1323" y="1124" class="badge" text-anchor="middle">U</text>
+<text x="1346" y="1125" class="field">code</text>
+<text x="1567" y="1125" class="type">varchar(30)</text>
+<line x1="1311" y1="1132" x2="1699" y2="1132" stroke="#eff2f5" stroke-width=".8"/>
+<circle cx="1323" cy="1143" r="2.6" fill="#b5c2cc"/>
+<text x="1346" y="1147" class="field">capacity</text>
+<text x="1567" y="1147" class="type">int</text>
+<line x1="1311" y1="1154" x2="1699" y2="1154" stroke="#eff2f5" stroke-width=".8"/>
+<circle cx="1323" cy="1165" r="2.6" fill="#b5c2cc"/>
+<text x="1346" y="1169" class="field">student_count</text>
+<text x="1567" y="1169" class="type">int</text>
+<line x1="1311" y1="1176" x2="1699" y2="1176" stroke="#eff2f5" stroke-width=".8"/>
+<circle cx="1323" cy="1187" r="2.6" fill="#b5c2cc"/>
+<text x="1346" y="1191" class="field">status</text>
+<text x="1567" y="1191" class="type">varchar(20)</text>
+<line x1="1311" y1="1198" x2="1699" y2="1198" stroke="#eff2f5" stroke-width=".8"/>
+<circle cx="1323" cy="1209" r="2.6" fill="#b5c2cc"/>
+<text x="1346" y="1213" class="field">created_at</text>
+<text x="1567" y="1213" class="type">datetime</text>
+<rect x="1311" y="1220" width="388" height="19" fill="#e7ecef"/><text x="1321" y="1234" class="footer">Indexes</text><path d="M 1682 1226 l 5 4 -5 4 z" fill="#7f919e"/></g>
+<g filter="url(#shadow)"><rect x="1930" y="190" width="390" height="142" rx="5" fill="#fff" stroke="#8ca6b9" stroke-width="1.2"/>
+<path d="M 1935 190 H 2315 Q 2320 190 2320 195 V 224 H 1930 V 195 Q 1930 190 1935 190" fill="#a9cbe0" stroke="#7ba3be" stroke-width="1"/>
+<rect x="1938" y="198" width="14" height="14" rx="2" fill="#e6f4fc" stroke="#6c91a9"/><path d="M 1940 203 H 1950 M 1940 207 H 1950" stroke="#6c91a9" stroke-width="1"/>
+<text x="1959" y="213" class="table">lecturer_assignments</text><path d="M 2303 203 l 5 0 -2.5 4 z" fill="#54748a"/>
+<rect x="1935" y="228" width="16" height="14" rx="3" fill="#d7a439"/><text x="1943" y="238" class="badge" text-anchor="middle">P</text>
+<text x="1966" y="239" class="field">id</text>
+<text x="2187" y="239" class="type">bigint</text>
+<line x1="1931" y1="246" x2="2319" y2="246" stroke="#eff2f5" stroke-width=".8"/>
+<rect x="1935" y="250" width="16" height="14" rx="3" fill="#67a9c7"/><text x="1943" y="260" class="badge" text-anchor="middle">F</text>
+<text x="1966" y="261" class="field">course_section_id</text>
+<text x="2187" y="261" class="type">bigint</text>
+<line x1="1931" y1="268" x2="2319" y2="268" stroke="#eff2f5" stroke-width=".8"/>
+<rect x="1935" y="272" width="16" height="14" rx="3" fill="#67a9c7"/><text x="1943" y="282" class="badge" text-anchor="middle">F</text>
+<text x="1966" y="283" class="field">lecturer_id</text>
+<text x="2187" y="283" class="type">bigint</text>
+<line x1="1931" y1="290" x2="2319" y2="290" stroke="#eff2f5" stroke-width=".8"/>
+<circle cx="1943" cy="301" r="2.6" fill="#b5c2cc"/>
+<text x="1966" y="305" class="field">assigned_at</text>
+<text x="2187" y="305" class="type">datetime</text>
+<rect x="1931" y="312" width="388" height="19" fill="#e7ecef"/><text x="1941" y="326" class="footer">Indexes</text><path d="M 2302 318 l 5 4 -5 4 z" fill="#7f919e"/></g>
+<g filter="url(#shadow)"><rect x="1930" y="510" width="390" height="164" rx="5" fill="#fff" stroke="#8ca6b9" stroke-width="1.2"/>
+<path d="M 1935 510 H 2315 Q 2320 510 2320 515 V 544 H 1930 V 515 Q 1930 510 1935 510" fill="#a9cbe0" stroke="#7ba3be" stroke-width="1"/>
+<rect x="1938" y="518" width="14" height="14" rx="2" fill="#e6f4fc" stroke="#6c91a9"/><path d="M 1940 523 H 1950 M 1940 527 H 1950" stroke="#6c91a9" stroke-width="1"/>
+<text x="1959" y="533" class="table">student_enrollments</text><path d="M 2303 523 l 5 0 -2.5 4 z" fill="#54748a"/>
+<rect x="1935" y="548" width="16" height="14" rx="3" fill="#d7a439"/><text x="1943" y="558" class="badge" text-anchor="middle">P</text>
+<text x="1966" y="559" class="field">id</text>
+<text x="2187" y="559" class="type">bigint</text>
+<line x1="1931" y1="566" x2="2319" y2="566" stroke="#eff2f5" stroke-width=".8"/>
+<rect x="1935" y="570" width="16" height="14" rx="3" fill="#67a9c7"/><text x="1943" y="580" class="badge" text-anchor="middle">F</text>
+<text x="1966" y="581" class="field">course_section_id</text>
+<text x="2187" y="581" class="type">bigint</text>
+<line x1="1931" y1="588" x2="2319" y2="588" stroke="#eff2f5" stroke-width=".8"/>
+<rect x="1935" y="592" width="16" height="14" rx="3" fill="#67a9c7"/><text x="1943" y="602" class="badge" text-anchor="middle">F</text>
+<text x="1966" y="603" class="field">student_id</text>
+<text x="2187" y="603" class="type">bigint</text>
+<line x1="1931" y1="610" x2="2319" y2="610" stroke="#eff2f5" stroke-width=".8"/>
+<circle cx="1943" cy="621" r="2.6" fill="#b5c2cc"/>
+<text x="1966" y="625" class="field">enrolled_at</text>
+<text x="2187" y="625" class="type">datetime</text>
+<line x1="1931" y1="632" x2="2319" y2="632" stroke="#eff2f5" stroke-width=".8"/>
+<circle cx="1943" cy="643" r="2.6" fill="#b5c2cc"/>
+<text x="1966" y="647" class="field">status</text>
+<text x="2187" y="647" class="type">varchar(20)</text>
+<rect x="1931" y="654" width="388" height="19" fill="#e7ecef"/><text x="1941" y="668" class="footer">Indexes</text><path d="M 2302 660 l 5 4 -5 4 z" fill="#7f919e"/></g>
+<g filter="url(#shadow)"><rect x="690" y="1320" width="390" height="252" rx="5" fill="#fff" stroke="#8ca6b9" stroke-width="1.2"/>
+<path d="M 695 1320 H 1075 Q 1080 1320 1080 1325 V 1354 H 690 V 1325 Q 690 1320 695 1320" fill="#a9cbe0" stroke="#7ba3be" stroke-width="1"/>
+<rect x="698" y="1328" width="14" height="14" rx="2" fill="#e6f4fc" stroke="#6c91a9"/><path d="M 700 1333 H 710 M 700 1337 H 710" stroke="#6c91a9" stroke-width="1"/>
+<text x="719" y="1343" class="table">classrooms</text><path d="M 1063 1333 l 5 0 -2.5 4 z" fill="#54748a"/>
+<rect x="695" y="1358" width="16" height="14" rx="3" fill="#d7a439"/><text x="703" y="1368" class="badge" text-anchor="middle">P</text>
+<text x="726" y="1369" class="field">id</text>
+<text x="947" y="1369" class="type">bigint</text>
+<line x1="691" y1="1376" x2="1079" y2="1376" stroke="#eff2f5" stroke-width=".8"/>
+<rect x="695" y="1380" width="16" height="14" rx="3" fill="#78a790"/><text x="703" y="1390" class="badge" text-anchor="middle">U</text>
+<text x="726" y="1391" class="field">code</text>
+<text x="947" y="1391" class="type">varchar(20)</text>
+<line x1="691" y1="1398" x2="1079" y2="1398" stroke="#eff2f5" stroke-width=".8"/>
+<circle cx="703" cy="1409" r="2.6" fill="#b5c2cc"/>
+<text x="726" y="1413" class="field">name</text>
+<text x="947" y="1413" class="type">varchar(100)</text>
+<line x1="691" y1="1420" x2="1079" y2="1420" stroke="#eff2f5" stroke-width=".8"/>
+<circle cx="703" cy="1431" r="2.6" fill="#b5c2cc"/>
+<text x="726" y="1435" class="field">building</text>
+<text x="947" y="1435" class="type">varchar(80)</text>
+<line x1="691" y1="1442" x2="1079" y2="1442" stroke="#eff2f5" stroke-width=".8"/>
+<circle cx="703" cy="1453" r="2.6" fill="#b5c2cc"/>
+<text x="726" y="1457" class="field">floor</text>
+<text x="947" y="1457" class="type">int</text>
+<line x1="691" y1="1464" x2="1079" y2="1464" stroke="#eff2f5" stroke-width=".8"/>
+<circle cx="703" cy="1475" r="2.6" fill="#b5c2cc"/>
+<text x="726" y="1479" class="field">capacity</text>
+<text x="947" y="1479" class="type">int</text>
+<line x1="691" y1="1486" x2="1079" y2="1486" stroke="#eff2f5" stroke-width=".8"/>
+<circle cx="703" cy="1497" r="2.6" fill="#b5c2cc"/>
+<text x="726" y="1501" class="field">room_type</text>
+<text x="947" y="1501" class="type">varchar(30)</text>
+<line x1="691" y1="1508" x2="1079" y2="1508" stroke="#eff2f5" stroke-width=".8"/>
+<circle cx="703" cy="1519" r="2.6" fill="#b5c2cc"/>
+<text x="726" y="1523" class="field">status</text>
+<text x="947" y="1523" class="type">varchar(20)</text>
+<line x1="691" y1="1530" x2="1079" y2="1530" stroke="#eff2f5" stroke-width=".8"/>
+<circle cx="703" cy="1541" r="2.6" fill="#b5c2cc"/>
+<text x="726" y="1545" class="field">description</text>
+<text x="947" y="1545" class="type">varchar(500)</text>
+<rect x="691" y="1552" width="388" height="19" fill="#e7ecef"/><text x="701" y="1566" class="footer">Indexes</text><path d="M 1062 1558 l 5 4 -5 4 z" fill="#7f919e"/></g>
+<g filter="url(#shadow)"><rect x="1310" y="1450" width="390" height="164" rx="5" fill="#fff" stroke="#8ca6b9" stroke-width="1.2"/>
+<path d="M 1315 1450 H 1695 Q 1700 1450 1700 1455 V 1484 H 1310 V 1455 Q 1310 1450 1315 1450" fill="#a9cbe0" stroke="#7ba3be" stroke-width="1"/>
+<rect x="1318" y="1458" width="14" height="14" rx="2" fill="#e6f4fc" stroke="#6c91a9"/><path d="M 1320 1463 H 1330 M 1320 1467 H 1330" stroke="#6c91a9" stroke-width="1"/>
+<text x="1339" y="1473" class="table">equipment</text><path d="M 1683 1463 l 5 0 -2.5 4 z" fill="#54748a"/>
+<rect x="1315" y="1488" width="16" height="14" rx="3" fill="#d7a439"/><text x="1323" y="1498" class="badge" text-anchor="middle">P</text>
+<text x="1346" y="1499" class="field">id</text>
+<text x="1567" y="1499" class="type">bigint</text>
+<line x1="1311" y1="1506" x2="1699" y2="1506" stroke="#eff2f5" stroke-width=".8"/>
+<rect x="1315" y="1510" width="16" height="14" rx="3" fill="#78a790"/><text x="1323" y="1520" class="badge" text-anchor="middle">U</text>
+<text x="1346" y="1521" class="field">code</text>
+<text x="1567" y="1521" class="type">varchar(30)</text>
+<line x1="1311" y1="1528" x2="1699" y2="1528" stroke="#eff2f5" stroke-width=".8"/>
+<circle cx="1323" cy="1539" r="2.6" fill="#b5c2cc"/>
+<text x="1346" y="1543" class="field">name</text>
+<text x="1567" y="1543" class="type">varchar(120)</text>
+<line x1="1311" y1="1550" x2="1699" y2="1550" stroke="#eff2f5" stroke-width=".8"/>
+<circle cx="1323" cy="1561" r="2.6" fill="#b5c2cc"/>
+<text x="1346" y="1565" class="field">category</text>
+<text x="1567" y="1565" class="type">varchar(50)</text>
+<line x1="1311" y1="1572" x2="1699" y2="1572" stroke="#eff2f5" stroke-width=".8"/>
+<circle cx="1323" cy="1583" r="2.6" fill="#b5c2cc"/>
+<text x="1346" y="1587" class="field">status</text>
+<text x="1567" y="1587" class="type">varchar(20)</text>
+<rect x="1311" y="1594" width="388" height="19" fill="#e7ecef"/><text x="1321" y="1608" class="footer">Indexes</text><path d="M 1682 1600 l 5 4 -5 4 z" fill="#7f919e"/></g>
+<g filter="url(#shadow)"><rect x="1930" y="850" width="390" height="208" rx="5" fill="#fff" stroke="#8ca6b9" stroke-width="1.2"/>
+<path d="M 1935 850 H 2315 Q 2320 850 2320 855 V 884 H 1930 V 855 Q 1930 850 1935 850" fill="#a9cbe0" stroke="#7ba3be" stroke-width="1"/>
+<rect x="1938" y="858" width="14" height="14" rx="2" fill="#e6f4fc" stroke="#6c91a9"/><path d="M 1940 863 H 1950 M 1940 867 H 1950" stroke="#6c91a9" stroke-width="1"/>
+<text x="1959" y="873" class="table">classroom_equipment</text><path d="M 2303 863 l 5 0 -2.5 4 z" fill="#54748a"/>
+<rect x="1935" y="888" width="16" height="14" rx="3" fill="#d7a439"/><text x="1943" y="898" class="badge" text-anchor="middle">P</text>
+<text x="1966" y="899" class="field">id</text>
+<text x="2187" y="899" class="type">bigint</text>
+<line x1="1931" y1="906" x2="2319" y2="906" stroke="#eff2f5" stroke-width=".8"/>
+<rect x="1935" y="910" width="16" height="14" rx="3" fill="#67a9c7"/><text x="1943" y="920" class="badge" text-anchor="middle">F</text>
+<text x="1966" y="921" class="field">classroom_id</text>
+<text x="2187" y="921" class="type">bigint</text>
+<line x1="1931" y1="928" x2="2319" y2="928" stroke="#eff2f5" stroke-width=".8"/>
+<rect x="1935" y="932" width="16" height="14" rx="3" fill="#67a9c7"/><text x="1943" y="942" class="badge" text-anchor="middle">F</text>
+<text x="1966" y="943" class="field">equipment_id</text>
+<text x="2187" y="943" class="type">bigint</text>
+<line x1="1931" y1="950" x2="2319" y2="950" stroke="#eff2f5" stroke-width=".8"/>
+<circle cx="1943" cy="961" r="2.6" fill="#b5c2cc"/>
+<text x="1966" y="965" class="field">quantity</text>
+<text x="2187" y="965" class="type">int</text>
+<line x1="1931" y1="972" x2="2319" y2="972" stroke="#eff2f5" stroke-width=".8"/>
+<circle cx="1943" cy="983" r="2.6" fill="#b5c2cc"/>
+<text x="1966" y="987" class="field">condition_status</text>
+<text x="2187" y="987" class="type">varchar(20)</text>
+<line x1="1931" y1="994" x2="2319" y2="994" stroke="#eff2f5" stroke-width=".8"/>
+<circle cx="1943" cy="1005" r="2.6" fill="#b5c2cc"/>
+<text x="1966" y="1009" class="field">condition_note</text>
+<text x="2187" y="1009" class="type">varchar(255)</text>
+<line x1="1931" y1="1016" x2="2319" y2="1016" stroke="#eff2f5" stroke-width=".8"/>
+<circle cx="1943" cy="1027" r="2.6" fill="#b5c2cc"/>
+<text x="1966" y="1031" class="field">updated_at</text>
+<text x="2187" y="1031" class="type">datetime</text>
+<rect x="1931" y="1038" width="388" height="19" fill="#e7ecef"/><text x="1941" y="1052" class="footer">Indexes</text><path d="M 2302 1044 l 5 4 -5 4 z" fill="#7f919e"/></g>
+<g filter="url(#shadow)"><rect x="2550" y="310" width="390" height="362" rx="5" fill="#fff" stroke="#8ca6b9" stroke-width="1.2"/>
+<path d="M 2555 310 H 2935 Q 2940 310 2940 315 V 344 H 2550 V 315 Q 2550 310 2555 310" fill="#a9cbe0" stroke="#7ba3be" stroke-width="1"/>
+<rect x="2558" y="318" width="14" height="14" rx="2" fill="#e6f4fc" stroke="#6c91a9"/><path d="M 2560 323 H 2570 M 2560 327 H 2570" stroke="#6c91a9" stroke-width="1"/>
+<text x="2579" y="333" class="table">schedules</text><path d="M 2923 323 l 5 0 -2.5 4 z" fill="#54748a"/>
+<rect x="2555" y="348" width="16" height="14" rx="3" fill="#d7a439"/><text x="2563" y="358" class="badge" text-anchor="middle">P</text>
+<text x="2586" y="359" class="field">id</text>
+<text x="2807" y="359" class="type">bigint</text>
+<line x1="2551" y1="366" x2="2939" y2="366" stroke="#eff2f5" stroke-width=".8"/>
+<rect x="2555" y="370" width="16" height="14" rx="3" fill="#67a9c7"/><text x="2563" y="380" class="badge" text-anchor="middle">F</text>
+<text x="2586" y="381" class="field">course_section_id</text>
+<text x="2807" y="381" class="type">bigint</text>
+<line x1="2551" y1="388" x2="2939" y2="388" stroke="#eff2f5" stroke-width=".8"/>
+<rect x="2555" y="392" width="16" height="14" rx="3" fill="#67a9c7"/><text x="2563" y="402" class="badge" text-anchor="middle">F</text>
+<text x="2586" y="403" class="field">lecturer_assignment_id</text>
+<text x="2807" y="403" class="type">bigint</text>
+<line x1="2551" y1="410" x2="2939" y2="410" stroke="#eff2f5" stroke-width=".8"/>
+<rect x="2555" y="414" width="16" height="14" rx="3" fill="#67a9c7"/><text x="2563" y="424" class="badge" text-anchor="middle">F</text>
+<text x="2586" y="425" class="field">classroom_id</text>
+<text x="2807" y="425" class="type">bigint</text>
+<line x1="2551" y1="432" x2="2939" y2="432" stroke="#eff2f5" stroke-width=".8"/>
+<rect x="2555" y="436" width="16" height="14" rx="3" fill="#67a9c7"/><text x="2563" y="446" class="badge" text-anchor="middle">F</text>
+<text x="2586" y="447" class="field">start_slot_id</text>
+<text x="2807" y="447" class="type">bigint</text>
+<line x1="2551" y1="454" x2="2939" y2="454" stroke="#eff2f5" stroke-width=".8"/>
+<rect x="2555" y="458" width="16" height="14" rx="3" fill="#67a9c7"/><text x="2563" y="468" class="badge" text-anchor="middle">F</text>
+<text x="2586" y="469" class="field">end_slot_id</text>
+<text x="2807" y="469" class="type">bigint</text>
+<line x1="2551" y1="476" x2="2939" y2="476" stroke="#eff2f5" stroke-width=".8"/>
+<circle cx="2563" cy="487" r="2.6" fill="#b5c2cc"/>
+<text x="2586" y="491" class="field">day_of_week</text>
+<text x="2807" y="491" class="type">tinyint</text>
+<line x1="2551" y1="498" x2="2939" y2="498" stroke="#eff2f5" stroke-width=".8"/>
+<circle cx="2563" cy="509" r="2.6" fill="#b5c2cc"/>
+<text x="2586" y="513" class="field">start_date</text>
+<text x="2807" y="513" class="type">date</text>
+<line x1="2551" y1="520" x2="2939" y2="520" stroke="#eff2f5" stroke-width=".8"/>
+<circle cx="2563" cy="531" r="2.6" fill="#b5c2cc"/>
+<text x="2586" y="535" class="field">end_date</text>
+<text x="2807" y="535" class="type">date</text>
+<line x1="2551" y1="542" x2="2939" y2="542" stroke="#eff2f5" stroke-width=".8"/>
+<circle cx="2563" cy="553" r="2.6" fill="#b5c2cc"/>
+<text x="2586" y="557" class="field">status</text>
+<text x="2807" y="557" class="type">varchar(20)</text>
+<line x1="2551" y1="564" x2="2939" y2="564" stroke="#eff2f5" stroke-width=".8"/>
+<circle cx="2563" cy="575" r="2.6" fill="#b5c2cc"/>
+<text x="2586" y="579" class="field">note</text>
+<text x="2807" y="579" class="type">varchar(500)</text>
+<line x1="2551" y1="586" x2="2939" y2="586" stroke="#eff2f5" stroke-width=".8"/>
+<rect x="2555" y="590" width="16" height="14" rx="3" fill="#67a9c7"/><text x="2563" y="600" class="badge" text-anchor="middle">F</text>
+<text x="2586" y="601" class="field">created_by</text>
+<text x="2807" y="601" class="type">bigint</text>
+<line x1="2551" y1="608" x2="2939" y2="608" stroke="#eff2f5" stroke-width=".8"/>
+<circle cx="2563" cy="619" r="2.6" fill="#b5c2cc"/>
+<text x="2586" y="623" class="field">created_at</text>
+<text x="2807" y="623" class="type">datetime</text>
+<line x1="2551" y1="630" x2="2939" y2="630" stroke="#eff2f5" stroke-width=".8"/>
+<circle cx="2563" cy="641" r="2.6" fill="#b5c2cc"/>
+<text x="2586" y="645" class="field">updated_at</text>
+<text x="2807" y="645" class="type">datetime</text>
+<rect x="2551" y="652" width="388" height="19" fill="#e7ecef"/><text x="2561" y="666" class="footer">Indexes</text><path d="M 2922 658 l 5 4 -5 4 z" fill="#7f919e"/></g>
+<g filter="url(#shadow)"><rect x="2550" y="990" width="390" height="472" rx="5" fill="#fff" stroke="#8ca6b9" stroke-width="1.2"/>
+<path d="M 2555 990 H 2935 Q 2940 990 2940 995 V 1024 H 2550 V 995 Q 2550 990 2555 990" fill="#a9cbe0" stroke="#7ba3be" stroke-width="1"/>
+<rect x="2558" y="998" width="14" height="14" rx="2" fill="#e6f4fc" stroke="#6c91a9"/><path d="M 2560 1003 H 2570 M 2560 1007 H 2570" stroke="#6c91a9" stroke-width="1"/>
+<text x="2579" y="1013" class="table">change_requests</text><path d="M 2923 1003 l 5 0 -2.5 4 z" fill="#54748a"/>
+<rect x="2555" y="1028" width="16" height="14" rx="3" fill="#d7a439"/><text x="2563" y="1038" class="badge" text-anchor="middle">P</text>
+<text x="2586" y="1039" class="field">id</text>
+<text x="2807" y="1039" class="type">bigint</text>
+<line x1="2551" y1="1046" x2="2939" y2="1046" stroke="#eff2f5" stroke-width=".8"/>
+<rect x="2555" y="1050" width="16" height="14" rx="3" fill="#67a9c7"/><text x="2563" y="1060" class="badge" text-anchor="middle">F</text>
+<text x="2586" y="1061" class="field">requester_id</text>
+<text x="2807" y="1061" class="type">bigint</text>
+<line x1="2551" y1="1068" x2="2939" y2="1068" stroke="#eff2f5" stroke-width=".8"/>
+<rect x="2555" y="1072" width="16" height="14" rx="3" fill="#67a9c7"/><text x="2563" y="1082" class="badge" text-anchor="middle">F</text>
+<text x="2586" y="1083" class="field">schedule_id</text>
+<text x="2807" y="1083" class="type">bigint</text>
+<line x1="2551" y1="1090" x2="2939" y2="1090" stroke="#eff2f5" stroke-width=".8"/>
+<rect x="2555" y="1094" width="16" height="14" rx="3" fill="#67a9c7"/><text x="2563" y="1104" class="badge" text-anchor="middle">F</text>
+<text x="2586" y="1105" class="field">requested_room_id</text>
+<text x="2807" y="1105" class="type">bigint</text>
+<line x1="2551" y1="1112" x2="2939" y2="1112" stroke="#eff2f5" stroke-width=".8"/>
+<rect x="2555" y="1116" width="16" height="14" rx="3" fill="#67a9c7"/><text x="2563" y="1126" class="badge" text-anchor="middle">F</text>
+<text x="2586" y="1127" class="field">requested_equipment_id</text>
+<text x="2807" y="1127" class="type">bigint</text>
+<line x1="2551" y1="1134" x2="2939" y2="1134" stroke="#eff2f5" stroke-width=".8"/>
+<circle cx="2563" cy="1145" r="2.6" fill="#b5c2cc"/>
+<text x="2586" y="1149" class="field">requested_date</text>
+<text x="2807" y="1149" class="type">date</text>
+<line x1="2551" y1="1156" x2="2939" y2="1156" stroke="#eff2f5" stroke-width=".8"/>
+<circle cx="2563" cy="1167" r="2.6" fill="#b5c2cc"/>
+<text x="2586" y="1171" class="field">requested_day</text>
+<text x="2807" y="1171" class="type">tinyint</text>
+<line x1="2551" y1="1178" x2="2939" y2="1178" stroke="#eff2f5" stroke-width=".8"/>
+<rect x="2555" y="1182" width="16" height="14" rx="3" fill="#67a9c7"/><text x="2563" y="1192" class="badge" text-anchor="middle">F</text>
+<text x="2586" y="1193" class="field">requested_start_slot_id</text>
+<text x="2807" y="1193" class="type">bigint</text>
+<line x1="2551" y1="1200" x2="2939" y2="1200" stroke="#eff2f5" stroke-width=".8"/>
+<rect x="2555" y="1204" width="16" height="14" rx="3" fill="#67a9c7"/><text x="2563" y="1214" class="badge" text-anchor="middle">F</text>
+<text x="2586" y="1215" class="field">requested_end_slot_id</text>
+<text x="2807" y="1215" class="type">bigint</text>
+<line x1="2551" y1="1222" x2="2939" y2="1222" stroke="#eff2f5" stroke-width=".8"/>
+<circle cx="2563" cy="1233" r="2.6" fill="#b5c2cc"/>
+<text x="2586" y="1237" class="field">equipment_name</text>
+<text x="2807" y="1237" class="type">varchar(120)</text>
+<line x1="2551" y1="1244" x2="2939" y2="1244" stroke="#eff2f5" stroke-width=".8"/>
+<circle cx="2563" cy="1255" r="2.6" fill="#b5c2cc"/>
+<text x="2586" y="1259" class="field">quantity</text>
+<text x="2807" y="1259" class="type">int</text>
+<line x1="2551" y1="1266" x2="2939" y2="1266" stroke="#eff2f5" stroke-width=".8"/>
+<circle cx="2563" cy="1277" r="2.6" fill="#b5c2cc"/>
+<text x="2586" y="1281" class="field">request_type</text>
+<text x="2807" y="1281" class="type">varchar(30)</text>
+<line x1="2551" y1="1288" x2="2939" y2="1288" stroke="#eff2f5" stroke-width=".8"/>
+<circle cx="2563" cy="1299" r="2.6" fill="#b5c2cc"/>
+<text x="2586" y="1303" class="field">reason</text>
+<text x="2807" y="1303" class="type">text</text>
+<line x1="2551" y1="1310" x2="2939" y2="1310" stroke="#eff2f5" stroke-width=".8"/>
+<circle cx="2563" cy="1321" r="2.6" fill="#b5c2cc"/>
+<text x="2586" y="1325" class="field">priority</text>
+<text x="2807" y="1325" class="type">varchar(20)</text>
+<line x1="2551" y1="1332" x2="2939" y2="1332" stroke="#eff2f5" stroke-width=".8"/>
+<circle cx="2563" cy="1343" r="2.6" fill="#b5c2cc"/>
+<text x="2586" y="1347" class="field">status</text>
+<text x="2807" y="1347" class="type">varchar(20)</text>
+<line x1="2551" y1="1354" x2="2939" y2="1354" stroke="#eff2f5" stroke-width=".8"/>
+<rect x="2555" y="1358" width="16" height="14" rx="3" fill="#67a9c7"/><text x="2563" y="1368" class="badge" text-anchor="middle">F</text>
+<text x="2586" y="1369" class="field">reviewed_by</text>
+<text x="2807" y="1369" class="type">bigint</text>
+<line x1="2551" y1="1376" x2="2939" y2="1376" stroke="#eff2f5" stroke-width=".8"/>
+<circle cx="2563" cy="1387" r="2.6" fill="#b5c2cc"/>
+<text x="2586" y="1391" class="field">review_reason</text>
+<text x="2807" y="1391" class="type">text</text>
+<line x1="2551" y1="1398" x2="2939" y2="1398" stroke="#eff2f5" stroke-width=".8"/>
+<circle cx="2563" cy="1409" r="2.6" fill="#b5c2cc"/>
+<text x="2586" y="1413" class="field">reviewed_at</text>
+<text x="2807" y="1413" class="type">datetime</text>
+<line x1="2551" y1="1420" x2="2939" y2="1420" stroke="#eff2f5" stroke-width=".8"/>
+<circle cx="2563" cy="1431" r="2.6" fill="#b5c2cc"/>
+<text x="2586" y="1435" class="field">created_at</text>
+<text x="2807" y="1435" class="type">datetime</text>
+<rect x="2551" y="1442" width="388" height="19" fill="#e7ecef"/><text x="2561" y="1456" class="footer">Indexes</text><path d="M 2922 1448 l 5 4 -5 4 z" fill="#7f919e"/></g>
+<g filter="url(#shadow)"><rect x="1310" y="180" width="390" height="296" rx="5" fill="#fff" stroke="#8ca6b9" stroke-width="1.2"/>
+<path d="M 1315 180 H 1695 Q 1700 180 1700 185 V 214 H 1310 V 185 Q 1310 180 1315 180" fill="#a9cbe0" stroke="#7ba3be" stroke-width="1"/>
+<rect x="1318" y="188" width="14" height="14" rx="2" fill="#e6f4fc" stroke="#6c91a9"/><path d="M 1320 193 H 1330 M 1320 197 H 1330" stroke="#6c91a9" stroke-width="1"/>
+<text x="1339" y="203" class="table">notifications</text><path d="M 1683 193 l 5 0 -2.5 4 z" fill="#54748a"/>
+<rect x="1315" y="218" width="16" height="14" rx="3" fill="#d7a439"/><text x="1323" y="228" class="badge" text-anchor="middle">P</text>
+<text x="1346" y="229" class="field">id</text>
+<text x="1567" y="229" class="type">bigint</text>
+<line x1="1311" y1="236" x2="1699" y2="236" stroke="#eff2f5" stroke-width=".8"/>
+<rect x="1315" y="240" width="16" height="14" rx="3" fill="#67a9c7"/><text x="1323" y="250" class="badge" text-anchor="middle">F</text>
+<text x="1346" y="251" class="field">user_id</text>
+<text x="1567" y="251" class="type">bigint</text>
+<line x1="1311" y1="258" x2="1699" y2="258" stroke="#eff2f5" stroke-width=".8"/>
+<circle cx="1323" cy="269" r="2.6" fill="#b5c2cc"/>
+<text x="1346" y="273" class="field">title</text>
+<text x="1567" y="273" class="type">varchar(180)</text>
+<line x1="1311" y1="280" x2="1699" y2="280" stroke="#eff2f5" stroke-width=".8"/>
+<circle cx="1323" cy="291" r="2.6" fill="#b5c2cc"/>
+<text x="1346" y="295" class="field">content</text>
+<text x="1567" y="295" class="type">text</text>
+<line x1="1311" y1="302" x2="1699" y2="302" stroke="#eff2f5" stroke-width=".8"/>
+<circle cx="1323" cy="313" r="2.6" fill="#b5c2cc"/>
+<text x="1346" y="317" class="field">type</text>
+<text x="1567" y="317" class="type">varchar(30)</text>
+<line x1="1311" y1="324" x2="1699" y2="324" stroke="#eff2f5" stroke-width=".8"/>
+<circle cx="1323" cy="335" r="2.6" fill="#b5c2cc"/>
+<text x="1346" y="339" class="field">reference_type</text>
+<text x="1567" y="339" class="type">varchar(50)</text>
+<line x1="1311" y1="346" x2="1699" y2="346" stroke="#eff2f5" stroke-width=".8"/>
+<circle cx="1323" cy="357" r="2.6" fill="#b5c2cc"/>
+<text x="1346" y="361" class="field">reference_id</text>
+<text x="1567" y="361" class="type">bigint</text>
+<line x1="1311" y1="368" x2="1699" y2="368" stroke="#eff2f5" stroke-width=".8"/>
+<circle cx="1323" cy="379" r="2.6" fill="#b5c2cc"/>
+<text x="1346" y="383" class="field">target_screen</text>
+<text x="1567" y="383" class="type">varchar(50)</text>
+<line x1="1311" y1="390" x2="1699" y2="390" stroke="#eff2f5" stroke-width=".8"/>
+<circle cx="1323" cy="401" r="2.6" fill="#b5c2cc"/>
+<text x="1346" y="405" class="field">is_read</text>
+<text x="1567" y="405" class="type">boolean</text>
+<line x1="1311" y1="412" x2="1699" y2="412" stroke="#eff2f5" stroke-width=".8"/>
+<circle cx="1323" cy="423" r="2.6" fill="#b5c2cc"/>
+<text x="1346" y="427" class="field">created_at</text>
+<text x="1567" y="427" class="type">datetime</text>
+<line x1="1311" y1="434" x2="1699" y2="434" stroke="#eff2f5" stroke-width=".8"/>
+<circle cx="1323" cy="445" r="2.6" fill="#b5c2cc"/>
+<text x="1346" y="449" class="field">read_at</text>
+<text x="1567" y="449" class="type">datetime</text>
+<rect x="1311" y="456" width="388" height="19" fill="#e7ecef"/><text x="1321" y="470" class="footer">Indexes</text><path d="M 1682 462 l 5 4 -5 4 z" fill="#7f919e"/></g>
+<g filter="url(#shadow)"><rect x="1310" y="640" width="390" height="208" rx="5" fill="#fff" stroke="#8ca6b9" stroke-width="1.2"/>
+<path d="M 1315 640 H 1695 Q 1700 640 1700 645 V 674 H 1310 V 645 Q 1310 640 1315 640" fill="#a9cbe0" stroke="#7ba3be" stroke-width="1"/>
+<rect x="1318" y="648" width="14" height="14" rx="2" fill="#e6f4fc" stroke="#6c91a9"/><path d="M 1320 653 H 1330 M 1320 657 H 1330" stroke="#6c91a9" stroke-width="1"/>
+<text x="1339" y="663" class="table">audit_logs</text><path d="M 1683 653 l 5 0 -2.5 4 z" fill="#54748a"/>
+<rect x="1315" y="678" width="16" height="14" rx="3" fill="#d7a439"/><text x="1323" y="688" class="badge" text-anchor="middle">P</text>
+<text x="1346" y="689" class="field">id</text>
+<text x="1567" y="689" class="type">bigint</text>
+<line x1="1311" y1="696" x2="1699" y2="696" stroke="#eff2f5" stroke-width=".8"/>
+<rect x="1315" y="700" width="16" height="14" rx="3" fill="#67a9c7"/><text x="1323" y="710" class="badge" text-anchor="middle">F</text>
+<text x="1346" y="711" class="field">user_id</text>
+<text x="1567" y="711" class="type">bigint</text>
+<line x1="1311" y1="718" x2="1699" y2="718" stroke="#eff2f5" stroke-width=".8"/>
+<circle cx="1323" cy="729" r="2.6" fill="#b5c2cc"/>
+<text x="1346" y="733" class="field">action</text>
+<text x="1567" y="733" class="type">varchar(80)</text>
+<line x1="1311" y1="740" x2="1699" y2="740" stroke="#eff2f5" stroke-width=".8"/>
+<circle cx="1323" cy="751" r="2.6" fill="#b5c2cc"/>
+<text x="1346" y="755" class="field">entity_type</text>
+<text x="1567" y="755" class="type">varchar(60)</text>
+<line x1="1311" y1="762" x2="1699" y2="762" stroke="#eff2f5" stroke-width=".8"/>
+<circle cx="1323" cy="773" r="2.6" fill="#b5c2cc"/>
+<text x="1346" y="777" class="field">entity_id</text>
+<text x="1567" y="777" class="type">bigint</text>
+<line x1="1311" y1="784" x2="1699" y2="784" stroke="#eff2f5" stroke-width=".8"/>
+<circle cx="1323" cy="795" r="2.6" fill="#b5c2cc"/>
+<text x="1346" y="799" class="field">details</text>
+<text x="1567" y="799" class="type">json</text>
+<line x1="1311" y1="806" x2="1699" y2="806" stroke="#eff2f5" stroke-width=".8"/>
+<circle cx="1323" cy="817" r="2.6" fill="#b5c2cc"/>
+<text x="1346" y="821" class="field">created_at</text>
+<text x="1567" y="821" class="type">datetime</text>
+<rect x="1311" y="828" width="388" height="19" fill="#e7ecef"/><text x="1321" y="842" class="footer">Indexes</text><path d="M 1682 834 l 5 4 -5 4 z" fill="#7f919e"/></g>
+<g filter="url(#shadow)"><rect x="1930" y="1260" width="390" height="252" rx="5" fill="#fff" stroke="#8ca6b9" stroke-width="1.2"/>
+<path d="M 1935 1260 H 2315 Q 2320 1260 2320 1265 V 1294 H 1930 V 1265 Q 1930 1260 1935 1260" fill="#a9cbe0" stroke="#7ba3be" stroke-width="1"/>
+<rect x="1938" y="1268" width="14" height="14" rx="2" fill="#e6f4fc" stroke="#6c91a9"/><path d="M 1940 1273 H 1950 M 1940 1277 H 1950" stroke="#6c91a9" stroke-width="1"/>
+<text x="1959" y="1283" class="table">maintenance_records</text><path d="M 2303 1273 l 5 0 -2.5 4 z" fill="#54748a"/>
+<rect x="1935" y="1298" width="16" height="14" rx="3" fill="#d7a439"/><text x="1943" y="1308" class="badge" text-anchor="middle">P</text>
+<text x="1966" y="1309" class="field">id</text>
+<text x="2187" y="1309" class="type">bigint</text>
+<line x1="1931" y1="1316" x2="2319" y2="1316" stroke="#eff2f5" stroke-width=".8"/>
+<rect x="1935" y="1320" width="16" height="14" rx="3" fill="#67a9c7"/><text x="1943" y="1330" class="badge" text-anchor="middle">F</text>
+<text x="1966" y="1331" class="field">classroom_id</text>
+<text x="2187" y="1331" class="type">bigint</text>
+<line x1="1931" y1="1338" x2="2319" y2="1338" stroke="#eff2f5" stroke-width=".8"/>
+<rect x="1935" y="1342" width="16" height="14" rx="3" fill="#67a9c7"/><text x="1943" y="1352" class="badge" text-anchor="middle">F</text>
+<text x="1966" y="1353" class="field">classroom_equipment_id</text>
+<text x="2187" y="1353" class="type">bigint</text>
+<line x1="1931" y1="1360" x2="2319" y2="1360" stroke="#eff2f5" stroke-width=".8"/>
+<rect x="1935" y="1364" width="16" height="14" rx="3" fill="#67a9c7"/><text x="1943" y="1374" class="badge" text-anchor="middle">F</text>
+<text x="1966" y="1375" class="field">reported_by</text>
+<text x="2187" y="1375" class="type">bigint</text>
+<line x1="1931" y1="1382" x2="2319" y2="1382" stroke="#eff2f5" stroke-width=".8"/>
+<circle cx="1943" cy="1393" r="2.6" fill="#b5c2cc"/>
+<text x="1966" y="1397" class="field">description</text>
+<text x="2187" y="1397" class="type">text</text>
+<line x1="1931" y1="1404" x2="2319" y2="1404" stroke="#eff2f5" stroke-width=".8"/>
+<circle cx="1943" cy="1415" r="2.6" fill="#b5c2cc"/>
+<text x="1966" y="1419" class="field">start_date</text>
+<text x="2187" y="1419" class="type">date</text>
+<line x1="1931" y1="1426" x2="2319" y2="1426" stroke="#eff2f5" stroke-width=".8"/>
+<circle cx="1943" cy="1437" r="2.6" fill="#b5c2cc"/>
+<text x="1966" y="1441" class="field">end_date</text>
+<text x="2187" y="1441" class="type">date</text>
+<line x1="1931" y1="1448" x2="2319" y2="1448" stroke="#eff2f5" stroke-width=".8"/>
+<circle cx="1943" cy="1459" r="2.6" fill="#b5c2cc"/>
+<text x="1966" y="1463" class="field">status</text>
+<text x="2187" y="1463" class="type">varchar(20)</text>
+<line x1="1931" y1="1470" x2="2319" y2="1470" stroke="#eff2f5" stroke-width=".8"/>
+<circle cx="1943" cy="1481" r="2.6" fill="#b5c2cc"/>
+<text x="1966" y="1485" class="field">created_at</text>
+<text x="2187" y="1485" class="type">datetime</text>
+<rect x="1931" y="1492" width="388" height="19" fill="#e7ecef"/><text x="1941" y="1506" class="footer">Indexes</text><path d="M 2302 1498 l 5 4 -5 4 z" fill="#7f919e"/></g>
+<path d="M 690 242 L 681 247 L 690 252 M 468 469 V 481" fill="none" stroke="#4d5b66" stroke-width="1.5"/>
+<path d="M 1080 740 L 1089 745 L 1080 750 M 1088 219 V 231" fill="none" stroke="#4d5b66" stroke-width="1.5"/>
+<path d="M 690 762 L 681 767 L 690 772 M 468 219 V 231" fill="none" stroke="#4d5b66" stroke-width="1.5"/>
+<path d="M 690 1022 L 681 1027 L 690 1032 M 468 469 V 481" fill="none" stroke="#4d5b66" stroke-width="1.5"/>
+<path d="M 1310 1072 L 1301 1077 L 1310 1082 M 1088 999 V 1011" fill="none" stroke="#4d5b66" stroke-width="1.5"/>
+<path d="M 1310 1094 L 1301 1099 L 1310 1104 M 468 769 V 781" fill="none" stroke="#4d5b66" stroke-width="1.5"/>
+<path d="M 1930 252 L 1921 257 L 1930 262 M 1708 1049 V 1061" fill="none" stroke="#4d5b66" stroke-width="1.5"/>
+<path d="M 1930 274 L 1921 279 L 1930 284 M 1088 219 V 231" fill="none" stroke="#4d5b66" stroke-width="1.5"/>
+<path d="M 1930 572 L 1921 577 L 1930 582 M 1708 1049 V 1061" fill="none" stroke="#4d5b66" stroke-width="1.5"/>
+<path d="M 1930 594 L 1921 599 L 1930 604 M 1088 219 V 231" fill="none" stroke="#4d5b66" stroke-width="1.5"/>
+<path d="M 1930 912 L 1921 917 L 1930 922 M 1088 1359 V 1371" fill="none" stroke="#4d5b66" stroke-width="1.5"/>
+<path d="M 1930 934 L 1921 939 L 1930 944 M 1708 1489 V 1501" fill="none" stroke="#4d5b66" stroke-width="1.5"/>
+<path d="M 2550 372 L 2541 377 L 2550 382 M 1708 1049 V 1061" fill="none" stroke="#4d5b66" stroke-width="1.5"/>
+<path d="M 2550 394 L 2541 399 L 2550 404 M 2328 229 V 241" fill="none" stroke="#4d5b66" stroke-width="1.5"/>
+<path d="M 2550 416 L 2541 421 L 2550 426 M 1088 1359 V 1371" fill="none" stroke="#4d5b66" stroke-width="1.5"/>
+<path d="M 2550 438 L 2541 443 L 2550 448 M 468 1139 V 1151" fill="none" stroke="#4d5b66" stroke-width="1.5"/>
+<path d="M 2550 460 L 2541 465 L 2550 470 M 468 1139 V 1151" fill="none" stroke="#4d5b66" stroke-width="1.5"/>
+<path d="M 2550 592 L 2541 597 L 2550 602 M 1088 219 V 231" fill="none" stroke="#4d5b66" stroke-width="1.5"/>
+<path d="M 2550 1052 L 2541 1057 L 2550 1062 M 1088 219 V 231" fill="none" stroke="#4d5b66" stroke-width="1.5"/>
+<path d="M 2940 1074 L 2949 1079 L 2940 1084 M 2948 349 V 361" fill="none" stroke="#4d5b66" stroke-width="1.5"/>
+<path d="M 2550 1096 L 2541 1101 L 2550 1106 M 1088 1359 V 1371" fill="none" stroke="#4d5b66" stroke-width="1.5"/>
+<path d="M 2550 1118 L 2541 1123 L 2550 1128 M 1708 1489 V 1501" fill="none" stroke="#4d5b66" stroke-width="1.5"/>
+<path d="M 2550 1184 L 2541 1189 L 2550 1194 M 468 1139 V 1151" fill="none" stroke="#4d5b66" stroke-width="1.5"/>
+<path d="M 2550 1206 L 2541 1211 L 2550 1216 M 468 1139 V 1151" fill="none" stroke="#4d5b66" stroke-width="1.5"/>
+<path d="M 2550 1360 L 2541 1365 L 2550 1370 M 1088 219 V 231" fill="none" stroke="#4d5b66" stroke-width="1.5"/>
+<path d="M 1310 242 L 1301 247 L 1310 252 M 1088 219 V 231" fill="none" stroke="#4d5b66" stroke-width="1.5"/>
+<path d="M 1310 702 L 1301 707 L 1310 712 M 1088 219 V 231" fill="none" stroke="#4d5b66" stroke-width="1.5"/>
+<path d="M 1930 1322 L 1921 1327 L 1930 1332 M 1088 1359 V 1371" fill="none" stroke="#4d5b66" stroke-width="1.5"/>
+<path d="M 2320 1344 L 2329 1349 L 2320 1354 M 2328 889 V 901" fill="none" stroke="#4d5b66" stroke-width="1.5"/>
+<path d="M 1930 1366 L 1921 1371 L 1930 1376 M 1088 219 V 231" fill="none" stroke="#4d5b66" stroke-width="1.5"/>
+<text x="70" y="1776" class="sub">Nguồn: SQL 01–05 của UniSchedule. Các kiểu BIGINT trong DBML là UNSIGNED trong SQL gốc; chi tiết CHECK / ON DELETE xem file DDL.</text>
+</svg>

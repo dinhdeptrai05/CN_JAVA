@@ -38,7 +38,11 @@ public class MainFrame extends JFrame implements ScreenNavigator {
     private final JButton notificationButton = new JButton();
     private final Map<String, JButton> menuButtons = new LinkedHashMap<>();
     private final Map<String, String> titles = new LinkedHashMap<>();
+    private final Map<String, java.util.function.Supplier<Component>> deferredScreens = new LinkedHashMap<>();
     private TimetablePanel timetableScreen;
+    private ReportPanel reportScreen;
+    private boolean firstDashboardDisplay=true;
+    private int notificationRefreshVersion;
 
     public MainFrame(AppControllers controllers, User currentUser) {
         super(AppConfig.APP_NAME);
@@ -97,6 +101,7 @@ public class MainFrame extends JFrame implements ScreenNavigator {
         JPanel menu = new JPanel(new GridLayout(0, 1, 0, 4));
         menu.setOpaque(false);
         addMenu(menu, "dashboard", "Dashboard", true);
+        addMenu(menu, "history", historyTitle(), true);
         addMenu(menu, "reports", "Báo cáo thống kê", currentUser.getRole()==Role.ADMIN || currentUser.getRole()==Role.ACADEMIC);
         addMenu(menu, "timetable", "Thời khóa biểu", true);
         addMenu(menu, "conflicts", "Xung đột", currentUser.getRole() == Role.ADMIN || currentUser.getRole() == Role.ACADEMIC);
@@ -164,18 +169,28 @@ public class MainFrame extends JFrame implements ScreenNavigator {
 
     private void registerScreens() {
         addScreen("dashboard", "Tổng quan điều hành", new DashboardPanel(controllers, currentUser, this));
-        if(currentUser.getRole()==Role.ADMIN || currentUser.getRole()==Role.ACADEMIC) addScreen("reports", "Báo cáo thống kê", new ReportPanel(controllers,currentUser));
-        timetableScreen = new TimetablePanel(controllers, currentUser);
-        addScreen("timetable", "Thời khóa biểu", timetableScreen);
-        addScreen("conflicts", "Xung đột thời khóa biểu", new ConflictPanel(controllers));
-        addScreen("courseSections", "Lớp học phần", new CourseSectionPanel(controllers, currentUser));
-        addScreen("rooms", "Phòng và thiết bị", new RoomManagementPanel(controllers, currentUser));
-        addScreen("requests", "Quản lý yêu cầu", new RequestManagementPanel(controllers, currentUser));
-        addScreen("roomSearch", "Tra cứu phòng trống", new RoomSearchPanel(controllers, currentUser));
-        if(currentUser.getRole()==vn.edu.donga.unischedule.model.Enums.Role.ADMIN) addScreen("users", "Quản lý người dùng", new UserManagementPanel(controllers));
-        if(currentUser.getRole()==vn.edu.donga.unischedule.model.Enums.Role.ADMIN || currentUser.getRole()==vn.edu.donga.unischedule.model.Enums.Role.ACADEMIC) addScreen("audit", "Nhật ký hoạt động", new AuditLogPanel(controllers.audit()));
-        addScreen("notifications", "Thông báo", new NotificationPanel(controllers, currentUser, this));
-        addScreen("profile", "Hồ sơ và cài đặt", new ProfilePanel(controllers, currentUser));
+        deferScreen("history",historyTitle(),()->new HistoryPanel(controllers,currentUser,this));
+        if(currentUser.getRole()==Role.ADMIN || currentUser.getRole()==Role.ACADEMIC) {
+            deferScreen("reports","Báo cáo thống kê",()->{reportScreen=new ReportPanel(controllers,currentUser);return reportScreen;});
+        }
+        deferScreen("timetable","Thời khóa biểu",()->{timetableScreen=new TimetablePanel(controllers,currentUser);return timetableScreen;});
+        deferScreen("conflicts","Xung đột thời khóa biểu",()->new ConflictPanel(controllers));
+        deferScreen("courseSections","Lớp học phần",()->new CourseSectionPanel(controllers,currentUser));
+        deferScreen("rooms","Phòng và thiết bị",()->new RoomManagementPanel(controllers,currentUser));
+        deferScreen("requests","Quản lý yêu cầu",()->new RequestManagementPanel(controllers,currentUser));
+        deferScreen("roomSearch","Tra cứu phòng trống",()->new RoomSearchPanel(controllers,currentUser));
+        if(currentUser.getRole()==Role.ADMIN) deferScreen("users","Quản lý người dùng",()->new UserManagementPanel(controllers));
+        if(currentUser.getRole()==Role.ADMIN || currentUser.getRole()==Role.ACADEMIC) deferScreen("audit","Nhật ký hoạt động",()->new AuditLogPanel(controllers.audit()));
+        deferScreen("notifications","Thông báo",()->new NotificationPanel(controllers,currentUser,this));
+        deferScreen("profile","Hồ sơ và cài đặt",()->new ProfilePanel(controllers,currentUser));
+    }
+
+    private void deferScreen(String key,String title,java.util.function.Supplier<Component> factory) {
+        titles.put(key,title);deferredScreens.put(key,factory);
+    }
+
+    private String historyTitle() {
+        return currentUser.getRole()==Role.ADMIN || currentUser.getRole()==Role.ACADEMIC ? "Hoạt động 5 năm" : "Hoạt động 3 năm";
     }
 
     private void addScreen(String key, String title, Component component) {
@@ -198,7 +213,7 @@ public class MainFrame extends JFrame implements ScreenNavigator {
         }
         JButton button = sidebarButton(label);
         String icon = switch (key) {
-            case "dashboard" -> "squares-2x2"; case "timetable" -> "calendar-days";
+            case "dashboard" -> "squares-2x2"; case "history" -> "clock"; case "timetable" -> "calendar-days";
             case "conflicts" -> "exclamation-triangle"; case "courseSections" -> "document-text";
             case "rooms" -> "building-office-2"; case "requests" -> "check-circle";
             case "roomSearch" -> "magnifying-glass"; case "users" -> "users";
@@ -236,6 +251,10 @@ public class MainFrame extends JFrame implements ScreenNavigator {
                     "Thông báo", javax.swing.JOptionPane.INFORMATION_MESSAGE);
             return;
         }
+        boolean created=false;
+        if(screenKey.equals("dashboard")&&firstDashboardDisplay){firstDashboardDisplay=false;created=true;}
+        var factory=deferredScreens.remove(screenKey);
+        if(factory!=null) {addScreen(screenKey,titles.get(screenKey),factory.get());created=true;}
         cardLayout.show(contentPanel, screenKey);
         titleLabel.setText("UniSchedule   /   " + titles.get(screenKey));
         menuButtons.forEach((key, button) -> {
@@ -244,12 +263,20 @@ public class MainFrame extends JFrame implements ScreenNavigator {
             button.setForeground(active ? AppConfig.PRIMARY : AppConfig.MUTED);
         });
         Component current = findVisibleComponent();
-        if (current instanceof Refreshable refreshable) {
+        if (current instanceof Refreshable refreshable && (!created || screenKey.equals("history") || screenKey.equals("reports"))) {
             refreshable.refresh();
         } else if (current instanceof JPanel wrapper) {
-            for (Component child : wrapper.getComponents()) if (child instanceof Refreshable refreshable) refreshable.refresh();
+            if(!created || screenKey.equals("history") || screenKey.equals("reports"))
+                for (Component child : wrapper.getComponents()) if (child instanceof Refreshable refreshable) refreshable.refresh();
         }
         refreshNotificationButton();
+    }
+
+    @Override public void showReportYear(int year) {
+        if(!titles.containsKey("reports"))return;
+        var factory=deferredScreens.remove("reports");
+        if(factory!=null)addScreen("reports",titles.get("reports"),factory.get());
+        reportScreen.selectYear(year);showScreen("reports");
     }
 
     private Component findVisibleComponent() {
@@ -262,10 +289,19 @@ public class MainFrame extends JFrame implements ScreenNavigator {
     }
 
     private void refreshNotificationButton() {
-        long unread = controllers.notifications().unreadCount(currentUser);
-        notificationButton.setText(String.valueOf(unread));
         notificationButton.setIcon(HeroIcons.of("bell", 18, AppConfig.PRIMARY));
         notificationButton.setToolTipText("Thông báo chưa đọc");
+        int version = ++notificationRefreshVersion;
+        new javax.swing.SwingWorker<Long, Void>() {
+            @Override protected Long doInBackground() {
+                return controllers.notifications().unreadCount(currentUser);
+            }
+            @Override protected void done() {
+                if (version != notificationRefreshVersion || !isDisplayable()) return;
+                try { notificationButton.setText(String.valueOf(get())); }
+                catch (Exception ignored) { notificationButton.setText("–"); }
+            }
+        }.execute();
     }
 
     private String initials(String fullName) {

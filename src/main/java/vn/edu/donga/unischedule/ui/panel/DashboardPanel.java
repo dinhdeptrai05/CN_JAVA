@@ -27,12 +27,38 @@ import java.awt.Color;
 import java.awt.GridLayout;
 import java.time.LocalDate;
 import java.util.List;
+import javax.swing.SwingWorker;
+import java.util.concurrent.ExecutionException;
 
 public class DashboardPanel extends JPanel implements Refreshable {
     private final AppControllers controllers;
     private final User user;
     private final ScreenNavigator navigator;
     private String department = "Tất cả khoa";
+    private int refreshVersion;
+    private DashboardData data;
+
+    private record DashboardData(List<String> departments,
+            List<vn.edu.donga.unischedule.controller.DashboardController.Metric> metrics,
+            List<ScheduleEntry> today,
+            List<vn.edu.donga.unischedule.controller.DashboardController.BuildingUsage> usage,
+            List<vn.edu.donga.unischedule.model.Conflict> conflicts,
+            List<ChangeRequest> requests,
+            List<vn.edu.donga.unischedule.model.Notification> notifications) { }
+
+    private DashboardData loadData(String selectedDepartment) {
+        List<String> departments = new java.util.ArrayList<>();
+        departments.add("Tất cả khoa");
+        controllers.catalog().getDepartments().forEach(item -> departments.add(item.getName()));
+        return new DashboardData(departments,
+                controllers.dashboard().metrics(user, selectedDepartment),
+                controllers.dashboard().today(user, selectedDepartment),
+                controllers.dashboard().usage(),
+                user.getRole() == Role.ADMIN || user.getRole() == Role.ACADEMIC
+                        ? controllers.dashboard().urgentConflicts() : List.of(),
+                user.getRole() == Role.STUDENT ? List.of() : controllers.dashboard().recentRequests(user),
+                user.getRole() == Role.STUDENT ? controllers.dashboard().recentNotifications(user) : List.of());
+    }
 
     public DashboardPanel(AppControllers controllers, User user) {
         this(controllers, user, key -> { });
@@ -50,6 +76,39 @@ public class DashboardPanel extends JPanel implements Refreshable {
 
     @Override
     public void refresh() {
+        int version = ++refreshVersion;
+        String selectedDepartment = department;
+        removeAll();
+        JLabel loading = new JLabel("Đang tải tổng quan…", JLabel.CENTER);
+        loading.setForeground(AppConfig.MUTED);
+        add(loading, BorderLayout.CENTER);
+        revalidate();
+        repaint();
+        new SwingWorker<DashboardData, Void>() {
+            @Override protected DashboardData doInBackground() { return loadData(selectedDepartment); }
+            @Override protected void done() {
+                if (version != refreshVersion) return;
+                try {
+                    data = get();
+                    renderDashboard();
+                } catch (InterruptedException ex) {
+                    Thread.currentThread().interrupt();
+                    showLoadError("Không thể tải tổng quan.");
+                } catch (ExecutionException ex) {
+                    showLoadError("Không thể tải tổng quan: " + UiTasks.message(ex.getCause() == null ? ex : ex.getCause()));
+                }
+            }
+        }.execute();
+    }
+
+    private void showLoadError(String message) {
+        removeAll();
+        add(new JLabel(message, JLabel.CENTER), BorderLayout.CENTER);
+        revalidate();
+        repaint();
+    }
+
+    private void renderDashboard() {
         removeAll();
         JPanel page = new vn.edu.donga.unischedule.ui.component.ScrollPage();
         page.setLayout(new javax.swing.BoxLayout(page, javax.swing.BoxLayout.Y_AXIS));
@@ -68,10 +127,7 @@ public class DashboardPanel extends JPanel implements Refreshable {
         JPanel filters = new JPanel(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT, 8, 0));
         filters.setOpaque(false);
         javax.swing.ButtonGroup group = new javax.swing.ButtonGroup();
-        java.util.List<String> departments = new java.util.ArrayList<>();
-        departments.add("Tất cả khoa");
-        controllers.catalog().getDepartments().forEach(d -> departments.add(d.getName()));
-        for (String name : departments) {
+        for (String name : data.departments()) {
             javax.swing.JToggleButton tab = new javax.swing.JToggleButton(name);
             tab.setSelected(name.equals(department));
             tab.setFont(tab.getFont().deriveFont(11f));
@@ -121,11 +177,14 @@ public class DashboardPanel extends JPanel implements Refreshable {
         all.addActionListener(e -> navigator.showScreen("timetable"));
         schedule.add(all, BorderLayout.SOUTH);
         left.add(schedule, BorderLayout.NORTH);
-        JPanel quick = new JPanel(new GridLayout(1, 2, 16, 0)); quick.setOpaque(false);
+        boolean staffHistory=user.getRole()==Role.ADMIN || user.getRole()==Role.ACADEMIC;
+        JPanel quick = new JPanel(new GridLayout(1, 3, 16, 0)); quick.setOpaque(false);
         javax.swing.JButton rooms = new vn.edu.donga.unischedule.ui.component.SecondaryButton("Tra cứu phòng trống");
         rooms.addActionListener(e -> navigator.showScreen("roomSearch")); quick.add(rooms);
         javax.swing.JButton alerts = new vn.edu.donga.unischedule.ui.component.SecondaryButton("Thông báo mới");
         alerts.addActionListener(e -> navigator.showScreen("notifications")); quick.add(alerts);
+        javax.swing.JButton history=new vn.edu.donga.unischedule.ui.component.SecondaryButton(staffHistory?"Hoạt động 5 năm":"Hoạt động 3 năm");
+        history.addActionListener(e->navigator.showScreen("history"));quick.add(history);
         left.add(quick, BorderLayout.CENTER);
         JPanel right = new JPanel(); right.setOpaque(false);
         right.setLayout(new javax.swing.BoxLayout(right, javax.swing.BoxLayout.Y_AXIS));
@@ -161,7 +220,7 @@ public class DashboardPanel extends JPanel implements Refreshable {
     }
 
     private void buildStats(JPanel stats) {
-        for (var metric : controllers.dashboard().metrics(user, department)) {
+        for (var metric : data.metrics()) {
             Color accent = switch (metric.tone()) {
                 case PRIMARY -> AppConfig.PRIMARY; case SUCCESS -> AppConfig.SUCCESS;
                 case WARNING -> AppConfig.WARNING; case DANGER -> AppConfig.DANGER;
@@ -180,7 +239,7 @@ public class DashboardPanel extends JPanel implements Refreshable {
                 entry -> entry.getCourseSection().getLecturer().getFullName(),
                 entry -> entry.getStartSlot().getName() + " - " + entry.getEndSlot().getName());
         int today = DateUtils.toSchoolDay(LocalDate.now());
-        model.setRows(controllers.dashboard().today(user, department));
+        model.setRows(data.today());
         JTable table = new JTable(model);
         TableUtils.style(table);
         return table;
@@ -190,7 +249,7 @@ public class DashboardPanel extends JPanel implements Refreshable {
     private JPanel buildUsagePanel() {
         JPanel panel = new JPanel(new GridLayout(0, 1, 0, 12));
         panel.setOpaque(false);
-        controllers.dashboard().usage().forEach(usage -> {
+        data.usage().forEach(usage -> {
             String building = usage.building();
             JPanel row = new JPanel(new BorderLayout(0, 6)); row.setOpaque(false);
             row.add(new JLabel(building + "  ·  " + usage.used() + "/" + usage.total() + " phòng"), BorderLayout.NORTH);
@@ -204,7 +263,7 @@ public class DashboardPanel extends JPanel implements Refreshable {
 
     private JPanel buildConflicts() {
         JPanel panel = new JPanel(new GridLayout(0, 1, 0, 14)); panel.setOpaque(false);
-        controllers.dashboard().urgentConflicts().forEach(conflict -> {
+        data.conflicts().forEach(conflict -> {
                     JPanel row = new JPanel(new BorderLayout(0, 10)); row.setOpaque(false);
                     JLabel text = new JLabel("<html><div style='width:220px'><b style='color:#E11D48'>" + conflict.getType().getDisplayName()
                             + "</b><br>" + conflict.getMessage() + "</div></html>");
@@ -219,7 +278,7 @@ public class DashboardPanel extends JPanel implements Refreshable {
     private JPanel buildRequests() {
         JPanel panel = new JPanel(); panel.setOpaque(false);
         panel.setLayout(new javax.swing.BoxLayout(panel, javax.swing.BoxLayout.Y_AXIS));
-        controllers.dashboard().recentRequests(user).forEach(request -> {
+        data.requests().forEach(request -> {
             JPanel row = new JPanel(new BorderLayout(0, 12)); row.setOpaque(false);
             JLabel name = new JLabel("<html><b>" + request.getRequester().getFullName() + "</b><br>" + request.getType().getDisplayName() + "</html>");
             name.setFont(name.getFont().deriveFont(11f));
@@ -244,7 +303,7 @@ public class DashboardPanel extends JPanel implements Refreshable {
     private JPanel buildNotificationPanel() {
         JPanel panel = new JPanel(new GridLayout(0, 1, 0, 8));
         panel.setOpaque(false);
-        controllers.dashboard().recentNotifications(user).forEach(notification -> {
+        data.notifications().forEach(notification -> {
             JLabel label = new JLabel("<html><b>" + notification.getTitle() + "</b><br><span style='color:#64748B'>"
                     + notification.getContent() + "</span></html>");
             panel.add(label);

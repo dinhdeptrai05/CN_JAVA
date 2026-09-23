@@ -12,6 +12,9 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.HashSet;
+import java.util.Set;
+import java.time.LocalDate;
 
 /**
  * Checks mock schedule data for room, lecturer and course-section conflicts.
@@ -25,14 +28,38 @@ public class ConflictService {
     }
 
     public List<Conflict> findAllConflicts() {
-        List<ScheduleEntry> entries = scheduleRepository.findAll().stream()
+        return detect(scheduleRepository.findAll());
+    }
+
+    public List<Conflict> findConflictsInWeek(LocalDate weekStart) {
+        return detect(scheduleRepository.findByWeek(weekStart));
+    }
+
+    private List<Conflict> detect(List<ScheduleEntry> schedules) {
+        List<ScheduleEntry> entries = schedules.stream()
                 .filter(entry -> entry.getStatus() != ScheduleStatus.CANCELLED)
                 .sorted(Comparator.comparing(ScheduleEntry::getId))
                 .toList();
         List<Conflict> result = new ArrayList<>();
-        for (int i = 0; i < entries.size(); i++) {
-            for (int j = i + 1; j < entries.size(); j++) {
-                result.addAll(compare(entries.get(i), entries.get(j)));
+        Map<String, List<ScheduleEntry>> candidates = new HashMap<>();
+        Set<String> compared = new HashSet<>();
+        for (ScheduleEntry entry : entries) {
+            String[] keys = {
+                "R:" + entry.getDayOfWeek() + ":" + entry.getRoom().getId(),
+                "L:" + entry.getDayOfWeek() + ":" + entry.getCourseSection().getLecturer().getId(),
+                "C:" + entry.getDayOfWeek() + ":" + entry.getCourseSection().getId()
+            };
+            for (String key : keys) {
+                List<ScheduleEntry> earlier = candidates.computeIfAbsent(key, ignored -> new ArrayList<>());
+                for (ScheduleEntry other : earlier) {
+                    if (other.getEndDate().isBefore(entry.getStartDate())
+                            || entry.getEndDate().isBefore(other.getStartDate())
+                            || other.getStartSlot().getOrder() > entry.getEndSlot().getOrder()
+                            || entry.getStartSlot().getOrder() > other.getEndSlot().getOrder()) continue;
+                    String pair = other.getId() + ":" + entry.getId();
+                    if (compared.add(pair)) result.addAll(compare(other, entry));
+                }
+                earlier.add(entry);
             }
         }
         return result;

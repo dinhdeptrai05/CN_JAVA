@@ -69,7 +69,9 @@ public class CourseSectionPanel extends JPanel implements Refreshable {
 
     private void buildFilters() {
         semesterBox.addItem("Tất cả học kỳ");
-        controllers.catalog().getSemesters().forEach(semester -> semesterBox.addItem(semester.getName()));
+        semesterBox.addItem("Học kỳ hiện tại");
+        controllers.catalog().getSemesters().forEach(semester -> semesterBox.addItem(semester.toString()));
+        semesterBox.setSelectedIndex(1);
         departmentBox.addItem("Tất cả khoa");
         controllers.catalog().getDepartments().forEach(department -> departmentBox.addItem(department.getName()));
         statusBox.addItem("Tất cả trạng thái");

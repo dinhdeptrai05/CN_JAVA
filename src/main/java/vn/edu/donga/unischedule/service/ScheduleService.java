@@ -2,6 +2,7 @@ package vn.edu.donga.unischedule.service;
 
 import vn.edu.donga.unischedule.model.Conflict;
 import vn.edu.donga.unischedule.model.ScheduleEntry;
+import vn.edu.donga.unischedule.model.TimetablePeriod;
 import vn.edu.donga.unischedule.model.Student;
 import vn.edu.donga.unischedule.model.User;
 import vn.edu.donga.unischedule.model.Enums.ConflictType;
@@ -30,24 +31,47 @@ public class ScheduleService {
         return scheduleRepository.findAll();
     }
 
+    public List<ScheduleEntry> findByWeek(LocalDate weekStart) {
+        return scheduleRepository.findByWeek(weekStart);
+    }
+
     public List<ScheduleEntry> findByWeekForUser(LocalDate weekStart, User user) {
-        if (scheduleRepository instanceof vn.edu.donga.unischedule.repository.jdbc.JdbcScheduleRepository jdbc) return jdbc.findForUser(weekStart, user);
+        if (scheduleRepository instanceof vn.edu.donga.unischedule.repository.jdbc.JdbcScheduleRepository jdbc)
+            return visibleRows(jdbc.findForUser(weekStart, user), weekStart, user);
         List<ScheduleEntry> entries = scheduleRepository.findByWeek(weekStart);
         if (user.getRole() == Role.ADMIN || user.getRole() == Role.ACADEMIC) {
-            return entries;
+            return visibleRows(entries, weekStart, user);
         }
         if (user.getRole() == Role.LECTURER) {
-            return entries.stream()
+            return visibleRows(entries.stream()
                     .filter(entry -> entry.getCourseSection().getLecturer().getId().equals(user.getId()))
-                    .toList();
+                    .toList(), weekStart, user);
         }
         if (user instanceof Student student) {
-            return entries.stream()
+            return visibleRows(entries.stream()
                     .filter(entry -> entry.getCourseSection().getCourse().getDepartment().getCode()
                             .equalsIgnoreCase(student.getClassCode().substring(0, 4)))
-                    .toList();
+                    .toList(), weekStart, user);
         }
-        return entries;
+        return visibleRows(entries, weekStart, user);
+    }
+
+    /** Read-only institutional calendar. Students and lecturers see published entries only. */
+    public List<ScheduleEntry> findPublishedByWeekForUser(LocalDate weekStart, User user) {
+        return visibleRows(scheduleRepository.findByWeek(weekStart), weekStart, user).stream()
+                .filter(entry -> entry.getStatus() == vn.edu.donga.unischedule.model.Enums.ScheduleStatus.PUBLISHED)
+                .toList();
+    }
+
+    private List<ScheduleEntry> visibleRows(List<ScheduleEntry> entries, LocalDate weekStart, User user) {
+        LocalDate today = LocalDate.now();
+        return entries.stream()
+                .filter(entry -> TimetablePeriod.visibleTo(entry.getCourseSection().getSemester(), user.getRole(), today))
+                .filter(entry -> {
+                    LocalDate classDay = weekStart.plusDays(entry.getDayOfWeek() - 2L);
+                    return !classDay.isBefore(entry.getStartDate()) && !classDay.isAfter(entry.getEndDate());
+                })
+                .toList();
     }
 
     public ScheduleEntry save(ScheduleEntry entry) {

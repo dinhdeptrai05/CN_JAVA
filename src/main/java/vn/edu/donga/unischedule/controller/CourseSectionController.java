@@ -18,7 +18,10 @@ public final class CourseSectionController {
 
     public List<CourseSection> search(User user, String keyword, String semester, String department, String status) {
         return service.findForUser(user).stream()
-                .filter(section -> semester == null || semester.startsWith("Tất cả") || section.getSemester().getName().equals(semester))
+                .filter(section -> semester == null || semester.startsWith("Tất cả")
+                        || semester.equals("Học kỳ hiện tại") && !section.getSemester().getStartDate().isAfter(LocalDate.now()) && !section.getSemester().getEndDate().isBefore(LocalDate.now())
+                        || section.getSemester().getName().equals(semester)
+                        || section.getSemester().toString().equals(semester))
                 .filter(section -> department == null || department.startsWith("Tất cả") || section.getCourse().getDepartment().getName().equals(department))
                 .filter(section -> status == null || status.startsWith("Tất cả") || section.getStatus().getDisplayName().equals(status))
                 .filter(section -> keyword == null || keyword.isBlank()

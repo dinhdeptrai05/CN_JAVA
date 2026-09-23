@@ -1,8 +1,10 @@
 package vn.edu.donga.unischedule.model;
 
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 
 public class Semester {
+    private static final DateTimeFormatter SHORT_DATE = DateTimeFormatter.ofPattern("dd/MM/yyyy");
     private Long id;
     private String name;
     private LocalDate startDate;
@@ -39,7 +41,7 @@ public class Semester {
 
     @Override
     public String toString() {
-        return name;
+        return name + " · " + startDate.format(SHORT_DATE);
     }
 
     @Override public boolean equals(Object other) {

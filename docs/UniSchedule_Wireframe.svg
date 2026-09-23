@@ -1,0 +1,183 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="2820" height="2780" viewBox="0 0 2820 2780" role="img" aria-label="Wireframe sáu màn hình UniSchedule">
+  <style>
+    text{font-family:Arial,"DejaVu Sans",sans-serif;fill:#28313a;font-size:17px}
+    .title{font-size:30px;font-weight:700}.screen{font-size:24px;font-weight:700}.h{font-size:21px;font-weight:700}.small{font-size:14px;fill:#65717a}.nav{font-size:16px}.muted{fill:#6f7880}
+    .board{fill:#f1f2f3}.window{fill:#fff;stroke:#46515a;stroke-width:3}.thin{fill:#fff;stroke:#81909b;stroke-width:2}.dash{fill:#fff;stroke:#81909b;stroke-width:2;stroke-dasharray:8 6}.pale{fill:#f7f8f9;stroke:#81909b;stroke-width:2}.dark{fill:#e7e9eb;stroke:#46515a;stroke-width:2}.line{stroke:#81909b;stroke-width:2}.lightline{stroke:#c4cbd0;stroke-width:2}
+  </style>
+  <rect width="2820" height="2780" class="board"/>
+  <text x="50" y="58" class="title">UNISCHEDULE · WIREFRAME GIAO DIỆN</text>
+  <text x="50" y="82" class="small">Phác thảo từ mã Java Swing của dự án · bố cục desktop · admin / phòng đào tạo</text>
+  <defs>
+    <g id="shell">
+      <rect width="1320" height="820" rx="8" class="window"/>
+      <rect x="0" y="0" width="240" height="820" fill="#f7f8f9" stroke="#81909b" stroke-width="2"/>
+      <text x="22" y="43" class="h">UniSchedule</text><text x="22" y="64" class="small">QUẢN LÝ THỜI KHÓA BIỂU</text>
+      <rect x="20" y="88" width="200" height="42" rx="6" class="dark"/><text x="47" y="115" class="nav">+  Tạo mới</text>
+      <text x="23" y="167" class="nav">Tổng quan điều hành</text>
+      <text x="23" y="208" class="nav">Báo cáo thống kê</text>
+      <text x="23" y="249" class="nav">Thời khóa biểu</text>
+      <text x="23" y="290" class="nav">Xung đột thời khóa biểu</text>
+      <text x="23" y="331" class="nav">Lớp học phần</text>
+      <text x="23" y="372" class="nav">Phòng và thiết bị</text>
+      <text x="23" y="413" class="nav">Quản lý yêu cầu</text>
+      <text x="23" y="454" class="nav">Tra cứu phòng trống</text>
+      <text x="23" y="495" class="nav">Quản lý người dùng</text>
+      <text x="23" y="536" class="nav">Nhật ký hoạt động</text>
+      <text x="23" y="577" class="nav">Thông báo</text>
+      <text x="23" y="618" class="nav">Hồ sơ và cài đặt</text>
+      <line x1="0" x2="240" y1="758" y2="758" class="lightline"/><text x="23" y="790" class="nav">Đăng xuất</text>
+      <rect x="240" y="0" width="1080" height="68" class="thin"/>
+      <rect x="650" y="15" width="340" height="38" rx="6" class="pale"/><text x="672" y="40" class="small">⌕  Tìm kiếm...</text>
+      <circle cx="1144" cy="34" r="16" class="thin"/><text x="1138" y="40" class="small">!</text>
+      <circle cx="1245" cy="34" r="18" class="pale"/><text x="1271" y="40" class="small">Admin</text>
+      <line x1="240" x2="1320" y1="788" y2="788" class="lightline"/><text x="262" y="809" class="small">MySQL · JDBC</text>
+    </g>
+    <g id="tableLines">
+      <line x1="0" x2="1000" y1="0" y2="0" class="line"/>
+      <line x1="0" x2="1000" y1="54" y2="54" class="lightline"/>
+      <line x1="0" x2="1000" y1="110" y2="110" class="lightline"/>
+      <line x1="0" x2="1000" y1="166" y2="166" class="lightline"/>
+      <line x1="0" x2="1000" y1="222" y2="222" class="lightline"/>
+      <line x1="0" x2="1000" y1="278" y2="278" class="lightline"/>
+    </g>
+  </defs>
+
+  <!-- 1: LoginFrame -->
+  <text x="50" y="127" class="screen">01 / Đăng nhập</text>
+  <g transform="translate(50 150)">
+    <rect width="1320" height="820" rx="8" class="window"/>
+    <rect x="0" y="0" width="1320" height="100" class="pale"/>
+    <text x="36" y="59" class="title">UniSchedule</text>
+    <rect x="362" y="152" width="596" height="584" rx="14" class="dash"/>
+    <text x="424" y="231" class="title">Đăng nhập</text>
+    <text x="424" y="264" class="muted">Chào mừng trở lại UniSchedule</text>
+    <text x="424" y="326" class="nav">Tên đăng nhập</text>
+    <rect x="424" y="340" width="472" height="56" rx="6" class="thin"/><text x="448" y="375" class="muted">admin</text>
+    <text x="424" y="442" class="nav">Mật khẩu</text>
+    <rect x="424" y="456" width="472" height="56" rx="6" class="thin"/><text x="448" y="491" class="muted">••••••••</text><text x="850" y="491">◉</text>
+    <rect x="424" y="555" width="472" height="58" rx="7" class="dark"/><text x="611" y="592" class="h">Đăng nhập</text>
+    <rect x="424" y="648" width="472" height="50" class="pale"/><text x="445" y="679" class="small">Thông báo lỗi / trạng thái đăng nhập</text>
+    <text x="28" y="793" class="small">Nguồn: LoginFrame.java · cửa sổ gốc 1080 × 700</text>
+  </g>
+
+  <!-- 2: DashboardPanel -->
+  <text x="1450" y="127" class="screen">02 / Tổng quan điều hành</text>
+  <g transform="translate(1450 150)">
+    <use href="#shell"/>
+    <rect x="13" y="140" width="214" height="39" rx="5" class="dark"/><text x="23" y="167" class="nav">Tổng quan điều hành</text>
+    <text x="268" y="43" class="h">Tổng quan điều hành</text>
+    <text x="267" y="111" class="h">Tổng quan điều hành</text><text x="267" y="137" class="small">Tuần hiện tại · bộ lọc học kỳ / khoa</text>
+    <rect x="265" y="160" width="1028" height="62" rx="6" class="pale"/><text x="285" y="197">Lưu ý điều hành: kiểm tra xung đột trước khi công bố lịch</text>
+    <g transform="translate(265 243)">
+      <rect width="242" height="112" rx="7" class="dash"/><rect x="260" width="242" height="112" rx="7" class="dash"/>
+      <rect x="520" width="242" height="112" rx="7" class="dash"/><rect x="780" width="242" height="112" rx="7" class="dash"/>
+      <text x="18" y="39" class="small">Chỉ số 1</text><text x="278" y="39" class="small">Chỉ số 2</text><text x="538" y="39" class="small">Chỉ số 3</text><text x="798" y="39" class="small">Chỉ số 4</text>
+      <text x="18" y="85" class="title">--</text><text x="278" y="85" class="title">--</text><text x="538" y="85" class="title">--</text><text x="798" y="85" class="title">--</text>
+    </g>
+    <rect x="265" y="378" width="660" height="322" rx="7" class="thin"/><text x="287" y="411" class="h">Lịch học trọng điểm hôm nay</text>
+    <line x1="284" x2="900" y1="431" y2="431" class="line"/><text x="290" y="459" class="small">Lớp học phần</text><text x="500" y="459" class="small">Ca</text><text x="610" y="459" class="small">Phòng</text><text x="760" y="459" class="small">Giảng viên</text>
+    <line x1="284" x2="900" y1="475" y2="475" class="lightline"/><line x1="284" x2="900" y1="543" y2="543" class="lightline"/><line x1="284" x2="900" y1="611" y2="611" class="lightline"/>
+    <rect x="286" y="643" width="235" height="38" rx="5" class="pale"/><text x="303" y="668" class="small">Xem toàn bộ lịch học</text>
+    <rect x="947" y="378" width="346" height="95" rx="7" class="dash"/><text x="966" y="410" class="h">Xung đột cần xử lý</text>
+    <rect x="947" y="489" width="346" height="95" rx="7" class="dash"/><text x="966" y="522" class="h">Sử dụng giảng đường</text>
+    <rect x="947" y="600" width="346" height="100" rx="7" class="dash"/><text x="966" y="633" class="h">Yêu cầu mới nhất</text>
+    <rect x="265" y="716" width="314" height="42" rx="5" class="pale"/><text x="285" y="743" class="small">Tra cứu phòng trống</text>
+    <rect x="595" y="716" width="314" height="42" rx="5" class="pale"/><text x="615" y="743" class="small">Thông báo mới</text>
+  </g>
+
+  <!-- 3: TimetablePanel -->
+  <text x="50" y="1027" class="screen">03 / Thời khóa biểu</text>
+  <g transform="translate(50 1050)">
+    <use href="#shell"/>
+    <rect x="13" y="222" width="214" height="39" rx="5" class="dark"/><text x="23" y="249" class="nav">Thời khóa biểu</text>
+    <text x="268" y="43" class="h">Thời khóa biểu</text>
+    <text x="267" y="112" class="h">Thời khóa biểu tuần</text>
+    <rect x="265" y="138" width="360" height="44" rx="5" class="thin"/><text x="282" y="166" class="small">Tìm môn, lớp, giảng viên, phòng</text>
+    <rect x="641" y="138" width="150" height="44" rx="5" class="thin"/><text x="657" y="166" class="small">Học kỳ ▾</text>
+    <rect x="807" y="138" width="150" height="44" rx="5" class="thin"/><text x="823" y="166" class="small">Khoa ▾</text>
+    <rect x="973" y="138" width="150" height="44" rx="5" class="thin"/><text x="989" y="166" class="small">Giảng viên ▾</text>
+    <rect x="1139" y="138" width="154" height="44" rx="5" class="thin"/><text x="1155" y="166" class="small">Phòng ▾</text>
+    <rect x="265" y="200" width="125" height="42" rx="5" class="pale"/><text x="280" y="227" class="small">Tuần trước</text>
+    <rect x="399" y="200" width="144" height="42" rx="5" class="pale"/><text x="414" y="227" class="small">Tuần hiện tại</text>
+    <rect x="552" y="200" width="113" height="42" rx="5" class="pale"/><text x="567" y="227" class="small">Tuần sau</text>
+    <text x="725" y="228" class="small">Tuần 22/09 – 28/09</text>
+    <rect x="1115" y="200" width="178" height="42" rx="5" class="thin"/><text x="1131" y="227" class="small">Dạng lịch / bảng ▾</text>
+    <rect x="265" y="264" width="1028" height="424" class="thin"/>
+    <rect x="265" y="264" width="1028" height="55" class="pale"/>
+    <g class="small"><text x="285" y="297">Ca</text><text x="413" y="297">Thứ 2</text><text x="547" y="297">Thứ 3</text><text x="681" y="297">Thứ 4</text><text x="815" y="297">Thứ 5</text><text x="949" y="297">Thứ 6</text><text x="1083" y="297">Thứ 7</text><text x="1213" y="297">CN</text></g>
+    <g class="lightline"><line x1="386" x2="386" y1="264" y2="688"/><line x1="520" x2="520" y1="264" y2="688"/><line x1="654" x2="654" y1="264" y2="688"/><line x1="788" x2="788" y1="264" y2="688"/><line x1="922" x2="922" y1="264" y2="688"/><line x1="1056" x2="1056" y1="264" y2="688"/><line x1="1190" x2="1190" y1="264" y2="688"/><line x1="265" x2="1293" y1="409" y2="409"/><line x1="265" x2="1293" y1="499" y2="499"/><line x1="265" x2="1293" y1="589" y2="589"/></g>
+    <text x="286" y="362" class="small">Ca 1–2</text><text x="286" y="452" class="small">Ca 3–4</text><text x="286" y="542" class="small">Ca 5–6</text><text x="286" y="632" class="small">Ca 7–8</text>
+    <rect x="399" y="332" width="108" height="63" rx="4" class="dash"/><text x="408" y="358" class="small">Lớp học</text><text x="408" y="379" class="small">Phòng · GV</text>
+    <rect x="666" y="422" width="108" height="63" rx="4" class="dash"/><text x="675" y="448" class="small">Lớp học</text><text x="675" y="469" class="small">Phòng · GV</text>
+    <rect x="934" y="513" width="108" height="63" rx="4" class="dash"/><text x="943" y="539" class="small">Lớp học</text><text x="943" y="560" class="small">Phòng · GV</text>
+    <rect x="265" y="713" width="155" height="44" rx="5" class="dark"/><text x="289" y="741" class="small">+ Thêm lịch</text>
+    <rect x="436" y="713" width="126" height="44" rx="5" class="pale"/><text x="467" y="741" class="small">Sửa</text>
+    <rect x="578" y="713" width="150" height="44" rx="5" class="pale"/><text x="597" y="741" class="small">Xem chi tiết</text>
+  </g>
+
+  <!-- 4: RoomManagementPanel -->
+  <text x="1450" y="1027" class="screen">04 / Phòng và thiết bị</text>
+  <g transform="translate(1450 1050)">
+    <use href="#shell"/>
+    <rect x="13" y="345" width="214" height="39" rx="5" class="dark"/><text x="23" y="372" class="nav">Phòng và thiết bị</text>
+    <text x="268" y="43" class="h">Phòng và thiết bị</text>
+    <text x="267" y="111" class="h">Quản lý phòng học</text>
+    <rect x="265" y="139" width="405" height="44" rx="5" class="thin"/><text x="282" y="167" class="small">Tìm mã, tên phòng hoặc thiết bị</text>
+    <rect x="686" y="139" width="140" height="44" rx="5" class="thin"/><text x="702" y="167" class="small">Tòa nhà ▾</text>
+    <rect x="842" y="139" width="140" height="44" rx="5" class="thin"/><text x="858" y="167" class="small">Loại phòng ▾</text>
+    <rect x="998" y="139" width="140" height="44" rx="5" class="thin"/><text x="1014" y="167" class="small">Sức chứa ▾</text>
+    <rect x="1154" y="139" width="139" height="44" rx="5" class="thin"/><text x="1170" y="167" class="small">Trạng thái ▾</text>
+    <rect x="265" y="207" width="1028" height="475" class="thin"/>
+    <rect x="265" y="207" width="1028" height="54" class="pale"/>
+    <text x="285" y="240" class="small">Mã phòng</text><text x="445" y="240" class="small">Tên phòng</text><text x="650" y="240" class="small">Tòa nhà</text><text x="815" y="240" class="small">Loại</text><text x="950" y="240" class="small">Sức chứa</text><text x="1103" y="240" class="small">Trạng thái</text>
+    <g transform="translate(277 270)"><use href="#tableLines"/></g>
+    <g class="small"><text x="286" y="304">P.101</text><text x="445" y="304">Phòng học</text><text x="650" y="304">A</text><text x="815" y="304">Lý thuyết</text><text x="950" y="304">60</text><text x="1103" y="304">Sẵn sàng</text></g>
+    <rect x="265" y="711" width="146" height="46" rx="5" class="dark"/><text x="287" y="740" class="small">+ Thêm phòng</text>
+    <rect x="427" y="711" width="98" height="46" rx="5" class="pale"/><text x="455" y="740" class="small">Sửa</text>
+    <rect x="541" y="711" width="188" height="46" rx="5" class="pale"/><text x="558" y="740" class="small">Bảo trì / mở lại</text>
+    <rect x="745" y="711" width="160" height="46" rx="5" class="pale"/><text x="767" y="740" class="small">Xem chi tiết</text>
+  </g>
+
+  <!-- 5: RequestManagementPanel -->
+  <text x="50" y="1927" class="screen">05 / Quản lý yêu cầu</text>
+  <g transform="translate(50 1950)">
+    <use href="#shell"/>
+    <rect x="13" y="386" width="214" height="39" rx="5" class="dark"/><text x="23" y="413" class="nav">Quản lý yêu cầu</text>
+    <text x="268" y="43" class="h">Quản lý yêu cầu</text>
+    <text x="267" y="111" class="h">Danh sách yêu cầu</text>
+    <rect x="265" y="139" width="418" height="44" rx="5" class="thin"/><text x="282" y="167" class="small">Tìm người gửi, nội dung yêu cầu</text>
+    <rect x="700" y="139" width="190" height="44" rx="5" class="thin"/><text x="716" y="167" class="small">Loại yêu cầu ▾</text>
+    <rect x="265" y="205" width="1028" height="50" rx="5" class="pale"/><text x="284" y="237" class="small">Tất cả</text><text x="400" y="237" class="small">Chờ duyệt</text><text x="556" y="237" class="small">Đã duyệt</text><text x="694" y="237" class="small">Từ chối</text>
+    <rect x="265" y="273" width="1028" height="405" class="thin"/>
+    <rect x="265" y="273" width="1028" height="55" class="pale"/>
+    <text x="285" y="308" class="small">Người gửi</text><text x="460" y="308" class="small">Loại yêu cầu</text><text x="700" y="308" class="small">Nội dung</text><text x="950" y="308" class="small">Ngày gửi</text><text x="1110" y="308" class="small">Trạng thái</text>
+    <g transform="translate(277 342)"><use href="#tableLines"/></g>
+    <rect x="265" y="707" width="155" height="48" rx="5" class="dark"/><text x="287" y="737" class="small">+ Gửi yêu cầu</text>
+    <rect x="437" y="707" width="145" height="48" rx="5" class="pale"/><text x="455" y="737" class="small">Xem chi tiết</text>
+    <rect x="599" y="707" width="112" height="48" rx="5" class="pale"/><text x="624" y="737" class="small">Duyệt</text>
+    <rect x="728" y="707" width="112" height="48" rx="5" class="pale"/><text x="751" y="737" class="small">Từ chối</text>
+  </g>
+
+  <!-- 6: ReportPanel -->
+  <text x="1450" y="1927" class="screen">06 / Báo cáo thống kê</text>
+  <g transform="translate(1450 1950)">
+    <use href="#shell"/>
+    <rect x="13" y="181" width="214" height="39" rx="5" class="dark"/><text x="23" y="208" class="nav">Báo cáo thống kê</text>
+    <text x="268" y="43" class="h">Báo cáo thống kê</text>
+    <text x="267" y="111" class="h">Tạo báo cáo</text>
+    <rect x="265" y="139" width="225" height="52" rx="5" class="thin"/><text x="283" y="171" class="small">Học kỳ ▾</text>
+    <rect x="506" y="139" width="225" height="52" rx="5" class="thin"/><text x="524" y="171" class="small">Khoa ▾</text>
+    <rect x="747" y="139" width="225" height="52" rx="5" class="thin"/><text x="765" y="171" class="small">Khoảng ngày ▾</text>
+    <rect x="991" y="139" width="301" height="52" rx="5" class="dark"/><text x="1081" y="171" class="small">Tạo báo cáo</text>
+    <rect x="265" y="218" width="1028" height="55" rx="5" class="pale"/><text x="284" y="252" class="small">Trạng thái: chọn bộ lọc và tạo báo cáo</text>
+    <rect x="265" y="298" width="1028" height="382" rx="5" class="thin"/><text x="286" y="333" class="h">Kết quả thống kê</text>
+    <line x1="284" x2="1274" y1="352" y2="352" class="line"/>
+    <rect x="285" y="373" width="462" height="265" class="dash"/><text x="307" y="405" class="small">Bảng số liệu: sử dụng phòng, lớp học</text>
+    <line x1="307" x2="725" y1="430" y2="430" class="lightline"/><line x1="307" x2="725" y1="486" y2="486" class="lightline"/><line x1="307" x2="725" y1="542" y2="542" class="lightline"/>
+    <rect x="771" y="373" width="501" height="265" class="dash"/><text x="793" y="405" class="small">Bảng số liệu: giảng dạy, yêu cầu</text>
+    <line x1="793" x2="1250" y1="430" y2="430" class="lightline"/><line x1="793" x2="1250" y1="486" y2="486" class="lightline"/><line x1="793" x2="1250" y1="542" y2="542" class="lightline"/>
+    <rect x="265" y="707" width="155" height="48" rx="5" class="pale"/><text x="293" y="737" class="small">Xuất PDF</text>
+    <rect x="437" y="707" width="155" height="48" rx="5" class="pale"/><text x="465" y="737" class="small">Xuất Word</text>
+    <rect x="609" y="707" width="155" height="48" rx="5" class="pale"/><text x="637" y="737" class="small">Xuất Excel</text>
+  </g>
+</svg>

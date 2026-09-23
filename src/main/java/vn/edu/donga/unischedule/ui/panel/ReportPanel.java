@@ -36,6 +36,13 @@ public final class ReportPanel extends JPanel implements Refreshable {
         JPanel filters=new JPanel(new GridLayout(1,4,12,0));filters.setOpaque(false);
         filters.add(field("Từ ngày (yyyy-MM-dd)",from));filters.add(field("Đến ngày (yyyy-MM-dd)",to));filters.add(field("Học kỳ",semester));filters.add(field("Khoa",department));
         JPanel actions=new JPanel(new FlowLayout(FlowLayout.LEFT,8,0));actions.setOpaque(false);actions.add(load);actions.add(pdf);actions.add(word);actions.add(excel);
+        actions.add(new JLabel("Năm:"));
+        var quickYear=new JComboBox<Integer>();
+        int currentYear=LocalDate.now().getYear();
+        for(int year=currentYear-5;year<=currentYear;year++)quickYear.addItem(year);
+        quickYear.setSelectedItem(currentYear);actions.add(quickYear);
+        var yearly=new SecondaryButton("Xem năm");
+        yearly.addActionListener(e->{selectYear((Integer)quickYear.getSelectedItem());generate(false);});actions.add(yearly);
         JPanel top=new JPanel(new BorderLayout(0,14));top.setOpaque(false);top.add(filters,BorderLayout.NORTH);top.add(actions,BorderLayout.CENTER);
         JPanel summary=new JPanel(new BorderLayout(0,10));summary.setOpaque(false);metrics.setOpaque(false);summary.add(metrics,BorderLayout.CENTER);
         JPanel feedback=new JPanel(new BorderLayout(0,5));feedback.setOpaque(false);feedback.add(status,BorderLayout.NORTH);
@@ -50,6 +57,11 @@ public final class ReportPanel extends JPanel implements Refreshable {
     private JPanel field(String label,JComponent input) {var panel=new JPanel(new BorderLayout(0,6));panel.setOpaque(false);panel.add(new JLabel(label),BorderLayout.NORTH);panel.add(input,BorderLayout.CENTER);return panel;}
     private void dirty(){report=null;setExportEnabled(false);status.setText("Bộ lọc đã thay đổi. Nhấn Tạo báo cáo để cập nhật số liệu.");}
     @Override public void refresh() { generate(false); }
+    public void selectYear(int year) {
+        LocalDate end=LocalDate.of(year,12,31),today=LocalDate.now();
+        from.setText(LocalDate.of(year,1,1).toString());to.setText(end.isAfter(today)?today.toString():end.toString());
+        semester.setSelectedIndex(0);department.setSelectedIndex(0);
+    }
     private void generate(boolean notify) {
         if(busy)return;
         String start=from.getText(),end=to.getText();Long sid=semester.getSelectedItem() instanceof Semester s?s.getId():null,did=department.getSelectedItem() instanceof Department d?d.getId():null;
