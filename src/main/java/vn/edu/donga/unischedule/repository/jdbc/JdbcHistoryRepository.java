@@ -6,14 +6,15 @@ import vn.edu.donga.unischedule.repository.HistoryRepository;
 import java.time.LocalDate;
 import java.util.*;
 
-/** Reads five years of activity without loading 10k+ notifications/audit entries into Swing. */
+/** Reads the forward simulation window without loading large detail tables into Swing. */
 public final class JdbcHistoryRepository implements HistoryRepository {
     private final JdbcDatabase db;
     public JdbcHistoryRepository(JdbcDatabase db) {this.db=db;}
     @Override public HistorySnapshot load() {
         db.require(Role.ADMIN,Role.ACADEMIC,Role.LECTURER,Role.STUDENT);
         boolean staff=db.hasRole(Role.ADMIN)||db.hasRole(Role.ACADEMIC);
-        LocalDate to=LocalDate.now(),from=to.minusYears(staff?5:3);
+        LocalDate from=LocalDate.of(2026,1,1);
+        LocalDate to=LocalDate.of(staff?2030:2028,12,31);
         return db.transaction(connection -> {
             var years=new TreeMap<Integer,long[]>();
             for(int year=from.getYear();year<=to.getYear();year++)years.put(year,new long[11]);
@@ -26,7 +27,7 @@ public final class JdbcHistoryRepository implements HistoryRepository {
             accumulate(years,7,"change_requests","created_at",from,to,"status='REJECTED'");
             accumulate(years,8,"change_requests","created_at",from,to,"status='PENDING'");
             accumulate(years,9,"maintenance_records","start_date",from,to,null);
-            // Expand weekly schedules into occurrences. Only days that have already happened count.
+            // Expand recurring weekly schedules into occurrences, including planned future lessons.
             String sql="WITH RECURSIVE lessons AS ("+
                     "SELECT DATE_ADD(start_date,INTERVAL MOD(CAST(day_of_week AS SIGNED)-2-WEEKDAY(start_date)+7,7) DAY) lesson_date,end_date FROM schedules WHERE status='PUBLISHED' AND start_date<=? AND end_date>=? "+
                     "UNION ALL SELECT DATE_ADD(lesson_date,INTERVAL 7 DAY),end_date FROM lessons WHERE DATE_ADD(lesson_date,INTERVAL 7 DAY)<=end_date) "+

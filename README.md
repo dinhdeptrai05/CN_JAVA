@@ -43,11 +43,13 @@ mvn exec:java # sau khi cấu hình MySQL theo README_DATABASE.md
 - Hồ sơ và cài đặt.
 - Nhật ký hoạt động lưu trong MySQL.
 
-## Mô phỏng 5 năm (2027–2031)
+## Mô phỏng 5 năm (2026–2030)
 
-Chạy `./scripts/run-simulation.ps1` để tạo dữ liệu riêng cho 18 bảng với seed, kiểm tra nhất quán và báo cáo HTML theo năm/tháng. Không ghi vào database ứng dụng. Xem [hướng dẫn, giả định và kết quả](docs/SIMULATION.md) hoặc [báo cáo đã chạy với seed 42](simulation/results/2027-2031-seed42-verified/report.html).
+Chạy `./scripts/run-simulation.ps1` để tạo dữ liệu riêng cho 18 bảng với seed, kiểm tra nhất quán và báo cáo HTML theo năm/tháng. Mặc định mô phỏng từ 2026 đến 2030 và không ghi vào database ứng dụng. Xem [hướng dẫn, giả định và kết quả](docs/SIMULATION.md).
 
 ## Seed dữ liệu như ứng dụng đã sử dụng 5 năm
+
+Các seed lịch sử bên dưới được giữ làm dữ liệu nền và để tái tạo database cũ. Phạm vi đang dùng trên giao diện đã chuyển sang **2026–2030**; hãy chạy [seed tiến tới 5 năm](docs/FORWARD_FIVE_YEAR_SEED.md) sau các seed nền.
 
 Chạy `./scripts/seed-history.ps1` để **thêm dữ liệu lịch sử trực tiếp vào database hiện tại**: hàng trăm người dùng, 11 học kỳ, lớp học phần, hàng nghìn đăng ký/thông báo/nhật ký, lịch và yêu cầu. Giữ nguyên dữ liệu cũ; chạy lại không chèn trùng. Dùng `-Preview` để chỉ xem trước hoặc `-Verify` để kiểm chứng.
 
@@ -61,7 +63,7 @@ Bước mới nhất `./scripts/seed-four-day-timetable.ps1` lấp lịch học 
 
 Màn hình **Người dùng** có bộ lọc năm đăng nhập cuối và tổng hợp số tài khoản theo năm. Dữ liệu đăng nhập mô phỏng hiện phân bố từ 2022 đến 2026; tài khoản `ACTIVE` là tài khoản được phép đăng nhập, còn `INACTIVE` là đã ngừng sử dụng. Xem [cách tái tạo và kiểm chứng các mốc đăng nhập](docs/HISTORY_SEED.md).
 
-Màn hình **Thời khóa biểu** chọn năm và **Học kỳ 1 / Học kỳ 2** theo ngày học thực tế. Admin/Đào tạo xem cửa sổ 5 năm; Giảng viên/Sinh viên chọn được các năm 2024–2026. Lịch cũ tự mở về tuần đầu kỳ; Giảng viên/Sinh viên có thể xem lịch cá nhân hoặc lịch đã công bố toàn trường. Lệnh `./scripts/test-timetable-ui.ps1` kiểm tra các kỳ và xuất ảnh tại `target/timetable-ui-previews`. Xem [cách dùng và số liệu theo kỳ](docs/HISTORY_SEED.md#thời-khóa-biểu-theo-năm-và-kỳ).
+Màn hình **Thời khóa biểu** chọn năm và **Học kỳ 1 / Học kỳ 2** theo ngày học thực tế. Admin/Đào tạo xem 2026–2030; Giảng viên/Sinh viên xem 2026–2028. Chạy `./scripts/seed-forward-five-years.ps1` để tái tạo lịch tương lai bằng seed cố định. Xem [phạm vi, số liệu và cách kiểm tra](docs/FORWARD_FIVE_YEAR_SEED.md).
 
 ## Kiểm chứng
 

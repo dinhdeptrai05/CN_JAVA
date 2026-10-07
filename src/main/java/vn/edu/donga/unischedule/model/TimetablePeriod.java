@@ -7,6 +7,9 @@ import java.util.List;
 
 /** A calendar-year term; multiple catalog semesters may share the same teaching period. */
 public record TimetablePeriod(int year, int half) {
+    public static final int SIMULATION_START_YEAR = 2026;
+    public static final int STAFF_VISIBLE_YEARS = 5;
+    public static final int USER_VISIBLE_YEARS = 3;
     public static TimetablePeriod of(LocalDate date) {
         return new TimetablePeriod(date.getYear(), date.getMonthValue() <= 6 ? 1 : 2);
     }
@@ -16,9 +19,10 @@ public record TimetablePeriod(int year, int half) {
     }
 
     public static boolean visibleTo(Semester semester, Role role, LocalDate today) {
-        LocalDate firstDay = role == Role.ADMIN || role == Role.ACADEMIC
-                ? today.minusYears(5) : LocalDate.of(today.getYear() - 2, 1, 1);
-        return !semester.getStartDate().isBefore(firstDay) && !semester.getStartDate().isAfter(today);
+        int visibleYears = role == Role.ADMIN || role == Role.ACADEMIC
+                ? STAFF_VISIBLE_YEARS : USER_VISIBLE_YEARS;
+        int year = semester.getStartDate().getYear();
+        return year >= SIMULATION_START_YEAR && year < SIMULATION_START_YEAR + visibleYears;
     }
 
     public boolean includes(Semester semester) {

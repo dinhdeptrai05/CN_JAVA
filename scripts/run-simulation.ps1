@@ -1,5 +1,5 @@
 param(
-    [int]$StartYear = 2027,
+    [int]$StartYear = 2026,
     [long]$Seed = 42,
     [string]$Baseline = 'simulation/baseline-2026-09-22.properties',
     [string]$Output = '',

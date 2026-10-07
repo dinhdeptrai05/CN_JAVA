@@ -14,7 +14,7 @@ import java.awt.*;
 import java.util.*;
 import java.util.List;
 
-/** Role-scoped live history: five years for staff, three for lecturers and students. */
+/** Role-scoped forward simulation: five years for staff, three for lecturers and students. */
 public final class HistoryPanel extends JPanel implements Refreshable {
     private final AppControllers controllers;
     private final ScreenNavigator navigator;
@@ -32,7 +32,7 @@ public final class HistoryPanel extends JPanel implements Refreshable {
         visibleYears=staff?5:3;
         setLayout(new BorderLayout(0,14));setBackground(AppConfig.BACKGROUND);setBorder(BorderFactory.createEmptyBorder(20,22,22,22));
         var top=new JPanel(new BorderLayout(0,12));top.setOpaque(false);
-        var intro=new JLabel("Hoạt động theo năm · tính trực tiếp từ dữ liệu ứng dụng");intro.setFont(intro.getFont().deriveFont(Font.BOLD,16f));top.add(intro,BorderLayout.NORTH);
+        var intro=new JLabel("Hoạt động theo năm · giai đoạn 2026 trở đi");intro.setFont(intro.getFont().deriveFont(Font.BOLD,16f));top.add(intro,BorderLayout.NORTH);
         var actions=new JPanel(new FlowLayout(FlowLayout.LEFT,10,0));actions.setOpaque(false);
         actions.add(new JLabel("Năm:"));actions.add(yearBox);
         if(staff) {
@@ -56,7 +56,7 @@ public final class HistoryPanel extends JPanel implements Refreshable {
         table.getSelectionModel().addListSelectionListener(e->{if(!e.getValueIsAdjusting()&&table.getSelectedRow()>=0&&snapshot!=null)yearBox.setSelectedItem(snapshot.years().get(table.convertRowIndexToModel(table.getSelectedRow())).year());});
         yearBox.addActionListener(e->showSelected());
         var bottom=new JPanel(new BorderLayout(0,8));bottom.setOpaque(false);
-        var note=new JTextArea("Số buổi học chỉ tính lịch đã công bố và ngày đã diễn ra. Lượt đăng ký không phải số sinh viên duy nhất. Hai năm ở đầu và cuối khoảng "+visibleYears+" năm có thể chỉ gồm một phần năm lịch.");
+        var note=new JTextArea("Số buổi học gồm lịch đã công bố trong giai đoạn mô phỏng. Lượt đăng ký không phải số sinh viên duy nhất. Admin/Đào tạo xem 2026–2030; Giảng viên/Sinh viên xem 2026–2028.");
         note.setEditable(false);note.setLineWrap(true);note.setWrapStyleWord(true);note.setBackground(AppConfig.BACKGROUND);note.setForeground(AppConfig.MUTED);note.setRows(2);bottom.add(note,BorderLayout.NORTH);
         var tableScroll=new JScrollPane(table);tableScroll.setPreferredSize(new Dimension(800,190));bottom.add(tableScroll,BorderLayout.CENTER);add(bottom,BorderLayout.SOUTH);
     }
@@ -80,7 +80,7 @@ public final class HistoryPanel extends JPanel implements Refreshable {
         if(yearBox.getItemCount()>0)yearBox.setSelectedIndex(yearBox.getItemCount()-1);
         ((AbstractTableModel)table.getModel()).fireTableDataChanged();
         long sessions=value.years().stream().mapToLong(HistorySnapshot.Year::sessions).sum();
-        status.setText("Khoảng "+value.from()+" → "+value.to()+"  ·  "+value.activeUsers()+" tài khoản đang hoạt động  ·  "+sessions+" buổi đã diễn ra");
+        status.setText("Khoảng "+value.from()+" → "+value.to()+"  ·  "+value.activeUsers()+" tài khoản đang hoạt động  ·  "+sessions+" buổi học");
         showSelected();chart.revalidate();chart.repaint();
     }
     private void showSelected() {

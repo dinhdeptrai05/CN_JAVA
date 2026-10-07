@@ -105,7 +105,8 @@ class TimetableHistoryIntegrationTest {
             ReportPanel panel = new ReportPanel(controllers, admin);
             JComboBox<?> semesterBox = findBox(panel, Semester.class);
             assertNotNull(semesterBox);
-            assertEquals(semesters.size() + 1, semesterBox.getItemCount());
+            long visible = semesters.stream().filter(item -> TimetablePeriod.visibleTo(item, admin.getRole(), LocalDate.now())).count();
+            assertEquals(visible + 1, semesterBox.getItemCount());
             assertTrue(contains(semesterBox, first2026.get(0)));
             assertTrue(contains(semesterBox, first2026.get(1)));
         });
@@ -120,21 +121,21 @@ class TimetableHistoryIntegrationTest {
         var academic = accounts.stream().filter(user -> user.getUsername().equals("daotao")).findFirst().orElseThrow();
         var lecturer = accounts.stream().filter(user -> user.getUsername().equals("giangvien")).findFirst().orElseThrow();
         var student = accounts.stream().filter(user -> user.getUsername().equals("sinhvien")).findFirst().orElseThrow();
-        LocalDate fall2022 = LocalDate.of(2022, 9, 12);
         LocalDate fall2024 = LocalDate.of(2024, 9, 9);
-        assertFalse(services.schedules().findByWeekForUser(fall2022, admin).isEmpty());
-        assertFalse(services.schedules().findByWeekForUser(fall2022, academic).isEmpty());
-        assertTrue(services.schedules().findPublishedByWeekForUser(fall2022, lecturer).isEmpty());
-        assertTrue(services.schedules().findPublishedByWeekForUser(fall2022, student).isEmpty());
-        assertFalse(services.schedules().findPublishedByWeekForUser(fall2024, lecturer).isEmpty());
-        assertFalse(services.schedules().findPublishedByWeekForUser(fall2024, student).isEmpty());
+        LocalDate fall2027 = LocalDate.of(2027, 9, 6);
+        assertTrue(services.schedules().findByWeekForUser(fall2024, admin).isEmpty());
+        assertTrue(services.schedules().findByWeekForUser(fall2024, academic).isEmpty());
+        assertTrue(services.schedules().findPublishedByWeekForUser(fall2024, lecturer).isEmpty());
+        assertTrue(services.schedules().findPublishedByWeekForUser(fall2024, student).isEmpty());
+        assertFalse(services.schedules().findPublishedByWeekForUser(fall2027, lecturer).isEmpty());
+        assertFalse(services.schedules().findPublishedByWeekForUser(fall2027, student).isEmpty());
         var semesters = services.catalog().getSemesters();
         var staffPeriods = semesters.stream().filter(semester -> TimetablePeriod.visibleTo(semester, admin.getRole(), LocalDate.now()))
                 .map(TimetablePeriod::of).distinct().toList();
         var studentPeriods = semesters.stream().filter(semester -> TimetablePeriod.visibleTo(semester, student.getRole(), LocalDate.now()))
                 .map(TimetablePeriod::of).distinct().toList();
-        assertEquals(11, staffPeriods.size()); // autumn 2021 + two terms in each following calendar year
-        assertEquals(6, studentPeriods.size()); // spring and autumn, 2024–2026
+        assertEquals(10, staffPeriods.size()); // two terms in each year, 2026–2030
+        assertEquals(6, studentPeriods.size()); // two terms in each year, 2026–2028
         for (var period : staffPeriods) {
             LocalDate week = period.firstDay(semesters).with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY));
             assertFalse(services.schedules().findByWeekForUser(week, admin).stream()
@@ -149,10 +150,10 @@ class TimetableHistoryIntegrationTest {
         Path output = Path.of("target", "timetable-ui-previews");
         Files.createDirectories(output);
         SwingUtilities.invokeAndWait(() -> ThemeConfig.install());
-        renderRole(controllers, admin, 2022, output.resolve("admin-2022.png"), true);
-        renderRole(controllers, academic, 2024, output.resolve("academic-2024.png"), true);
-        renderRole(controllers, lecturer, 2024, output.resolve("lecturer-2024.png"), false);
-        renderRole(controllers, student, 2024, output.resolve("student-2024.png"), false);
+        renderRole(controllers, admin, 2030, output.resolve("admin-2030.png"), true);
+        renderRole(controllers, academic, 2029, output.resolve("academic-2029.png"), true);
+        renderRole(controllers, lecturer, 2028, output.resolve("lecturer-2028.png"), false);
+        renderRole(controllers, student, 2027, output.resolve("student-2027.png"), false);
         renderRole(controllers, admin, 2026, output.resolve("admin-2026.png"), true);
         renderRole(controllers, student, 2026, output.resolve("student-2026-personal.png"), false);
     }
@@ -166,11 +167,12 @@ class TimetableHistoryIntegrationTest {
             JComboBox<?> periodBox = findBox(panel, TimetablePeriod.class);
             assertNotNull(yearBox);
             assertNotNull(periodBox);
-            assertEquals(staff, contains(yearBox, 2022));
-            assertEquals(staff ? 6 : 3, yearBox.getItemCount());
-            assertTrue(contains(yearBox, 2024));
-            assertTrue(contains(yearBox, 2025));
+            assertFalse(contains(yearBox, 2022));
+            assertEquals(staff ? 5 : 3, yearBox.getItemCount());
             assertTrue(contains(yearBox, 2026));
+            assertTrue(contains(yearBox, 2028));
+            assertEquals(staff, contains(yearBox, 2029));
+            assertEquals(staff, contains(yearBox, 2030));
             yearBox.setSelectedItem(year);
             periodBox.setSelectedItem(new TimetablePeriod(year, 2));
             JTable table = find(panel, JTable.class);

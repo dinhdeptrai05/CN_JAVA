@@ -29,11 +29,16 @@ class TimetablePeriodTest {
         assertNotEquals(originalFall.toString(), seededFall.toString());
         assertEquals(originalFall.getStartDate(), fall.firstDay(List.of(spring, originalFall, seededFall)));
         assertEquals(originalFall.getEndDate(), fall.lastDay(List.of(spring, originalFall, seededFall)));
-        assertTrue(TimetablePeriod.visibleTo(old, Role.ADMIN, today));
-        assertTrue(TimetablePeriod.visibleTo(old, Role.ACADEMIC, today));
+        assertFalse(TimetablePeriod.visibleTo(old, Role.ADMIN, today));
+        assertFalse(TimetablePeriod.visibleTo(old, Role.ACADEMIC, today));
         assertFalse(TimetablePeriod.visibleTo(old, Role.LECTURER, today));
         assertFalse(TimetablePeriod.visibleTo(old, Role.STUDENT, today));
         assertTrue(TimetablePeriod.visibleTo(spring, Role.STUDENT, today));
-        assertFalse(TimetablePeriod.visibleTo(next, Role.ADMIN, today));
+        assertTrue(TimetablePeriod.visibleTo(next, Role.ADMIN, today));
+        Semester year2030 = new Semester(20L, "Học kỳ 1 - 2030", LocalDate.of(2030, 9, 7), LocalDate.of(2030, 12, 27), "PLANNED");
+        Semester year2029 = new Semester(21L, "Học kỳ 1 - 2029", LocalDate.of(2029, 9, 7), LocalDate.of(2029, 12, 27), "PLANNED");
+        assertTrue(TimetablePeriod.visibleTo(year2030, Role.ADMIN, today));
+        assertFalse(TimetablePeriod.visibleTo(year2030, Role.STUDENT, today));
+        assertTrue(TimetablePeriod.visibleTo(year2029, Role.ACADEMIC, today));
     }
 }

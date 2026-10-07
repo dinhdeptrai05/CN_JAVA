@@ -32,14 +32,17 @@ public final class ReportPanel extends JPanel implements Refreshable {
         this.controllers=controllers;this.user=user;
         setLayout(new BorderLayout(0,14));setBackground(AppConfig.BACKGROUND);setBorder(BorderFactory.createEmptyBorder(20,22,22,22));
         semester.addItem("Tất cả học kỳ");department.addItem("Tất cả khoa");
-        controllers.catalog().getSemesters().forEach(semester::addItem);controllers.catalog().getDepartments().forEach(department::addItem);
+        controllers.catalog().getSemesters().stream()
+                .filter(item -> TimetablePeriod.visibleTo(item, user.getRole(), LocalDate.now()))
+                .forEach(semester::addItem);
+        controllers.catalog().getDepartments().forEach(department::addItem);
         JPanel filters=new JPanel(new GridLayout(1,4,12,0));filters.setOpaque(false);
         filters.add(field("Từ ngày (yyyy-MM-dd)",from));filters.add(field("Đến ngày (yyyy-MM-dd)",to));filters.add(field("Học kỳ",semester));filters.add(field("Khoa",department));
         JPanel actions=new JPanel(new FlowLayout(FlowLayout.LEFT,8,0));actions.setOpaque(false);actions.add(load);actions.add(pdf);actions.add(word);actions.add(excel);
         actions.add(new JLabel("Năm:"));
         var quickYear=new JComboBox<Integer>();
-        int currentYear=LocalDate.now().getYear();
-        for(int year=currentYear-5;year<=currentYear;year++)quickYear.addItem(year);
+        int currentYear=vn.edu.donga.unischedule.model.TimetablePeriod.SIMULATION_START_YEAR;
+        for(int year=currentYear;year<currentYear+vn.edu.donga.unischedule.model.TimetablePeriod.STAFF_VISIBLE_YEARS;year++)quickYear.addItem(year);
         quickYear.setSelectedItem(currentYear);actions.add(quickYear);
         var yearly=new SecondaryButton("Xem năm");
         yearly.addActionListener(e->{selectYear((Integer)quickYear.getSelectedItem());generate(false);});actions.add(yearly);
@@ -58,8 +61,8 @@ public final class ReportPanel extends JPanel implements Refreshable {
     private void dirty(){report=null;setExportEnabled(false);status.setText("Bộ lọc đã thay đổi. Nhấn Tạo báo cáo để cập nhật số liệu.");}
     @Override public void refresh() { generate(false); }
     public void selectYear(int year) {
-        LocalDate end=LocalDate.of(year,12,31),today=LocalDate.now();
-        from.setText(LocalDate.of(year,1,1).toString());to.setText(end.isAfter(today)?today.toString():end.toString());
+        LocalDate end=LocalDate.of(year,12,31);
+        from.setText(LocalDate.of(year,1,1).toString());to.setText(end.toString());
         semester.setSelectedIndex(0);department.setSelectedIndex(0);
     }
     private void generate(boolean notify) {

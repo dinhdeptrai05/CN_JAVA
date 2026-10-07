@@ -2,6 +2,7 @@ package vn.edu.donga.unischedule.ui.panel;
 
 import vn.edu.donga.unischedule.config.AppConfig;
 import vn.edu.donga.unischedule.model.User;
+import vn.edu.donga.unischedule.model.TimetablePeriod;
 import vn.edu.donga.unischedule.model.Enums.Role;
 import vn.edu.donga.unischedule.model.Enums.UserStatus;
 import vn.edu.donga.unischedule.controller.AppControllers;
@@ -74,7 +75,8 @@ public class UserManagementPanel extends JPanel implements Refreshable {
             statusBox.addItem(status.getDisplayName());
         }
         loginYearBox.addItem("Tất cả năm đăng nhập");
-        for(int year=LocalDate.now().getYear();year>=LocalDate.now().minusYears(5).getYear();year--)loginYearBox.addItem(String.valueOf(year));
+        for(int year=TimetablePeriod.SIMULATION_START_YEAR + TimetablePeriod.STAFF_VISIBLE_YEARS - 1;
+            year>=TimetablePeriod.SIMULATION_START_YEAR;year--)loginYearBox.addItem(String.valueOf(year));
         loginYearBox.addItem("Chưa đăng nhập");
         statusBox.setToolTipText("Hoạt động nghĩa là tài khoản được phép đăng nhập, không phải vừa đăng nhập.");
         roleBox.addActionListener(event -> refresh());

@@ -1,18 +1,18 @@
-# Bài tập mô phỏng UniSchedule trong 5 năm: 2027–2031
+# Bài tập mô phỏng UniSchedule trong 5 năm: 2026–2030
 
 ## 1. Kết quả và cách mở
 
-Mở [báo cáo HTML đã chạy](../simulation/results/2027-2031-seed42-verified/report.html) bằng Chrome/Edge. Báo cáo có bảng từng năm, biểu đồ người dùng, bảng 60 tháng, tổng kết và giải thích công thức. Không cần mạng hoặc MySQL để xem; có thể in bằng chức năng Print của trình duyệt.
+Chạy `./scripts/run-simulation.ps1` rồi mở `report.html` trong thư mục kết quả bằng Chrome/Edge. Báo cáo có bảng từng năm, biểu đồ người dùng, bảng 60 tháng, tổng kết và giải thích công thức. Không cần mạng hoặc MySQL để xem; có thể in bằng chức năng Print của trình duyệt.
 
 **Đây là kịch bản giả định phục vụ bài tập, không phải dữ liệu thật hoặc dự báo được hiệu chỉnh từ lịch sử.** Toàn bộ dữ liệu mô phỏng nằm riêng trong `simulation/`. Ứng dụng Swing vẫn sử dụng database hiện tại như trước.
 
 | Năm | Đầu năm | Mới | Rời đi | Cuối năm | Lớp HP | Buổi học hợp lệ | Yêu cầu |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
-| 2027 | 28 | 7 | 3 | 32 | 16 | 240 | 7 |
-| 2028 | 32 | 8 | 4 | 36 | 24 | 369 | 16 |
-| 2029 | 36 | 10 | 4 | 42 | 32 | 450 | 19 |
-| 2030 | 42 | 12 | 5 | 49 | 32 | 497 | 23 |
-| 2031 | 49 | 14 | 6 | 57 | 32 | 498 | 19 |
+| 2026 | 28 | 7 | 3 | 32 | 16 | 240 | 7 |
+| 2027 | 32 | 8 | 4 | 36 | 24 | 369 | 16 |
+| 2028 | 36 | 10 | 4 | 42 | 32 | 450 | 19 |
+| 2029 | 42 | 12 | 5 | 49 | 32 | 497 | 23 |
+| 2030 | 49 | 14 | 6 | 57 | 32 | 498 | 19 |
 
 Tổng 5 năm, seed `42`:
 
@@ -22,7 +22,7 @@ Tổng 5 năm, seed `42`:
 - 4.108 ca phòng được sử dụng, **438.250 phút dạy** (7.304 giờ 10 phút), 102.360 ca phòng khả dụng. Công suất toàn kỳ = **4,01%**.
 - 84 yêu cầu: **57 duyệt + 18 từ chối + 9 chờ = 84**; 36 đợt bảo trì, 407 thông báo, 357 bản ghi nhật ký.
 
-Số lớp tăng theo ngưỡng nhóm 25 sinh viên, nên không tăng đều theo phần trăm. Số buổi 2030–2031 gần như ngang nhau dù số sinh viên tăng, vì vẫn chỉ cần hai nhóm/môn; khác biệt đến từ hủy lịch và buổi bổ sung. Công suất thấp phù hợp với quy mô dữ liệu demo, không chứng minh toàn trường đang sử dụng phòng kém hiệu quả.
+Số lớp tăng theo ngưỡng nhóm 25 sinh viên, nên không tăng đều theo phần trăm. Số buổi 2029–2030 gần như ngang nhau dù số sinh viên tăng, vì vẫn chỉ cần hai nhóm/môn; khác biệt đến từ hủy lịch và buổi bổ sung. Công suất thấp phù hợp với quy mô dữ liệu demo, không chứng minh toàn trường đang sử dụng phòng kém hiệu quả.
 
 ## 2. Ứng dụng hiện tại làm gì?
 
@@ -107,7 +107,7 @@ Các tỷ lệ là giả định sư phạm vì không có chuỗi quan sát l�
 
 | Tham số | Giả định và thời điểm |
 | --- | --- |
-| Phạm vi | Đúng 5 năm lịch, mặc định 2027–2031; dùng ngày/giờ mô phỏng xác định |
+| Phạm vi | Đúng 5 năm lịch, mặc định 2026–2030; dùng ngày/giờ mô phỏng xác định |
 | Sinh viên mới | `max(4, round(0,35 × SV đầu năm))`; nhập ngày 20/08 |
 | Sinh viên rời đi | `max(1, round(0,15 × SV đầu năm))`; chọn không lặp từ SV hiện hữu, ngày 01/07; đại diện tốt nghiệp/ngừng học/ngừng sử dụng |
 | Giảng viên | Bổ sung trước học kỳ 2 khi thấp hơn `max(6, ceil(SV hiện tại/10))`; không mô phỏng giảng viên nghỉ việc |
@@ -151,11 +151,11 @@ Kiểm thử tự động còn kiểm tra cùng seed cho cùng dữ liệu, seed
 
 | Năm | Buổi học | Ca phòng dùng | Phút dạy |
 | --- | ---: | ---: | ---: |
-| 2027 | 240 | 480 | 51.200 |
-| 2028 | 369 | 738 | 78.650 |
-| 2029 | 450 | 900 | 95.650 |
-| 2030 | 497 | 994 | 106.650 |
-| 2031 | 498 | 996 | 106.100 |
+| 2026 | 240 | 480 | 51.200 |
+| 2027 | 369 | 738 | 78.650 |
+| 2028 | 450 | 900 | 95.650 |
+| 2029 | 497 | 994 | 106.650 |
+| 2030 | 498 | 996 | 106.100 |
 
 Các database mô phỏng này giữ lại để kiểm tra, không thay đổi cấu hình của ứng dụng. Bản xuất `verified` đã được nhập và kiểm chứng trực tiếp; đã đối chiếu hash cả 7 file kết quả. Database gốc vẫn có 28 người dùng; mã chạy mô phỏng không có đường ghi vào MySQL.
 
@@ -183,6 +183,6 @@ Mô phỏng là module CLI riêng trong package `simulation`, không can thiệp
 1. Giới thiệu UniSchedule và quan hệ lớp–sinh viên–giảng viên–phòng; giải thích vì sao không tính doanh thu.
 2. Trình bày mốc khảo sát 28 người dùng và 12 phòng; phân biệt dữ liệu đang có với 28 hồ sơ tổng hợp ban đầu.
 3. Giải thích tuyển mới 35%, rời đi 15%, chia nhóm 25 người, hủy đăng ký/lịch và hai cao điểm học kỳ; nhấn mạnh đây là giả định để thử hoạt động.
-4. Mở báo cáo, đọc bảng 2027–2031 và phương trình **28 + 51 − 22 = 57**. So sánh 142 bản ghi lịch với 2.054 buổi thực xảy ra để giải thích lịch lặp.
+4. Mở báo cáo, đọc bảng 2026–2030 và phương trình **28 + 51 − 22 = 57**. So sánh 142 bản ghi lịch với 2.054 buổi thực xảy ra để giải thích lịch lặp.
 5. Chỉ ra tổng phút dạy dùng thời lượng thật của ca, công suất 4,01% phù hợp quy mô demo và 9 yêu cầu chờ là tồn đọng cần chú ý.
 6. Chạy lại seed 42 vào thư mục mới để minh họa tính tái tạo; trình bày các kiểm tra và kết quả MySQL 0 xung đột. Nêu giới hạn: chưa hiệu chỉnh tỷ lệ từ lịch sử, chưa có chương trình học nhiều khóa và chưa mô phỏng hàng đợi/SLA.

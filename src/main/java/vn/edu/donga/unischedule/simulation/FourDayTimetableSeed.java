@@ -24,34 +24,40 @@ import java.util.Set;
 public final class FourDayTimetableSeed {
     private static final String MARKER = "ROOM_FOUR_DAYS_V1";
     private static final String SOURCE = "ROOM_FOUR_DAYS";
-    private static final String DETAILS = "{\"seed\":\"" + SOURCE + "\"}";
+    private static final String FORWARD_MARKER = "FORWARD_FIVE_YEARS_V1";
+    private static final String FORWARD_SOURCE = "FORWARD_2026_2030";
     private static final LocalDate AS_OF = LocalDate.of(2026, 9, 23);
     private static final long SEED = 20260923L;
     private static final int DAYS_PER_ROOM = 4;
     private static final int STUDENTS_PER_SECTION = 6;
     private static final String[] FAMILY = {"Nguyễn", "Trần", "Lê", "Phạm", "Hoàng", "Võ", "Đặng", "Bùi"};
     private static final String[] GIVEN = {"Minh Anh", "Gia Huy", "Thu Hà", "Hoàng Nam", "Thanh Trúc", "Đức Minh", "Ngọc Linh", "Quốc Bảo", "Anh Tuấn", "Thảo Vy"};
+    private static boolean forwardMode;
 
     private FourDayTimetableSeed() { }
 
     public static void main(String[] args) throws Exception {
-        if (args.length > 1 || (args.length == 1 && !List.of("--apply", "--dry-run", "--verify").contains(args[0])))
-            throw new IllegalArgumentException("Use --apply, --dry-run, --verify, or no argument for preview");
+        if (args.length > 1 || (args.length == 1 && !List.of("--apply", "--dry-run", "--verify",
+                "--forward-apply", "--forward-dry-run", "--forward-verify", "--forward-preview").contains(args[0])))
+            throw new IllegalArgumentException("Use an apply, dry-run, verify, preview, or forward variant");
+        forwardMode = args.length == 1 && args[0].startsWith("--forward-");
+        String mode = forwardMode ? args[0].substring("--forward-".length()) : args.length == 0 ? "preview" : args[0].substring(2);
         try (Connection connection = new ConnectionFactory().open()) {
-            if (args.length == 0) printCoverage(connection);
-            else if (args[0].equals("--verify")) { verify(connection); printCoverage(connection); }
+            if (mode.equals("preview")) printCoverage(connection);
+            else if (mode.equals("verify")) { verify(connection); printCoverage(connection); }
             else {
-                boolean inserted = apply(connection, args[0].equals("--apply"));
-                System.out.println(!inserted ? "ALREADY_APPLIED" : args[0].equals("--apply") ? "APPLIED" : "VALIDATED_AND_ROLLED_BACK");
+                boolean inserted = apply(connection, mode.equals("apply"));
+                System.out.println(!inserted ? "ALREADY_APPLIED" : mode.equals("apply") ? "APPLIED" : "VALIDATED_AND_ROLLED_BACK");
                 printCoverage(connection);
             }
         }
     }
 
     public static boolean apply(Connection connection, boolean commit) throws Exception {
-        if (scalar(connection, "SELECT COUNT(*) FROM audit_logs WHERE action='ROOM_OCCUPANCY_60_V1'") != 1)
-            throw new SQLException("The room occupancy seed is required first");
-        String lockName = "room_four_days_" + connection.getCatalog();
+        String prerequisite = forwardMode ? MARKER : "ROOM_OCCUPANCY_60_V1";
+        if (scalar(connection, "SELECT COUNT(*) FROM audit_logs WHERE action='" + prerequisite + "'") != 1)
+            throw new SQLException(forwardMode ? "The existing four-day timetable seed is required first" : "The room occupancy seed is required first");
+        String lockName = (forwardMode ? "forward_five_years_" : "room_four_days_") + connection.getCatalog();
         try (PreparedStatement lock = connection.prepareStatement("SELECT GET_LOCK(?,15)")) {
             lock.setString(1, lockName);
             try (ResultSet result = lock.executeQuery()) {
@@ -66,12 +72,14 @@ public final class FourDayTimetableSeed {
                  ResultSet ignored = lockScheduling.executeQuery("SELECT id FROM roles WHERE code='ACADEMIC' FOR UPDATE")) {
                 while (ignored.next()) { /* App scheduling lock. */ }
             }
-            if (scalar(connection, "SELECT COUNT(*) FROM audit_logs WHERE action='" + MARKER + "'") != 0) {
+            if (scalar(connection, "SELECT COUNT(*) FROM audit_logs WHERE action='" + marker() + "'") != 0) {
                 connection.rollback();
                 return false;
             }
+            if (forwardMode) ensureForwardSemesters(connection);
             List<Period> periods = periods(connection);
-            if (periods.size() != 12) throw new SQLException("Expected twelve academic periods from 2021 to 2026");
+            int expectedPeriods = forwardMode ? 10 : 12;
+            if (periods.size() != expectedPeriods) throw new SQLException("Expected " + expectedPeriods + " timetable periods");
             List<Room> rooms = rooms(connection);
             if (rooms.size() < 990) throw new SQLException("Unexpected number of usable rooms");
             List<Long> slots = slots(connection);
@@ -83,7 +91,7 @@ public final class FourDayTimetableSeed {
             try (Writer writer = new Writer(connection)) {
                 addLaboratoryCourses(connection, writer, departmentIds, academic);
                 Map<String, List<Course>> courses = courses(connection);
-                addPeople(writer, departmentIds, lecturerRole, studentRole, academic);
+                if (!forwardMode) addPeople(writer, departmentIds, lecturerRole, studentRole, academic);
                 Map<Long, List<Long>> teachers = teachers(connection);
                 Map<Long, List<Student>> students = students(connection);
                 indexExisting(connection, periods);
@@ -103,7 +111,7 @@ public final class FourDayTimetableSeed {
                             Placement placement = place(period, room, departmentTeachers, departmentStudents,
                                     Math.min(2, DAYS_PER_ROOM - roomDays.size()), ordinal);
                             if (placement == null) throw new SQLException("Cannot fill four weekdays for " + room.code + " in " + period.key);
-                            LocalDate created = beforeStart(period.start, 14);
+                            LocalDate created = sectionCreated(period.start);
                             String sectionCode = "LHD" + period.year + "-" + period.term + "-" + room.code + "-"
                                     + placement.days.get(0).day + (placement.days.size() == 2 ? placement.days.get(1).day : "");
                             long section = writer.insert("INSERT INTO course_sections(course_id,semester_id,code,capacity,student_count,status,created_at) VALUES (?,?,?,?,?,?,?)",
@@ -120,7 +128,7 @@ public final class FourDayTimetableSeed {
                                         period.start.toString(), period.end.toString(), "PUBLISHED", "Lịch học chính khóa",
                                         academic, stamp(beforeStart(period.start, 5)), stamp(beforeStart(period.start, 5)));
                                 writer.batch("INSERT INTO audit_logs(user_id,action,entity_type,entity_id,details,created_at) VALUES (?,?,?,?,?,?)",
-                                        academic, "PUBLISH_SCHEDULE", "schedules", schedule, DETAILS, stamp(beforeStart(period.start, 5)));
+                                        academic, "PUBLISH_SCHEDULE", "schedules", schedule, details(), stamp(beforeStart(period.start, 5)));
                                 roomDays.add(day.day);
                                 period.teacherBusy.add(key(placement.teacher, day.day, day.block));
                                 for (long student : placement.students) period.studentBusy.add(key(student, day.day, day.block));
@@ -128,7 +136,7 @@ public final class FourDayTimetableSeed {
                                 addedSchedules++;
                             }
                             writer.batch("INSERT INTO audit_logs(user_id,action,entity_type,entity_id,details,created_at) VALUES (?,?,?,?,?,?)",
-                                    academic, "CREATE_SECTION", "course_sections", section, DETAILS, stamp(created));
+                                    academic, "CREATE_SECTION", "course_sections", section, details(), stamp(created));
                             addedSections++;
                             ordinal++;
                         }
@@ -136,7 +144,7 @@ public final class FourDayTimetableSeed {
                 }
                 writer.flush();
                 writer.insert("INSERT INTO audit_logs(user_id,action,entity_type,details,created_at) VALUES (?,?,?,?,?)",
-                        academic, MARKER, "database", "{\"seed\":\"" + SOURCE + "\",\"random_seed\":" + SEED
+                        academic, marker(), "database", "{\"seed\":\"" + source() + "\",\"random_seed\":" + SEED
                                 + ",\"new_sections\":" + addedSections + ",\"new_schedules\":" + addedSchedules + "}", stamp(AS_OF));
             }
             verifyCoverage(connection, rooms, periods);
@@ -157,7 +165,7 @@ public final class FourDayTimetableSeed {
     }
 
     public static void verify(Connection connection) throws SQLException {
-        if (scalar(connection, "SELECT COUNT(*) FROM audit_logs WHERE action='" + MARKER + "'") != 1)
+        if (scalar(connection, "SELECT COUNT(*) FROM audit_logs WHERE action='" + marker() + "'") != 1)
             throw new SQLException("Four-day timetable marker is missing");
         verifyCoverage(connection, rooms(connection), periods(connection));
         verifyNewSections(connection);
@@ -171,7 +179,7 @@ public final class FourDayTimetableSeed {
             long course = writer.insert("INSERT INTO courses(department_id,code,name,credits,required_room_type,status) VALUES (?,?,?,?,?,?)",
                     departments.get(index), "LAB" + (210 + index), names[index], 3, "LABORATORY", "ACTIVE");
             writer.batch("INSERT INTO audit_logs(user_id,action,entity_type,entity_id,details,created_at) VALUES (?,?,?,?,?,?)",
-                    academic, "CREATE_COURSE", "courses", course, DETAILS, stamp(LocalDate.of(2021, 9, 24)));
+                    academic, "CREATE_COURSE", "courses", course, details(), stamp(LocalDate.of(2021, 9, 24)));
         }
         writer.flush();
     }
@@ -186,7 +194,7 @@ public final class FourDayTimetableSeed {
                     phone(index), username.toUpperCase(Locale.ROOT), "ACTIVE", stamp(AS_OF.minusDays(index % 91)), stamp(created), stamp(created));
             writer.batch("INSERT INTO user_roles(user_id,role_id) VALUES (?,?)", user, lecturerRole);
             writer.batch("INSERT INTO audit_logs(user_id,action,entity_type,entity_id,details,created_at) VALUES (?,?,?,?,?,?)",
-                    academic, "CREATE_USER", "users", user, DETAILS, stamp(created));
+                    academic, "CREATE_USER", "users", user, details(), stamp(created));
         }
         for (int year = 2021; year <= 2026; year++) {
             int size = year == 2021 ? 1800 : 450;
@@ -204,7 +212,7 @@ public final class FourDayTimetableSeed {
                         stamp(login), stamp(created), stamp(left == null ? created : left));
                 writer.batch("INSERT INTO user_roles(user_id,role_id) VALUES (?,?)", user, studentRole);
                 writer.batch("INSERT INTO audit_logs(user_id,action,entity_type,entity_id,details,created_at) VALUES (?,?,?,?,?,?)",
-                        academic, "CREATE_USER", "users", user, DETAILS, stamp(created));
+                        academic, "CREATE_USER", "users", user, details(), stamp(created));
             }
         }
         writer.flush();
@@ -375,9 +383,11 @@ public final class FourDayTimetableSeed {
         try (Statement statement = connection.createStatement(); ResultSet rows = statement.executeQuery("SELECT id,start_date,end_date FROM semesters ORDER BY start_date")) {
             while (rows.next()) {
                 LocalDate start = rows.getDate(2).toLocalDate(), end = rows.getDate(3).toLocalDate();
-                int year = start.getMonthValue() >= 8 ? start.getYear() : start.getYear() - 1;
+                int year = forwardMode ? start.getYear() : start.getMonthValue() >= 8 ? start.getYear() : start.getYear() - 1;
                 int term = start.getMonthValue() >= 8 ? 1 : 2;
-                if (year < 2021 || year > 2026) continue;
+                int firstYear = forwardMode ? 2026 : 2021;
+                int lastYear = forwardMode ? 2030 : 2026;
+                if (year < firstYear || year > lastYear) continue;
                 String key = year + "-" + term;
                 Period period = grouped.computeIfAbsent(key, ignored -> new Period(key, year, term));
                 period.semesterIds.add(rows.getLong(1));
@@ -387,6 +397,26 @@ public final class FourDayTimetableSeed {
             }
         }
         return new ArrayList<>(grouped.values());
+    }
+
+    private static void ensureForwardSemesters(Connection connection) throws SQLException {
+        String countSql = "SELECT COUNT(*) FROM semesters WHERE YEAR(start_date)=? AND "
+                + "IF(MONTH(start_date)<=6,2,1)=?";
+        String insertSql = "INSERT INTO semesters(code,name,start_date,end_date,status) VALUES (?,?,?,?,?)";
+        try (PreparedStatement count = connection.prepareStatement(countSql);
+             PreparedStatement insert = connection.prepareStatement(insertSql)) {
+            for (int year = 2026; year <= 2030; year++) for (int term = 1; term <= 2; term++) {
+                count.setInt(1, year); count.setInt(2, term);
+                try (ResultSet rows = count.executeQuery()) { rows.next(); if (rows.getLong(1) > 0) continue; }
+                LocalDate start = term == 1 ? LocalDate.of(year, 9, 7) : LocalDate.of(year, 1, 12);
+                LocalDate end = term == 1 ? LocalDate.of(year, 12, 27) : LocalDate.of(year, 5, 3);
+                String academicYear = String.valueOf(term == 1 ? year : year - 1);
+                insert.setString(1, "HK" + term + "-" + academicYear);
+                insert.setString(2, "Học kỳ " + term + " - " + academicYear);
+                insert.setObject(3, start); insert.setObject(4, end); insert.setString(5, "PLANNED");
+                insert.executeUpdate();
+            }
+        }
     }
 
     private static List<Room> rooms(Connection connection) throws SQLException {
@@ -448,11 +478,18 @@ public final class FourDayTimetableSeed {
         }
     }
     private static String key(long user, int day, int block) { return user + "/" + day + "/" + block; }
+    private static String marker() { return forwardMode ? FORWARD_MARKER : MARKER; }
+    private static String source() { return forwardMode ? FORWARD_SOURCE : SOURCE; }
+    private static String details() { return "{\"seed\":\"" + source() + "\"}"; }
     private static String name(int index) { return FAMILY[index % FAMILY.length] + " " + GIVEN[(index / FAMILY.length) % GIVEN.length]; }
     private static String phone(int index) { return String.format(Locale.ROOT, "09%08d", 50000000 + index); }
     private static LocalDate beforeStart(LocalDate start, int days) {
         LocalDate planned = start.minusDays(days);
-        return planned.isAfter(AS_OF) ? AS_OF : planned;
+        return forwardMode || !planned.isAfter(AS_OF) ? planned : AS_OF;
+    }
+    private static LocalDate sectionCreated(LocalDate start) {
+        LocalDate planned = beforeStart(start, 14);
+        return forwardMode && planned.getYear() < start.getYear() ? start.withDayOfYear(1) : planned;
     }
     private static String stamp(LocalDate day) { return day + " 08:00:00"; }
 

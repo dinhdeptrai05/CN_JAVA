@@ -31,9 +31,9 @@ class HistoricalUiIntegrationTest {
             db.setActor(user);
             var history=new vn.edu.donga.unischedule.repository.jdbc.JdbcHistoryRepository(db).load();
             int visibleYears=account.equals("admin")||account.equals("daotao")?5:3;
-            assertEquals(java.time.LocalDate.now().minusYears(visibleYears),history.from(),account);
-            assertEquals(java.time.LocalDate.now(),history.to(),account);
-            assertEquals(visibleYears+1,history.years().size(),account);
+            assertEquals(java.time.LocalDate.of(2026,1,1),history.from(),account);
+            assertEquals(java.time.LocalDate.of(visibleYears==5?2030:2028,12,31),history.to(),account);
+            assertEquals(visibleYears,history.years().size(),account);
             assertTrue(history.years().stream().mapToLong(y->y.sessions()).sum()>1000,account);
         }
     }
@@ -42,11 +42,11 @@ class HistoricalUiIntegrationTest {
         AppServices services=AppServices.createJdbc();
         var admin=services.auth().login("qt_hethong","123456");
         var history=services.history().load();
-        assertEquals(6,history.years().size());
+        assertEquals(5,history.years().size());
         assertTrue(history.years().stream().mapToLong(y->y.sessions()).sum()>5000);
         assertTrue(history.years().stream().anyMatch(y->y.year()==2026&&y.sections()>100));
         assertTrue(services.reports().generate(admin,new vn.edu.donga.unischedule.model.Report.Filter(
-                java.time.LocalDate.of(2026,1,1),java.time.LocalDate.now(),null,null)).sessions()>1000);
+                java.time.LocalDate.of(2030,1,1),java.time.LocalDate.of(2030,12,31),null,null)).sessions()>1000);
         final MainFrame[] frame=new MainFrame[1];
         SwingUtilities.invokeAndWait(()->{
             ThemeConfig.install();
@@ -84,11 +84,11 @@ class HistoricalUiIntegrationTest {
             SwingUtilities.invokeAndWait(()->{
                 var users=find(frame[0],UserManagementPanel.class);
                 find(users,SearchField.class).getTextField().setText("");
-                var year=findLoginYearBox(users);assertNotNull(year);year.setSelectedItem("2024");
+                var year=findLoginYearBox(users);assertNotNull(year);year.setSelectedItem("2027");
                 var root=frame[0].getRootPane();root.setSize(1440,900);layout(root);
                 var graphics=earlierUsers.createGraphics();root.printAll(graphics);graphics.dispose();
             });
-            ImageIO.write(earlierUsers,"png",dir.resolve("users-login-2024.png").toFile());
+            ImageIO.write(earlierUsers,"png",dir.resolve("users-login-2027.png").toFile());
         } finally {SwingUtilities.invokeAndWait(frame[0]::dispose);}
     }
     @SuppressWarnings("unchecked") private static <T extends Component> T find(Container root,Class<T> type) {
